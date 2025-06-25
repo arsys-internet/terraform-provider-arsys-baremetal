@@ -1,49 +1,37 @@
 package provider
 
 import (
-	"os"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/hashicorp/terraform-plugin-testing/echoprovider"
+	"os"
+	"terraform-provider-arsys-baremetal/internal/client"
+	"testing"
 )
 
-// testAccProtoV6ProviderFactories is used to instantiate a provider during acceptance testing.
-// The factory function is called for each Terraform CLI command to create a provider
-// server that the CLI can connect to and interact with.
-var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"cloudbuilder": providerserver.NewProtocol6WithError(New("test")()),
+// TestAccProtoV6ProviderFactories are used to instantiate a provider during acceptance testing.
+// Exported for use in other testing packages
+var TestAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
+	"arsys-baremetal": providerserver.NewProtocol6WithError(New("test")()),
 }
 
-// testAccProtoV6ProviderFactoriesWithEcho includes the echo provider alongside the scaffolding provider.
-// It allows for testing assertions on data returned by an ephemeral resource during Open.
-// The echoprovider is used to arrange tests by echoing ephemeral data into the Terraform state.
-// This lets the data be referenced in test assertions with state checks.
-var testAccProtoV6ProviderFactoriesWithEcho = map[string]func() (tfprotov6.ProviderServer, error){
-	"cloudbuilder": providerserver.NewProtocol6WithError(New("test")()),
-	"echo":         echoprovider.NewProviderServer(),
+// testAccProtoV6ProviderFactories is the local version for use in this package
+var testAccProtoV6ProviderFactories = TestAccProtoV6ProviderFactories
+
+// TestAccPreCheck verifies that required environment variables are configured
+// Exported for use in other testing packages
+func TestAccPreCheck(t *testing.T) {
+	// Check required environment variables
+	if v := os.Getenv("BAREMETAL_HOST"); v == "" {
+		t.Fatal("BAREMETAL_HOST must be set for acceptance tests")
+	}
+	if v := os.Getenv("BAREMETAL_API_TOKEN"); v == "" {
+		t.Fatal("BAREMETAL_API_TOKEN must be set for acceptance tests")
+	}
 }
 
-func testAccPreCheck(t *testing.T) {
-	err := util.LoadEnv()
-
-	if err != nil {
-		t.Logf("Warning: %s", err)
-		return
-	}
-
-	requiredEnvVars := []string{
-		"CB_API_URL",
-		"CB_API_KEY",
-		"CB_USERNAME",
-		"TF_ACC",
-	}
-
-	for _, env := range requiredEnvVars {
-		if os.Getenv(env) == "" {
-			t.Fatalf("The environment variable %s must be set", env)
-		}
-	}
+func getTestClient() *client.APIClient {
+	return client.NewAPIClient(
+		os.Getenv("BAREMETAL_API_TOKEN"),
+		os.Getenv("BAREMETAL_HOST"),
+	)
 }

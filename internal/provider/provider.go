@@ -2,20 +2,19 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/function"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"log"
 	"os"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/util"
-
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
-	"github.com/hashicorp/terraform-plugin-framework/function"
-	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure BaremetalProvider satisfies various provider interfaces.
@@ -35,12 +34,12 @@ type BaremetalProviderModel struct {
 	Token types.String `tfsdk:"token"`
 }
 
-func (p *BaremetalProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *BaremetalProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "arsys-baremetal"
 	resp.Version = p.version
 }
 
-func (p *BaremetalProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *BaremetalProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Baremetal provider.",
 		Attributes: map[string]schema.Attribute{
@@ -59,7 +58,6 @@ func (p *BaremetalProvider) Schema(ctx context.Context, req provider.SchemaReque
 func (p *BaremetalProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	tflog.Info(ctx, "Baremetal provider client")
 
-	// Retrieve provider data from configuration
 	var config BaremetalProviderModel
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
@@ -106,9 +104,6 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 		apiToken = os.Getenv("BAREMETAL_API_TOKEN")
 	}
 
-	// If any of the expected configurations are missing, return
-	// errors with provider-specific guidance.
-
 	if host == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("host"),
@@ -135,33 +130,32 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 
 	tflog.Debug(ctx, "Creating client")
 
-	// Create a new client using the configuration values
 	c := client.NewAPIClient(apiToken, host)
 
-	// Make the client available during DataSource and Resource type Configure methods.
 	resp.DataSourceData = c
 	resp.ResourceData = c
 
 	tflog.Info(ctx, "Configured client", map[string]any{"success": true})
 }
 
-func (p *BaremetalProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExecutionGroupResource,
+		NewPrivateNetworkResource,
 	}
 }
 
-func (p *BaremetalProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
+func (p *BaremetalProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{}
 }
 
-func (p *BaremetalProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewPrivateNetworkDataSource,
+		NewPrivateNetworksDataSource,
 	}
 }
 
-func (p *BaremetalProvider) Functions(ctx context.Context) []func() function.Function {
+func (p *BaremetalProvider) Functions(_ context.Context) []func() function.Function {
 	return []func() function.Function{}
 }
 
