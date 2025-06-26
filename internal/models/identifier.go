@@ -42,8 +42,13 @@ func NewIdentifierObject(identifier IdentifierResponse) (types.Object, diag.Diag
 }
 
 func NewIdentifierList(responses []IdentifierResponse) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var values []attr.Value
+	diags := diag.Diagnostics{}
+
+	if len(responses) == 0 {
+		return types.ListValue(IdentifierObjectType(), []attr.Value{})
+	}
+
+	values := make([]attr.Value, 0, len(responses))
 
 	for _, server := range responses {
 		serverObj, identifierDiags := NewIdentifierObject(server)

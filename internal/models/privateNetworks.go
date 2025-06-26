@@ -13,7 +13,7 @@ type PrivateNetworksModel struct {
 }
 
 func NewPrivateNetworks(ctx context.Context, privateNetworksResponse []PrivateNetworkResponse) (*PrivateNetworksModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 
 	model := &PrivateNetworksModel{}
 	model.ID = types.StringValue("private_networks")

@@ -42,7 +42,7 @@ func (r *PrivateNetworkResource) Configure(_ context.Context, req resource.Confi
 	if client == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *client.APIClient, got: %T", req.ProviderData),
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
 	}
@@ -51,7 +51,7 @@ func (r *PrivateNetworkResource) Configure(_ context.Context, req resource.Confi
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *privateNetwork.ApiPrivateNetworkService, got: %T", client),
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
 	}
@@ -71,7 +71,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
-			"The 'name' field is required when creating a private network",
+			"'name' field is required when creating a private network",
 		)
 	}
 
@@ -79,7 +79,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
-			"The 'datacenter_id' field is required when creating a private network",
+			"'datacenter_id' field is required when creating a private network",
 		)
 	}
 

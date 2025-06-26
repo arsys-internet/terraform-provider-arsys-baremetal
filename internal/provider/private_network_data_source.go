@@ -38,7 +38,7 @@ func (d *PrivateNetworkDataSource) Configure(_ context.Context, req datasource.C
 	if client == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *client.APIClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
 	}
@@ -47,7 +47,7 @@ func (d *PrivateNetworkDataSource) Configure(_ context.Context, req datasource.C
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *pNetwork.ApiPrivateNetworkService, got: %T. Please report this issue to the provider developers.", client),
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
 	}

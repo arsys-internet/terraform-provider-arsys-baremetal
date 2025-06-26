@@ -42,7 +42,7 @@ type PrivateNetworkResponse struct {
 }
 
 func NewPrivateNetwork(_ context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 
 	if pn == nil {
 		diags.AddError("Constructor Error", "private network response is nil")
@@ -120,8 +120,12 @@ func privateNetworkNestedAttributeObject() schema.NestedAttributeObject {
 }
 
 func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkResponse) ([]PrivateNetworkModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 	var models []PrivateNetworkModel
+
+	if len(pnList) == 0 {
+		return []PrivateNetworkModel{}, diags
+	}
 
 	for i, pn := range pnList {
 		model, modelDiags := NewPrivateNetwork(ctx, &pn)

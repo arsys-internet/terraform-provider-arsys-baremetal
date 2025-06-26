@@ -37,7 +37,7 @@ func (d *PrivateNetworksDataSource) Configure(_ context.Context, req datasource.
 	if client == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *client.APIClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
 	}
@@ -46,7 +46,7 @@ func (d *PrivateNetworksDataSource) Configure(_ context.Context, req datasource.
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *pNetwork.ApiPrivateNetworkService, got: %T. Please report this issue to the provider developers.", client),
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
 	}
@@ -64,11 +64,6 @@ func (d *PrivateNetworksDataSource) Read(ctx context.Context, _ datasource.ReadR
 			fmt.Sprintf("Could not read private networks: %s", err),
 		)
 		return
-	}
-
-	if apiResponse == nil {
-		tflog.Info(ctx, "No private networks found")
-		apiResponse = []models.PrivateNetworkResponse{}
 	}
 
 	model, diags := models.NewPrivateNetworks(ctx, apiResponse)
