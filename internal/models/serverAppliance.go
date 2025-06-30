@@ -39,13 +39,13 @@ func (osa *OSArchitecture) UnmarshalJSON(data []byte) error {
 			if parsed, parseErr := strconv.ParseInt(s, 10, 64); parseErr == nil {
 				osa.Value = parsed
 			} else {
-				return fmt.Errorf("valor de os_architecture no reconocido: %s", s)
+				return fmt.Errorf("os_architecture format not recognised: %s", s)
 			}
 		}
 		return nil
 	}
 
-	return fmt.Errorf("os_architecture debe ser string o int")
+	return fmt.Errorf("os_architecture format not recognised")
 }
 
 type ServerApplianceModel struct {
