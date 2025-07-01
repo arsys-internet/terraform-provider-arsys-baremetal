@@ -7,12 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type BaseDatacenterModel struct {
-	ID          types.String `tfsdk:"id"`
-	CountryCode types.String `tfsdk:"country_code"`
-	Location    types.String `tfsdk:"location"`
-}
-
 type BaseDatacenterResponse struct {
 	ID          string `json:"id"`
 	CountryCode string `json:"country_code"`

@@ -68,7 +68,7 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	if id == "" {
 		resp.Diagnostics.AddError(
 			"Invalid Datacenter Id",
-			"datacenter_id cannot be empty",
+			"Datacenter ID cannot be empty",
 		)
 		return
 	}
@@ -84,8 +84,8 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		}
 
 		resp.Diagnostics.AddError(
-			"Error reading the private network",
-			fmt.Sprintf("Could not read private network: %s", err),
+			"Error reading datacenter",
+			fmt.Sprintf("Could not read datacenter: %s", err),
 		)
 		return
 	}

@@ -43,7 +43,7 @@ func NewDatacenter(_ context.Context, dc *DatacenterResponse) (*DatacenterModel,
 	diags := diag.Diagnostics{}
 
 	if dc == nil {
-		diags.AddError("Constructor Error", "datacenter response is nil")
+		diags.AddError("Response Error", "datacenter response is nil")
 		return nil, diags
 	}
 
@@ -68,8 +68,8 @@ func NewDatacenterFromList(ctx context.Context, dcList []DatacenterResponse) ([]
 		model, modelDiags := NewDatacenter(ctx, &dc)
 		if modelDiags.HasError() {
 			diags.AddError(
-				"Creation error",
-				fmt.Sprintf("failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
+				"Build error",
+				fmt.Sprintf("Failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
 			)
 			continue
 		}

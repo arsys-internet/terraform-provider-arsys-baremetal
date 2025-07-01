@@ -41,13 +41,8 @@ type PrivateNetworkResponse struct {
 	CloudPanelId   string                 `json:"cloudpanel_id"`
 }
 
-func NewPrivateNetwork(_ context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
+func NewPrivateNetwork(_ context.Context, pn PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
-
-	if pn == nil {
-		diags.AddError("Constructor Error", "private network response is nil")
-		return nil, diags
-	}
 
 	model := &PrivateNetworkModel{}
 
@@ -128,11 +123,11 @@ func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkRespo
 	}
 
 	for i, pn := range pnList {
-		model, modelDiags := NewPrivateNetwork(ctx, &pn)
+		model, modelDiags := NewPrivateNetwork(ctx, pn)
 		if modelDiags.HasError() {
 			diags.AddError(
-				"List Constructor Error",
-				fmt.Sprintf("failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
+				"Build error",
+				fmt.Sprintf("Failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
 			)
 			continue
 		}
