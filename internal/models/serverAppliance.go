@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,14 +21,19 @@ type OSArchitecture struct {
 }
 
 func (osa *OSArchitecture) UnmarshalJSON(data []byte) error {
+	reader := bytes.NewReader(data)
+	decoder := json.NewDecoder(reader)
+
 	var i int64
-	if err := json.Unmarshal(data, &i); err == nil {
+	decoder = json.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&i); err == nil {
 		osa.Value = i
 		return nil
 	}
 
 	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
+	decoder = json.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&s); err == nil {
 		switch s {
 		case "x86", "32":
 			osa.Value = 32
