@@ -150,6 +150,8 @@ func (p *BaremetalProvider) EphemeralResources(_ context.Context) []func() ephem
 
 func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewDatacenterDataSource,
+		NewDatacentersDataSource,
 		NewPrivateNetworkDataSource,
 		NewPrivateNetworksDataSource,
 		NewServerApplianceDataSource,

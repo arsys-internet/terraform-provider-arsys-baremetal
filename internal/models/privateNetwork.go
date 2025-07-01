@@ -29,25 +29,20 @@ type PrivateNetworkModel struct {
 }
 
 type PrivateNetworkResponse struct {
-	ID             string               `json:"id"`
-	Name           string               `json:"name"`
-	Description    *string              `json:"description"`
-	NetworkAddress string               `json:"network_address"`
-	SubnetMask     string               `json:"subnet_mask"`
-	State          string               `json:"state"`
-	Datacenter     DatacenterResponse   `json:"datacenter"`
-	CreationDate   string               `json:"creation_date"`
-	Servers        []IdentifierResponse `json:"servers"`
-	CloudPanelId   string               `json:"cloudpanel_id"`
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name"`
+	Description    *string                `json:"description"`
+	NetworkAddress string                 `json:"network_address"`
+	SubnetMask     string                 `json:"subnet_mask"`
+	State          string                 `json:"state"`
+	Datacenter     BaseDatacenterResponse `json:"datacenter"`
+	CreationDate   string                 `json:"creation_date"`
+	Servers        []IdentifierResponse   `json:"servers"`
+	CloudPanelId   string                 `json:"cloudpanel_id"`
 }
 
-func NewPrivateNetwork(_ context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
+func NewPrivateNetwork(_ context.Context, pn PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
-
-	if pn == nil {
-		diags.AddError("Constructor Error", "private network response is nil")
-		return nil, diags
-	}
 
 	model := &PrivateNetworkModel{}
 
@@ -66,7 +61,7 @@ func NewPrivateNetwork(_ context.Context, pn *PrivateNetworkResponse) (*PrivateN
 		model.Description = types.StringNull()
 	}
 
-	datacenterObj, dcDiags := NewDatacenterObject(pn.Datacenter)
+	datacenterObj, dcDiags := NewBaseDatacenterObject(pn.Datacenter)
 	diags.Append(dcDiags...)
 	if !dcDiags.HasError() {
 		model.Datacenter = datacenterObj
@@ -90,7 +85,7 @@ func privateNetworkObjectType() types.ObjectType {
 			"network_address": types.StringType,
 			"subnet_mask":     types.StringType,
 			"state":           types.StringType,
-			"datacenter":      DatacenterObjectType(),
+			"datacenter":      baseDatacenterObjectType(),
 			"creation_date":   types.StringType,
 			"servers":         types.ListType{ElemType: IdentifierObjectType()},
 			"cloudpanel_id":   types.StringType,
@@ -128,11 +123,11 @@ func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkRespo
 	}
 
 	for i, pn := range pnList {
-		model, modelDiags := NewPrivateNetwork(ctx, &pn)
+		model, modelDiags := NewPrivateNetwork(ctx, pn)
 		if modelDiags.HasError() {
 			diags.AddError(
-				"List Constructor Error",
-				fmt.Sprintf("failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
+				"Build error",
+				fmt.Sprintf("Failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
 			)
 			continue
 		}
@@ -206,7 +201,7 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "Private network description",
 			},
-			"datacenter": DatacenterNestedAttribute(),
+			"datacenter": BaseDatacenterNestedAttribute(),
 			"network_address": schema.StringAttribute{
 				Computed:    true,
 				Description: "Network address",
@@ -302,7 +297,7 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Description: "Private network state",
 			},
-			"datacenter": DatacenterNestedAttribute(),
+			"datacenter": BaseDatacenterNestedAttribute(),
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Creation timestamp",
