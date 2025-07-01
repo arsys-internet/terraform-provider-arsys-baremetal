@@ -66,7 +66,7 @@ type WaitResult struct {
 }
 
 func WaitForResourceState(ctx context.Context, resourceID string, service ResourceService, options WaitOptions) (*WaitResult, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 	startTime := time.Now()
 
 	tflog.Info(ctx, "Starting wait for resource state", map[string]interface{}{
@@ -130,7 +130,7 @@ func WaitForResourceState(ctx context.Context, resourceID string, service Resour
 }
 
 func pollResourceState(ctx context.Context, resourceID string, service ResourceService, options WaitOptions, isDeleting bool) (*WaitResult, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 
 	ticker := time.NewTicker(options.RetryInterval)
 	defer ticker.Stop()
@@ -199,7 +199,7 @@ func checkResourceState(ctx context.Context, resourceID string, service Resource
 }
 
 func handleDeletionState(ctx context.Context, resourceID string, resource ResourceModel, err error, options WaitOptions) (*WaitResult, bool, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 
 	if err != nil || resource == nil {
 		tflog.Info(ctx, "Resource deleted successfully", map[string]interface{}{
@@ -233,7 +233,7 @@ func handleDeletionState(ctx context.Context, resourceID string, resource Resour
 }
 
 func handleNormalState(ctx context.Context, resourceID string, resource ResourceModel, err error, options WaitOptions) (*WaitResult, bool, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 
 	if err != nil {
 		diags.AddError(
@@ -265,7 +265,7 @@ func handleNormalState(ctx context.Context, resourceID string, resource Resource
 }
 
 func evaluateState(ctx context.Context, resourceID string, resource ResourceModel, currentState string, options WaitOptions) (*WaitResult, bool, diag.Diagnostics) {
-	var diags diag.Diagnostics
+	diags := diag.Diagnostics{}
 
 	if contains(options.TargetStates, currentState) {
 		tflog.Info(ctx, "Resource reached target state", map[string]interface{}{
