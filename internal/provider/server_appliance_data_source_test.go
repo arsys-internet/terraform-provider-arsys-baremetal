@@ -105,7 +105,7 @@ func TestAccServerApplianceDataSource(t *testing.T) {
 func testAccServerApplianceDataSourceConfig() string {
 	return `
 data "arsys-baremetal_server_appliance" "test" {
-  id = "B964B3D9B337C62E7A3622546E4E60B0"
+  id = "38B470C2FDF1C7EF683804C8F38D4685"
 }
 `
 }

@@ -118,8 +118,8 @@ func validateFirstServerApplianceEssentials(attributes map[string]string) error 
 	}
 
 	categoriesCountKey := "server_appliances.0.categories.#"
-	if categoriesCount, exists := attributes[categoriesCountKey]; !exists || categoriesCount == "0" {
-		return fmt.Errorf("first server appliance must have at least one category")
+	if _, exists := attributes[categoriesCountKey]; !exists {
+		return fmt.Errorf("first server appliance missing categories field")
 	}
 
 	return nil
