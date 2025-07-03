@@ -16,11 +16,11 @@ import (
 	"terraform-provider-arsys-baremetal/internal/util"
 )
 
-type OSArchitecture struct {
+type ServerApplianceOSArchitecture struct {
 	Value int64
 }
 
-func (osa *OSArchitecture) UnmarshalJSON(data []byte) error {
+func (osa *ServerApplianceOSArchitecture) UnmarshalJSON(data []byte) error {
 	reader := bytes.NewReader(data)
 	decoder := json.NewDecoder(reader)
 
@@ -54,6 +54,47 @@ func (osa *OSArchitecture) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("os_architecture format not recognised")
 }
 
+type ServerApplianceLicense struct {
+	Name string `json:"name"`
+}
+
+type ServerApplianceLicenseArray []ServerApplianceLicense
+
+func (la *ServerApplianceLicenseArray) UnmarshalJSON(data []byte) error {
+	reader := bytes.NewReader(data)
+	decoder := json.NewDecoder(reader)
+
+	// Primero intentar deserializar como array de objetos ServerApplianceLicense
+	var licenseObjects []ServerApplianceLicense
+	decoder = json.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&licenseObjects); err == nil {
+		*la = licenseObjects
+		return nil
+	}
+
+	// Si falla, intentar como array de strings (formato del listado)
+	var licenseStrings []string
+	decoder = json.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&licenseStrings); err == nil {
+		licenses := make([]ServerApplianceLicense, len(licenseStrings))
+		for i, str := range licenseStrings {
+			licenses[i] = ServerApplianceLicense{Name: str}
+		}
+		*la = licenses
+		return nil
+	}
+
+	// Si falla, intentar como array vacío
+	var emptyArray []interface{}
+	decoder = json.NewDecoder(bytes.NewReader(data))
+	if err := decoder.Decode(&emptyArray); err == nil {
+		*la = ServerApplianceLicenseArray{}
+		return nil
+	}
+
+	return fmt.Errorf("cannot unmarshal licenses array")
+}
+
 type ServerApplianceModel struct {
 	ID                      types.String `tfsdk:"id"`
 	Name                    types.String `tfsdk:"name"`
@@ -72,20 +113,20 @@ type ServerApplianceModel struct {
 }
 
 type ServerApplianceResponse struct {
-	Id                      string         `json:"id"`
-	Name                    string         `json:"name"`
-	AvailableDatacenters    []string       `json:"available_datacenters"`
-	OsFamily                string         `json:"os_family"`
-	Os                      string         `json:"os"`
-	OsVersion               string         `json:"os_version"`
-	OsArchitecture          OSArchitecture `json:"os_architecture"`
-	OsImageType             string         `json:"os_image_type"`
-	Type                    string         `json:"type"`
-	ServerTypeCompatibility []string       `json:"server_type_compatibility"`
-	MinHddSize              int            `json:"min_hdd_size"`
-	Licenses                []string       `json:"licenses"`
-	Version                 string         `json:"version"`
-	Categories              []string       `json:"categories"`
+	Id                      string                        `json:"id"`
+	Name                    string                        `json:"name"`
+	AvailableDatacenters    []string                      `json:"available_datacenters"`
+	OsFamily                string                        `json:"os_family"`
+	Os                      string                        `json:"os"`
+	OsVersion               string                        `json:"os_version"`
+	OsArchitecture          ServerApplianceOSArchitecture `json:"os_architecture"`
+	OsImageType             string                        `json:"os_image_type"`
+	Type                    string                        `json:"type"`
+	ServerTypeCompatibility []string                      `json:"server_type_compatibility"`
+	MinHddSize              int                           `json:"min_hdd_size"`
+	Licenses                ServerApplianceLicenseArray   `json:"licenses"`
+	Version                 string                        `json:"version"`
+	Categories              []string                      `json:"categories"`
 }
 
 func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*ServerApplianceModel, diag.Diagnostics) {
@@ -93,6 +134,15 @@ func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*Server
 
 	if sa == nil {
 		diags.AddError("Constructor Error", "server appliance response is nil")
+		return nil, diags
+	}
+
+	if sa.ServerTypeCompatibility[0] != "baremetal" {
+		diags.AddError(
+			"Server appliance not found",
+			"server appliance not found",
+		)
+
 		return nil, diags
 	}
 
@@ -131,7 +181,7 @@ func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*Server
 
 	elements = make([]attr.Value, len(sa.Licenses))
 	for i, license := range sa.Licenses {
-		elements[i] = types.StringValue(license)
+		elements[i] = types.StringValue(license.Name)
 	}
 	listValue, listDiags = types.ListValue(types.StringType, elements)
 	diags.Append(listDiags...)
@@ -202,18 +252,24 @@ func NewServerApplianceFromList(ctx context.Context, pnList []ServerApplianceRes
 	}
 
 	for i, sa := range pnList {
-		model, modelDiags := NewServerAppliance(ctx, &sa)
-		if modelDiags.HasError() {
-			diags.AddError(
-				"List Constructor Error",
-				fmt.Sprintf("failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
-			)
-			continue
+		if sa.ServerTypeCompatibility[0] == "baremetal" {
+			model, modelDiags := NewServerAppliance(ctx, &sa)
+			if modelDiags.HasError() {
+				diags.AddError(
+					"List Constructor Error",
+					fmt.Sprintf("failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
+				)
+				continue
+			}
+			diags.Append(modelDiags...)
+			if model != nil {
+				models = append(models, *model)
+			}
 		}
-		diags.Append(modelDiags...)
-		if model != nil {
-			models = append(models, *model)
-		}
+	}
+
+	if len(models) == 0 {
+		return []ServerApplianceModel{}, diags
 	}
 
 	return models, diags
@@ -270,10 +326,7 @@ func ServerApplianceDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"type": schema.StringAttribute{
 				Computed:    true,
-				Description: "Server appliance type (IMAGE, MY_IMAGE, APPLICATION, ISO)",
-				Validators: []validator.String{
-					stringvalidator.OneOf("IMAGE", "MY_IMAGE", "APPLICATION", "ISO"),
-				},
+				Description: "Server appliance type",
 			},
 			"server_type_compatibility": schema.ListAttribute{
 				Computed:    true,
@@ -286,7 +339,7 @@ func ServerApplianceDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"licenses": schema.ListAttribute{
 				Computed:    true,
-				Description: "List of license identifiers",
+				Description: "List of licenses",
 				ElementType: types.StringType,
 			},
 			"version": schema.StringAttribute{
