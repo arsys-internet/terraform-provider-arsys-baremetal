@@ -96,7 +96,7 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Not Found",
-			fmt.Sprintf("Datacenter not found"),
+			fmt.Sprintf("Private network not found"),
 		)
 		return
 	}
