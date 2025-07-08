@@ -25,7 +25,11 @@ type PrivateNetworkModel struct {
 	CreationDate   types.String `tfsdk:"creation_date"`
 	Servers        types.List   `tfsdk:"servers"`
 	CloudPanelID   types.String `tfsdk:"cloudpanel_id"`
-	DatacenterID   types.String `tfsdk:"datacenter_id"`
+}
+
+type PrivateNetworkResourceModel struct {
+	PrivateNetworkModel
+	DatacenterID types.String `tfsdk:"datacenter_id"`
 }
 
 type PrivateNetworkResponse struct {
@@ -41,8 +45,13 @@ type PrivateNetworkResponse struct {
 	CloudPanelId   string                 `json:"cloudpanel_id"`
 }
 
-func NewPrivateNetwork(_ context.Context, pn PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
+func newPrivateNetworkModelFromResponse(_ context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
+
+	if pn == nil {
+		diags.AddError("Constructor Error", "private network response is nil")
+		return nil, diags
+	}
 
 	model := &PrivateNetworkModel{}
 
@@ -53,7 +62,6 @@ func NewPrivateNetwork(_ context.Context, pn PrivateNetworkResponse) (*PrivateNe
 	model.State = types.StringValue(pn.State)
 	model.CreationDate = types.StringValue(pn.CreationDate)
 	model.CloudPanelID = types.StringValue(pn.CloudPanelId)
-	model.DatacenterID = types.StringValue(pn.Datacenter.ID)
 
 	if pn.Description != nil {
 		model.Description = types.StringValue(*pn.Description)
@@ -76,6 +84,24 @@ func NewPrivateNetwork(_ context.Context, pn PrivateNetworkResponse) (*PrivateNe
 	return model, diags
 }
 
+func NewPrivateNetwork(ctx context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
+	return newPrivateNetworkModelFromResponse(ctx, pn)
+}
+
+func NewPrivateNetworkResource(ctx context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkResourceModel, diag.Diagnostics) {
+	baseModel, diags := newPrivateNetworkModelFromResponse(ctx, pn)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	resourceModel := &PrivateNetworkResourceModel{
+		PrivateNetworkModel: *baseModel,
+		DatacenterID:        types.StringValue(pn.Datacenter.ID),
+	}
+
+	return resourceModel, diags
+}
+
 func privateNetworkObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
@@ -89,7 +115,6 @@ func privateNetworkObjectType() types.ObjectType {
 			"creation_date":   types.StringType,
 			"servers":         types.ListType{ElemType: IdentifierObjectType()},
 			"cloudpanel_id":   types.StringType,
-			"datacenter_id":   types.StringType,
 		},
 	}
 }
@@ -123,10 +148,10 @@ func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkRespo
 	}
 
 	for i, pn := range pnList {
-		model, modelDiags := NewPrivateNetwork(ctx, pn)
+		model, modelDiags := NewPrivateNetwork(ctx, &pn)
 		if modelDiags.HasError() {
 			diags.AddError(
-				"Build error",
+				"List Constructor Error",
 				fmt.Sprintf("Failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
 			)
 			continue
@@ -140,7 +165,7 @@ func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkRespo
 	return models, diags
 }
 
-func (m *PrivateNetworkModel) ToCreateRequest() PrivateNetworkCreateRequest {
+func (m *PrivateNetworkResourceModel) ToCreateRequest() PrivateNetworkCreateRequest {
 	return PrivateNetworkCreateRequest{
 		Name:           m.Name.ValueString(),
 		Description:    m.Description.ValueString(),
@@ -150,7 +175,7 @@ func (m *PrivateNetworkModel) ToCreateRequest() PrivateNetworkCreateRequest {
 	}
 }
 
-func (m *PrivateNetworkModel) ToUpdateRequest() PrivateNetworkUpdateRequest {
+func (m *PrivateNetworkResourceModel) ToUpdateRequest() PrivateNetworkUpdateRequest {
 	return PrivateNetworkUpdateRequest{
 		Name:           m.Name.ValueString(),
 		Description:    m.Description.ValueString(),
@@ -218,10 +243,6 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "Creation timestamp",
 			},
-			"datacenter_id": schema.StringAttribute{
-				Computed:    true,
-				Description: "Datacenter identifier",
-			},
 			"servers": schema.ListNestedAttribute{
 				Computed:     true,
 				Description:  "List of servers in the private network",
@@ -262,7 +283,6 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"datacenter_id": rschema.StringAttribute{
 				Optional:    true,
-				Computed:    true,
 				Description: "Datacenter identifier where the network will be created",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(

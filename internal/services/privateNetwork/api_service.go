@@ -119,8 +119,6 @@ func (s *ApiPrivateNetworkService) CreatePrivateNetwork(request *models.PrivateN
 }
 
 func (s *ApiPrivateNetworkService) UpdatePrivateNetwork(id string, request *models.PrivateNetworkUpdateRequest) (*models.PrivateNetworkResponse, error) {
-	fmt.Printf("DEBUG UpdatePrivateNetwork: ID=%s, Request=%+v\n", id, request)
-
 	resp, err := s.client.Put(fmt.Sprintf("/private_networks/%s", id), &request)
 	if err != nil {
 		return nil, err
