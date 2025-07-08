@@ -99,11 +99,6 @@ func validatePrivateNetworkEssentials(attributes map[string]string, index int, t
 		return fmt.Errorf("private network '%s' missing network_address", targetName)
 	}
 
-	datacenterIdKey := fmt.Sprintf("private_networks.%d.datacenter_id", index)
-	if dcId, exists := attributes[datacenterIdKey]; !exists || dcId == "" {
-		return fmt.Errorf("private network '%s' missing datacenter_id", targetName)
-	}
-
 	return nil
 }
 

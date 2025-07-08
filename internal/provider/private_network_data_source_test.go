@@ -83,16 +83,6 @@ func TestAccPrivateNetworkDataSource(t *testing.T) {
 					),
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_private_network.test",
-						tfjsonpath.New("datacenter_id"),
-						knownvalue.StringExact("81DEF28500FBC2A973FC0C620DF5B721"),
-					),
-					statecheck.ExpectKnownValue(
-						"data.arsys-baremetal_private_network.test",
-						tfjsonpath.New("datacenter_id"),
-						knownvalue.StringRegexp(regexp.MustCompile(util.HexID32Pattern)),
-					),
-					statecheck.ExpectKnownValue(
-						"data.arsys-baremetal_private_network.test",
 						tfjsonpath.New("cloudpanel_id"),
 						knownvalue.NotNull(),
 					),

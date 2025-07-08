@@ -78,8 +78,11 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 	apiResponse, err := d.client.GetPrivateNetwork(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found, removing from state", id))
-			resp.State.RemoveResource(ctx)
+			resp.Diagnostics.AddError(
+				"Private network Not Found",
+				fmt.Sprintf("Private network with id %s not found", id),
+			)
+			tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found", id))
 			return
 		}
 
@@ -91,8 +94,10 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Not Found",
+			fmt.Sprintf("Datacenter not found"),
+		)
 		return
 	}
 

@@ -78,8 +78,11 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	apiResponse, err := d.client.GetDatacenter(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Datacenter with ID %s not found, removing from state", id))
-			resp.State.RemoveResource(ctx)
+			resp.Diagnostics.AddError(
+				"Datacenter Not Found",
+				fmt.Sprintf("Datacenter with id %s not found", id),
+			)
+			tflog.Info(ctx, fmt.Sprintf("Datacenter with ID %s not found", id))
 			return
 		}
 
@@ -91,8 +94,10 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Datacenter with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Not Found",
+			fmt.Sprintf("Datacenter not found"),
+		)
 		return
 	}
 

@@ -60,7 +60,7 @@ func (r *PrivateNetworkResource) Configure(_ context.Context, req resource.Confi
 }
 
 func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data models.PrivateNetworkModel
+	var data models.PrivateNetworkResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -100,7 +100,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	model, diags := models.NewPrivateNetwork(ctx, apiResponse)
+	model, diags := models.NewPrivateNetworkResource(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -112,7 +112,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 }
 
 func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data models.PrivateNetworkModel
+	var data models.PrivateNetworkResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -126,8 +126,11 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 	apiResponse, err := r.client.GetPrivateNetwork(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found, removing from state", id))
-			resp.State.RemoveResource(ctx)
+			resp.Diagnostics.AddError(
+				"Private network Not Found",
+				fmt.Sprintf("Private network with id %s not found", id),
+			)
+			tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found", id))
 			return
 		}
 
@@ -139,24 +142,26 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Not Found",
+			fmt.Sprintf("Datacenter not found"),
+		)
 		return
 	}
 
-	readModel, diags := models.NewPrivateNetwork(ctx, apiResponse)
+	readModel, diags := models.NewPrivateNetworkResource(ctx, apiResponse)
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
-
 }
 
 func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan models.PrivateNetworkModel
-	var state models.PrivateNetworkModel
+	var plan models.PrivateNetworkResourceModel
+	var state models.PrivateNetworkResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -182,7 +187,7 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	updatedModel, diags := models.NewPrivateNetwork(ctx, updatedPrivateNetwork)
+	updatedModel, diags := models.NewPrivateNetworkResource(ctx, updatedPrivateNetwork)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -195,7 +200,7 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 }
 
 func (r *PrivateNetworkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data models.PrivateNetworkModel
+	var data models.PrivateNetworkResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
