@@ -7,13 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
 )
 
-// PublicIpModel representa la estructura de datos para el modelo Terraform
 type PublicIpModel struct {
 	ID           types.String `tfsdk:"id"`
 	IP           types.String `tfsdk:"ip"`
@@ -27,7 +27,6 @@ type PublicIpModel struct {
 	CreationDate types.String `tfsdk:"creation_date"`
 }
 
-// PublicIpResponse representa la estructura de la respuesta de la API
 type PublicIpResponse struct {
 	ID           string                 `json:"id"`
 	IP           string                 `json:"ip"`
@@ -41,14 +40,12 @@ type PublicIpResponse struct {
 	CreationDate string                 `json:"creation_date"`
 }
 
-// AssignedToResponse representa la estructura de la entidad asignada a la IP
 type AssignedToResponse struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
 
-// assignedToAttributeTypes returns the attribute types for AssignedTo
 func assignedToAttributeTypes() map[string]attr.Type {
 	return map[string]attr.Type{
 		"id":   types.StringType,
@@ -57,7 +54,6 @@ func assignedToAttributeTypes() map[string]attr.Type {
 	}
 }
 
-// assignedToObjectType returns the object type for AssignedTo
 func assignedToObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: assignedToAttributeTypes(),
@@ -94,6 +90,12 @@ func NewPublicIp(_ context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.
 	model.State = types.StringValue(ip.State)
 	model.CreationDate = types.StringValue(ip.CreationDate)
 
+	if ip.DatacenterId != nil {
+		model.DatacenterId = types.StringValue(*ip.DatacenterId)
+	} else {
+		model.DatacenterId = types.StringNull()
+	}
+
 	if ip.SubnetID != nil {
 		model.SubnetID = types.StringValue(*ip.SubnetID)
 	} else {
@@ -121,7 +123,6 @@ func NewPublicIp(_ context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.
 	return model, diags
 }
 
-// NewPublicIpFromList creates a list of models from a list of responses
 func NewPublicIpFromList(ctx context.Context, ipList []PublicIpResponse) ([]PublicIpModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 	var models []PublicIpModel
@@ -148,7 +149,6 @@ func NewPublicIpFromList(ctx context.Context, ipList []PublicIpResponse) ([]Publ
 	return models, diags
 }
 
-// assignedToAttributes returns schema attributes for AssignedTo
 func assignedToAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
@@ -175,7 +175,6 @@ func assignedToAttributes() map[string]schema.Attribute {
 	}
 }
 
-// AssignedToNestedAttribute returns a nested attribute for AssignedTo
 func AssignedToNestedAttribute() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
 		Computed:    true,
@@ -184,7 +183,6 @@ func AssignedToNestedAttribute() schema.SingleNestedAttribute {
 	}
 }
 
-// PublicIpDataSourceSchema returns the schema for the PublicIp data source
 func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
 		Description: "Data source for public IP information",
@@ -211,7 +209,7 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"type": schema.StringAttribute{
 				Computed:    true,
-				Description: "IP type (IPV4)",
+				Description: "IP type",
 				Validators: []validator.String{
 					stringvalidator.OneOf("IPV4", "IPV6"),
 				},
@@ -245,5 +243,96 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 				},
 			},
 		},
+	}
+}
+
+type PublicIpPostModel struct {
+	PublicIpModel
+	DatacenterId types.String `tfsdk:"datacenter_id"`
+}
+
+type PublicIpCreateRequest struct {
+	ReverseDns   string `json:"reverse_dns"`
+	DatacenterId string `json:"datacenter_id"`
+	Type         string `json:"type"`
+}
+
+func (m *PublicIpPostModel) ToCreateRequest() PublicIpCreateRequest {
+	return PublicIpCreateRequest{
+		ReverseDns:   m.ReverseDNS.ValueString(),
+		DatacenterId: m.DatacenterId.ValueString(),
+		Type:         m.Type.ValueString(),
+	}
+}
+
+func PublicIpResourceSchema(_ context.Context) rschema.Schema {
+	return rschema.Schema{
+		Description: "Public ip resource",
+		Attributes: map[string]rschema.Attribute{
+			"id": rschema.StringAttribute{
+				Computed:    true,
+				Description: "Public ip identifier",
+			},
+			"reverse_dns": rschema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Reverse DNS name",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(util.MaxNameLength),
+					stringvalidator.LengthAtLeast(1),
+				},
+			},
+			"datacenter_id": rschema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Datacenter identifier where the ip will be created",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid datacenter_id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
+					),
+				},
+			},
+			"type": rschema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "IP type",
+				Validators: []validator.String{
+					stringvalidator.OneOf("IPV4", "IPV6"),
+				},
+			},
+			"ip": rschema.StringAttribute{
+				Computed:    true,
+				Description: "IP address",
+			},
+			"datacenter":  BaseDatacenterNestedAttribute(),
+			"assigned_to": AssignedToNestedAttribute(),
+			"subnet_id": rschema.StringAttribute{
+				Computed:    true,
+				Description: "ID of the subnet to which the IP belongs",
+			},
+			"is_dhcp": rschema.BoolAttribute{
+				Computed:    true,
+				Description: "IP use DHCP",
+			},
+			"state": schema.StringAttribute{
+				Computed:    true,
+				Description: "Current state of the IP (ACTIVE, etc.)",
+			},
+			"creation_date": rschema.StringAttribute{
+				Computed:    true,
+				Description: "IP creation date",
+			},
+		},
+	}
+}
+
+type PublicIpUpdateRequest struct {
+	ReverseDns string `json:"reverse_dns"`
+}
+
+func (m *PublicIpModel) ToUpdateRequest() PublicIpUpdateRequest {
+	return PublicIpUpdateRequest{
+		ReverseDns: m.ReverseDNS.ValueString(),
 	}
 }

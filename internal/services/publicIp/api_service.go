@@ -18,9 +18,9 @@ type ApiPublicIpService struct {
 type ApiPublicIpServiceInterface interface {
 	GetPublicIp(id string) (*models.PublicIpResponse, error)
 	GetPublicIps() ([]models.PublicIpResponse, error)
-	//CreatePublicIp(request *models.PublicIpCreateRequest) (*models.PublicIpResponse, error)
-	//UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error)
-	//DeletePublicIp(id string) error
+	CreatePublicIp(request *models.PublicIpCreateRequest) (*models.PublicIpResponse, error)
+	UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error)
+	DeletePublicIp(id string) error
 }
 
 func NewApiPublicIpService(client *client.APIClient) *ApiPublicIpService {
@@ -91,76 +91,76 @@ func (s *ApiPublicIpService) GetPublicIps() ([]models.PublicIpResponse, error) {
 	return publicIps, nil
 }
 
-//func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateRequest) (*models.PublicIpResponse, error) {
-//	resp, err := s.client.Post("/public_ips", request)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	defer func(Body io.ReadCloser) {
-//		err := Body.Close()
-//		if err != nil {
-//			fmt.Println(err)
-//		}
-//	}(resp.Body)
-//
-//	if resp.StatusCode != http.StatusCreated {
-//		body, _ := io.ReadAll(resp.Body)
-//		return nil, fmt.Errorf("error creating public ip: %s", string(body))
-//	}
-//
-//	var createdPublicIp models.PublicIpResponse
-//	if err := json.NewDecoder(resp.Body).Decode(&createdPublicIp); err != nil {
-//		fmt.Printf("JSON Decode Error: %v\n", err)
-//		return nil, err
-//	}
-//
-//	return &createdPublicIp, nil
-//}
-//
-//func (s *ApiPublicIpService) UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error) {
-//	resp, err := s.client.Put(fmt.Sprintf("/public_ips/%s", id), &request)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	defer func(Body io.ReadCloser) {
-//		err := Body.Close()
-//		if err != nil {
-//			fmt.Println(err)
-//		}
-//	}(resp.Body)
-//
-//	if resp.StatusCode != http.StatusOK {
-//		body, _ := io.ReadAll(resp.Body)
-//		return nil, fmt.Errorf("error updating public ip: %s", string(body))
-//	}
-//
-//	var updatedPublicIp models.PublicIpResponse
-//	if err := json.NewDecoder(resp.Body).Decode(&updatedPublicIp); err != nil {
-//		return nil, err
-//	}
-//
-//	return &updatedPublicIp, nil
-//}
-//
-//func (s *ApiPublicIpService) DeletePublicIp(id string) error {
-//	resp, err := s.client.Delete(fmt.Sprintf("/public_ips/%s", id))
-//	if err != nil {
-//		return err
-//	}
-//
-//	defer func(Body io.ReadCloser) {
-//		err := Body.Close()
-//		if err != nil {
-//			fmt.Println(err)
-//		}
-//	}(resp.Body)
-//
-//	if resp.StatusCode != http.StatusOK {
-//		body, _ := io.ReadAll(resp.Body)
-//		return fmt.Errorf("error deleting public ip: %s", string(body))
-//	}
-//
-//	return nil
-//}
+func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateRequest) (*models.PublicIpResponse, error) {
+	resp, err := s.client.Post("/public_ips", request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusCreated {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("error creating public ip: %s", string(body))
+	}
+
+	var createdPublicIp models.PublicIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&createdPublicIp); err != nil {
+		fmt.Printf("JSON Decode Error: %v\n", err)
+		return nil, err
+	}
+
+	return &createdPublicIp, nil
+}
+
+func (s *ApiPublicIpService) UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error) {
+	resp, err := s.client.Put(fmt.Sprintf("/public_ips/%s", id), &request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("error updating public ip: %s", string(body))
+	}
+
+	var updatedPublicIp models.PublicIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&updatedPublicIp); err != nil {
+		return nil, err
+	}
+
+	return &updatedPublicIp, nil
+}
+
+func (s *ApiPublicIpService) DeletePublicIp(id string) error {
+	resp, err := s.client.Delete(fmt.Sprintf("/public_ips/%s", id))
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("error deleting public ip: %s", string(body))
+	}
+
+	return nil
+}

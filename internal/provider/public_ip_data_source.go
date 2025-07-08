@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicIp"
@@ -73,13 +72,13 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Reading public IP with ID: %s", id))
-
 	apiResponse, err := d.client.GetPublicIp(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Public IP with ID %s not found, removing from state", id))
-			resp.State.RemoveResource(ctx)
+			resp.Diagnostics.AddError(
+				"Public IP not found",
+				fmt.Sprintf("Public IP with ID %s was not found", id),
+			)
 			return
 		}
 
@@ -91,8 +90,10 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Public IP with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Public IP not found",
+			fmt.Sprintf("Public IP with ID %s was not found", id),
+		)
 		return
 	}
 

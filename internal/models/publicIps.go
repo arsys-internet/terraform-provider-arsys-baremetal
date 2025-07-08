@@ -8,13 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// PublicIpsModel represents the data structure for the collection of public IPs
 type PublicIpsModel struct {
 	ID        types.String `tfsdk:"id"`
 	PublicIps types.List   `tfsdk:"public_ips"`
 }
 
-// publicIpObjectType returns the object type for public IP
 func publicIpObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
@@ -32,7 +30,6 @@ func publicIpObjectType() types.ObjectType {
 	}
 }
 
-// publicIpNestedAttributeObject returns the nested attribute object for public IP
 func publicIpNestedAttributeObject() schema.NestedAttributeObject {
 	existingSchema := PublicIpDataSourceSchema(context.Background())
 
@@ -53,7 +50,6 @@ func publicIpNestedAttributeObject() schema.NestedAttributeObject {
 	}
 }
 
-// NewPublicIps creates a PublicIpsModel from the API response
 func NewPublicIps(ctx context.Context, publicIpsResponse []PublicIpResponse) (*PublicIpsModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
@@ -74,7 +70,6 @@ func NewPublicIps(ctx context.Context, publicIpsResponse []PublicIpResponse) (*P
 	return model, diags
 }
 
-// PublicIpsDataSourceSchema returns the schema for the PublicIps data source
 func PublicIpsDataSourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
 		Description: "Data source for listing public IPs",

@@ -55,8 +55,6 @@ func (d *PublicIpsDataSource) Configure(_ context.Context, req datasource.Config
 }
 
 func (d *PublicIpsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
-	tflog.Info(ctx, "Reading all public IPs")
-
 	apiResponse, err := d.client.GetPublicIps()
 	if err != nil {
 		resp.Diagnostics.AddError(
