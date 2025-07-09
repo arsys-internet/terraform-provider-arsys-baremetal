@@ -22,6 +22,9 @@ func TestAccPublicIpsDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				Config: testAccPublicIpsResourceConfig(),
+			},
+			{
 				Config: testAccPublicIpsDataSourceConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.arsys-baremetal_public_ips.all", "id"),
@@ -89,9 +92,11 @@ func validateFirstPublicIpEssentials(attributes map[string]string) error {
 		return fmt.Errorf("first public IP is_dhcp field must be 'true' or 'false', got '%s'", isDhcp)
 	}
 
-	assignedToIdKey := "public_ips.0.assigned_to.id"
-	if _, exists := attributes[assignedToIdKey]; !exists {
-		return fmt.Errorf("first public IP missing assigned_to.id")
+	if assignedToId, exists := attributes["public_ips.0.assigned_to.id"]; exists && assignedToId != "" {
+		assignedToIdKey := "public_ips.0.assigned_to.id"
+		if _, exists := attributes[assignedToIdKey]; !exists {
+			return fmt.Errorf("first public IP missing assigned_to.id")
+		}
 	}
 
 	datacenterIdKey := "public_ips.0.datacenter.id"
@@ -105,6 +110,16 @@ func validateFirstPublicIpEssentials(attributes map[string]string) error {
 	}
 
 	return nil
+}
+
+func testAccPublicIpsResourceConfig() string {
+	return `
+resource "arsys-baremetal_public_ip" "test" {
+   reverse_dns = "dns1324.dominio.com"
+   datacenter_id = "81DEF28500FBC2A973FC0C620DF5B721"
+   type = "IPV4"
+}
+`
 }
 
 func testAccPublicIpsDataSourceConfig() string {

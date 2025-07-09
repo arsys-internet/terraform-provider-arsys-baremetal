@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
@@ -23,13 +22,22 @@ func TestAccPublicIpDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccPublicIpDataSourceConfig("D9C3C724CC521387E962E822F043017D"),
+				Config: testAccPublicIpResourceConfig(
+					"81DEF28500FBC2A973FC0C620DF5B721",
+					"IPV4",
+					"test-datasource.example.com",
+				),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
-						"data.arsys-baremetal_public_ip.test",
+						"arsys-baremetal_public_ip.test",
 						tfjsonpath.New("id"),
-						knownvalue.StringExact("D9C3C724CC521387E962E822F043017D"),
+						knownvalue.NotNull(),
 					),
+				},
+			},
+			{
+				Config: testAccPublicIpDataSourceConfig(),
+				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_public_ip.test",
 						tfjsonpath.New("id"),
@@ -43,7 +51,7 @@ func TestAccPublicIpDataSource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_public_ip.test",
 						tfjsonpath.New("type"),
-						knownvalue.NotNull(),
+						knownvalue.StringExact("IPV4"),
 					),
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_public_ip.test",
@@ -53,11 +61,6 @@ func TestAccPublicIpDataSource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_public_ip.test",
 						tfjsonpath.New("is_dhcp"),
-						knownvalue.NotNull(),
-					),
-					statecheck.ExpectKnownValue(
-						"data.arsys-baremetal_public_ip.test",
-						tfjsonpath.New("assigned_to"),
 						knownvalue.NotNull(),
 					),
 					statecheck.ExpectKnownValue(
@@ -76,10 +79,10 @@ func TestAccPublicIpDataSource(t *testing.T) {
 	})
 }
 
-func testAccPublicIpDataSourceConfig(id string) string {
-	return fmt.Sprintf(`
+func testAccPublicIpDataSourceConfig() string {
+	return testAccPublicIpResourceConfig("81DEF28500FBC2A973FC0C620DF5B721", "IPV4", "test-datasource.example.com") + `
 data "arsys-baremetal_public_ip" "test" {
-  id = "%s"
+  id = arsys-baremetal_public_ip.test.id
 }
-`, id)
+`
 }

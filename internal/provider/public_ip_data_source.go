@@ -36,7 +36,7 @@ func (d *PublicIpDataSource) Configure(_ context.Context, req datasource.Configu
 
 	if client == nil {
 		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
+			"Unexpected Datasource Configure Type",
 			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return
@@ -45,7 +45,7 @@ func (d *PublicIpDataSource) Configure(_ context.Context, req datasource.Configu
 	publicIpService, ok := client.(*service.ApiPublicIpService)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
+			"Unexpected Datasource Configure Type",
 			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
 		)
 		return

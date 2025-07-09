@@ -36,7 +36,7 @@ type PublicIpResponse struct {
 	ID           string                 `json:"id"`
 	IP           string                 `json:"ip"`
 	Type         string                 `json:"type"`
-	AssignedTo   AssignedToResponse     `json:"assigned_to"`
+	AssignedTo   *AssignedToResponse    `json:"assigned_to"`
 	SubnetID     *string                `json:"subnet_id"`
 	ReverseDNS   *string                `json:"reverse_dns"`
 	IsDHCP       bool                   `json:"is_dhcp"`
@@ -105,10 +105,14 @@ func newPublicIpFromResponse(_ context.Context, ip *PublicIpResponse) (*PublicIp
 		model.ReverseDNS = types.StringNull()
 	}
 
-	assignedToObj, assignedToDiags := NewAssignedToObject(ip.AssignedTo)
-	diags.Append(assignedToDiags...)
-	if !assignedToDiags.HasError() {
-		model.AssignedTo = assignedToObj
+	if ip.AssignedTo != nil {
+		assignedToObj, assignedToDiags := NewAssignedToObject(*ip.AssignedTo)
+		diags.Append(assignedToDiags...)
+		if !assignedToDiags.HasError() {
+			model.AssignedTo = assignedToObj
+		}
+	} else {
+		model.AssignedTo = types.ObjectNull(assignedToAttributeTypes())
 	}
 
 	datacenterObj, dcDiags := NewBaseDatacenterObject(ip.Datacenter)
@@ -262,9 +266,9 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 }
 
 type PublicIpCreateRequest struct {
-	ReverseDns   string `json:"reverse_dns"`
-	DatacenterId string `json:"datacenter_id"`
-	Type         string `json:"type"`
+	ReverseDns   string `json:"reverse_dns,omitempty"`
+	DatacenterId string `json:"datacenter_id,omitempty"`
+	Type         string `json:"type,omitempty"`
 }
 
 func (m *PublicIpResourceModel) ToCreateRequest() PublicIpCreateRequest {
