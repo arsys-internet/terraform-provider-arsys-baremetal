@@ -113,8 +113,7 @@ func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateReques
 
 	var createdPublicIp models.PublicIpResponse
 	if err := json.NewDecoder(resp.Body).Decode(&createdPublicIp); err != nil {
-		fmt.Printf("JSON Decode Error: %v\n", err)
-		return nil, err
+		return nil, fmt.Errorf("JSON Decode Error: %w", err)
 	}
 
 	return &createdPublicIp, nil
