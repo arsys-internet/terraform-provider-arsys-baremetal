@@ -1,12 +1,14 @@
 package publicIp
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
+	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 var _ ApiPublicIpServiceInterface = (*ApiPublicIpService)(nil)
@@ -157,10 +159,28 @@ func (s *ApiPublicIpService) DeletePublicIp(id string) error {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusAccepted {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("error deleting public ip: %s", string(body))
 	}
 
 	return nil
+}
+
+func (s *ApiPublicIpService) GetResource(id string) (util.ResourceModel, error) {
+	ip, err := s.GetPublicIp(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if ip == nil {
+		return nil, nil
+	}
+
+	model, diags := models.NewPublicIpResourceModel(context.Background(), ip)
+	if diags.HasError() {
+		return nil, fmt.Errorf("error converting to model: %v", diags)
+	}
+
+	return model, nil
 }

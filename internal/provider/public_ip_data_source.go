@@ -97,7 +97,7 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	model, diags := models.NewPublicIp(ctx, apiResponse)
+	model, diags := models.NewPublicIpModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

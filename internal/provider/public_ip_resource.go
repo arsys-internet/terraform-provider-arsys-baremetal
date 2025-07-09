@@ -9,6 +9,8 @@ import (
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicIp"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"time"
 )
 
 var (
@@ -60,7 +62,7 @@ func (r *PublicIpResource) Configure(_ context.Context, req resource.ConfigureRe
 }
 
 func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data models.PublicIpModel
+	var data models.PublicIpResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -92,7 +94,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	readModel, diags := models.NewPublicIp(ctx, apiResponse)
+	readModel, diags := models.NewPublicIpResourceModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -103,7 +105,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 }
 
 func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data models.PublicIpModel
+	var data models.PublicIpResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -121,7 +123,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	model, diags := models.NewPublicIp(ctx, apiResponse)
+	model, diags := models.NewPublicIpResourceModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -133,8 +135,8 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 }
 
 func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan models.PublicIpModel
-	var state models.PublicIpModel
+	var plan models.PublicIpResourceModel
+	var state models.PublicIpResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
@@ -160,7 +162,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	updatedModel, diags := models.NewPublicIp(ctx, updatedPublicIp)
+	updatedModel, diags := models.NewPublicIpResourceModel(ctx, updatedPublicIp)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -173,7 +175,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 }
 
 func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data models.PublicIpModel
+	var data models.PublicIpResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -198,9 +200,39 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
+	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getIpTimeout()
+
+	waitOptions := util.NewWaitOptions(
+		defaultTimeout,
+		defaultRetryInterval,
+		defaultMinTimeout,
+		[]string{util.StateRemoving},
+		[]string{util.StateDeleted},
+	)
+
+	_, diags := util.WaitForResourceState(
+		ctx,
+		data.ID.ValueString(),
+		r.client,
+		waitOptions,
+	)
+
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	tflog.Info(ctx, fmt.Sprintf("Deleted public ip with ID: %s", id))
 }
 
 func (r *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func getIpTimeout() (time.Duration, time.Duration, time.Duration) {
+	var timeout = util.GetTimeoutFromEnv("IP_DEFAULT_TIMEOUT", time.Minute)
+	var retryInterval = util.GetTimeoutFromEnv("IP_DEFAULT_RETRY_INTERVAL", time.Second)
+	var minTimeout = util.GetTimeoutFromEnv("IP_DEFAULT_MIN_TIMEOUT", time.Second)
+
+	return timeout, retryInterval, minTimeout
 }

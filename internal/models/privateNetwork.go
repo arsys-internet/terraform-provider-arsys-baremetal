@@ -84,11 +84,11 @@ func newPrivateNetworkModelFromResponse(_ context.Context, pn *PrivateNetworkRes
 	return model, diags
 }
 
-func NewPrivateNetwork(ctx context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
+func NewPrivateNetworkModel(ctx context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
 	return newPrivateNetworkModelFromResponse(ctx, pn)
 }
 
-func NewPrivateNetworkResource(ctx context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkResourceModel, diag.Diagnostics) {
+func NewPrivateNetworkResourceModel(ctx context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkResourceModel, diag.Diagnostics) {
 	baseModel, diags := newPrivateNetworkModelFromResponse(ctx, pn)
 	if diags.HasError() {
 		return nil, diags
@@ -148,7 +148,7 @@ func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkRespo
 	}
 
 	for i, pn := range pnList {
-		model, modelDiags := NewPrivateNetwork(ctx, &pn)
+		model, modelDiags := NewPrivateNetworkModel(ctx, &pn)
 		if modelDiags.HasError() {
 			diags.AddError(
 				"List Constructor Error",
@@ -283,6 +283,7 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"datacenter_id": rschema.StringAttribute{
 				Optional:    true,
+				Computed:    true,
 				Description: "Datacenter identifier where the network will be created",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(

@@ -27,6 +27,11 @@ type PublicIpModel struct {
 	CreationDate types.String `tfsdk:"creation_date"`
 }
 
+type PublicIpResourceModel struct {
+	PublicIpModel
+	DatacenterId types.String `tfsdk:"datacenter_id"`
+}
+
 type PublicIpResponse struct {
 	ID           string                 `json:"id"`
 	IP           string                 `json:"ip"`
@@ -60,7 +65,6 @@ func assignedToObjectType() types.ObjectType {
 	}
 }
 
-// NewAssignedToObject creates a types.Object from an AssignedToResponse
 func NewAssignedToObject(assignedTo AssignedToResponse) (types.Object, diag.Diagnostics) {
 	return types.ObjectValue(
 		assignedToAttributeTypes(),
@@ -72,8 +76,7 @@ func NewAssignedToObject(assignedTo AssignedToResponse) (types.Object, diag.Diag
 	)
 }
 
-// NewPublicIp creates a PublicIpModel from the API response
-func NewPublicIp(_ context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.Diagnostics) {
+func newPublicIpFromResponse(_ context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	if ip == nil {
@@ -89,12 +92,6 @@ func NewPublicIp(_ context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.
 	model.IsDHCP = types.BoolValue(ip.IsDHCP)
 	model.State = types.StringValue(ip.State)
 	model.CreationDate = types.StringValue(ip.CreationDate)
-
-	if ip.DatacenterId != nil {
-		model.DatacenterId = types.StringValue(*ip.DatacenterId)
-	} else {
-		model.DatacenterId = types.StringNull()
-	}
 
 	if ip.SubnetID != nil {
 		model.SubnetID = types.StringValue(*ip.SubnetID)
@@ -123,6 +120,24 @@ func NewPublicIp(_ context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.
 	return model, diags
 }
 
+func NewPublicIpModel(ctx context.Context, ip *PublicIpResponse) (*PublicIpModel, diag.Diagnostics) {
+	return newPublicIpFromResponse(ctx, ip)
+}
+
+func NewPublicIpResourceModel(ctx context.Context, ip *PublicIpResponse) (*PublicIpResourceModel, diag.Diagnostics) {
+	baseModel, diags := newPublicIpFromResponse(ctx, ip)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	resourceModel := &PublicIpResourceModel{
+		PublicIpModel: *baseModel,
+		DatacenterId:  types.StringValue(ip.Datacenter.ID),
+	}
+
+	return resourceModel, diags
+}
+
 func NewPublicIpFromList(ctx context.Context, ipList []PublicIpResponse) ([]PublicIpModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 	var models []PublicIpModel
@@ -132,7 +147,7 @@ func NewPublicIpFromList(ctx context.Context, ipList []PublicIpResponse) ([]Publ
 	}
 
 	for i, ip := range ipList {
-		model, modelDiags := NewPublicIp(ctx, &ip)
+		model, modelDiags := NewPublicIpModel(ctx, &ip)
 		if modelDiags.HasError() {
 			diags.AddError(
 				"List Constructor Error",
@@ -246,18 +261,13 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 	}
 }
 
-type PublicIpPostModel struct {
-	PublicIpModel
-	DatacenterId types.String `tfsdk:"datacenter_id"`
-}
-
 type PublicIpCreateRequest struct {
 	ReverseDns   string `json:"reverse_dns"`
 	DatacenterId string `json:"datacenter_id"`
 	Type         string `json:"type"`
 }
 
-func (m *PublicIpPostModel) ToCreateRequest() PublicIpCreateRequest {
+func (m *PublicIpResourceModel) ToCreateRequest() PublicIpCreateRequest {
 	return PublicIpCreateRequest{
 		ReverseDns:   m.ReverseDNS.ValueString(),
 		DatacenterId: m.DatacenterId.ValueString(),
@@ -331,8 +341,12 @@ type PublicIpUpdateRequest struct {
 	ReverseDns string `json:"reverse_dns"`
 }
 
-func (m *PublicIpModel) ToUpdateRequest() PublicIpUpdateRequest {
+func (m *PublicIpResourceModel) ToUpdateRequest() PublicIpUpdateRequest {
 	return PublicIpUpdateRequest{
 		ReverseDns: m.ReverseDNS.ValueString(),
 	}
+}
+
+func (m *PublicIpResourceModel) GetState() string {
+	return m.State.ValueString()
 }

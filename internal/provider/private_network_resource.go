@@ -100,7 +100,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	model, diags := models.NewPrivateNetworkResource(ctx, apiResponse)
+	model, diags := models.NewPrivateNetworkResourceModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -149,7 +149,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	readModel, diags := models.NewPrivateNetworkResource(ctx, apiResponse)
+	readModel, diags := models.NewPrivateNetworkResourceModel(ctx, apiResponse)
 
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -187,7 +187,7 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	updatedModel, diags := models.NewPrivateNetworkResource(ctx, updatedPrivateNetwork)
+	updatedModel, diags := models.NewPrivateNetworkResourceModel(ctx, updatedPrivateNetwork)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

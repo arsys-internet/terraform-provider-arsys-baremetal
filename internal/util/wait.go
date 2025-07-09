@@ -36,7 +36,7 @@ type WaitOptions struct {
 
 func NewWaitOptions(timeout, retryInterval, minTimeout time.Duration, pendingStates, targetStates []string) WaitOptions {
 	return WaitOptions{
-		Timeout:              timeout * time.Minute,
+		Timeout:              timeout,
 		RetryInterval:        retryInterval,
 		MinTimeout:           minTimeout,
 		PendingStates:        pendingStates,
