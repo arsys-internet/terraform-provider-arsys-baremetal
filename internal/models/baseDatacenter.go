@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -55,10 +56,35 @@ func baseDatacenterAttributes() map[string]schema.Attribute {
 	}
 }
 
+func BaseDatacenterResourceAttributes() map[string]rschema.Attribute {
+	return map[string]rschema.Attribute{
+		"id": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Datacenter ID",
+		},
+		"country_code": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Country code",
+		},
+		"location": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Location",
+		},
+	}
+}
+
 func BaseDatacenterNestedAttribute() schema.SingleNestedAttribute {
 	return schema.SingleNestedAttribute{
 		Computed:    true,
 		Description: "Datacenter information",
 		Attributes:  baseDatacenterAttributes(),
+	}
+}
+
+func BaseDatacenterResourceNestedAttribute() rschema.SingleNestedAttribute {
+	return rschema.SingleNestedAttribute{
+		Computed:    true,
+		Description: "Datacenter information",
+		Attributes:  BaseDatacenterResourceAttributes(),
 	}
 }

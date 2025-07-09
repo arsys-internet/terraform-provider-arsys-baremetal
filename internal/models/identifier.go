@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -32,33 +33,33 @@ func IdentifierObjectType() types.ObjectType {
 }
 
 func NewIdentifierObject(identifier IdentifierResponse) (types.Object, diag.Diagnostics) {
-	return types.ObjectValue(
-		IdentifierAttributeTypes(),
-		map[string]attr.Value{
-			"id":   types.StringValue(identifier.ID),
-			"name": types.StringValue(identifier.Name),
-		},
-	)
+	model := IdentifierModel{
+		ID:   types.StringValue(identifier.ID),
+		Name: types.StringValue(identifier.Name),
+	}
+
+	return types.ObjectValueFrom(context.Background(), IdentifierObjectType().AttrTypes, model)
 }
 
 func NewIdentifierList(responses []IdentifierResponse) (types.List, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	if len(responses) == 0 {
-		return types.ListValue(IdentifierObjectType(), []attr.Value{})
+		return types.ListValueFrom(context.Background(), IdentifierObjectType(), []IdentifierModel{})
 	}
 
-	values := make([]attr.Value, 0, len(responses))
-
-	for _, server := range responses {
-		serverObj, identifierDiags := NewIdentifierObject(server)
-		diags.Append(identifierDiags...)
-		if !identifierDiags.HasError() {
-			values = append(values, serverObj)
+	var models []IdentifierModel
+	for _, response := range responses {
+		model := IdentifierModel{
+			ID:   types.StringValue(response.ID),
+			Name: types.StringValue(response.Name),
 		}
+		models = append(models, model)
 	}
 
-	return types.ListValue(IdentifierObjectType(), values)
+	list, listDiags := types.ListValueFrom(context.Background(), IdentifierObjectType(), models)
+	diags.Append(listDiags...)
+	return list, diags
 }
 
 func BaseIdentifierAttributes() map[string]schema.Attribute {
@@ -89,8 +90,29 @@ func IdentifierResourceNestedObject() rschema.NestedAttributeObject {
 	}
 }
 
+func BaseIdentifierResourceAttributes() map[string]rschema.Attribute {
+	return map[string]rschema.Attribute{
+		"id": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Identifier",
+		},
+		"name": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Name",
+		},
+	}
+}
+
 func IdentifierNestedObject() schema.NestedAttributeObject {
 	return schema.NestedAttributeObject{
 		Attributes: BaseIdentifierAttributes(),
+	}
+}
+
+func BaseIdentifierResourceNestedAttribute() rschema.SingleNestedAttribute {
+	return rschema.SingleNestedAttribute{
+		Computed:    true,
+		Description: "Identifier information",
+		Attributes:  BaseIdentifierResourceAttributes(),
 	}
 }
