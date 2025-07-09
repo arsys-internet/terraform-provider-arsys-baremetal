@@ -121,7 +121,7 @@ func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateReques
 }
 
 func (s *ApiPublicIpService) UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error) {
-	resp, err := s.client.Put(fmt.Sprintf("/public_ips/%s", id), &request)
+	resp, err := s.client.Put(fmt.Sprintf("/public_ips/%s", id), request)
 	if err != nil {
 		return nil, err
 	}

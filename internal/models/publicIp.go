@@ -325,7 +325,7 @@ func PublicIpResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Description: "IP use DHCP",
 			},
-			"state": schema.StringAttribute{
+			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Current state of the IP (ACTIVE, etc.)",
 			},
