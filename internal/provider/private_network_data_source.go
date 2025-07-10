@@ -101,7 +101,7 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	model, diags := models.NewPrivateNetwork(ctx, apiResponse)
+	model, diags := models.NewPrivateNetworkModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
