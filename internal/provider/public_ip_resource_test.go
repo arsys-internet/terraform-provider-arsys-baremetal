@@ -89,7 +89,7 @@ func TestAccPublicIpResource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"arsys-baremetal_public_ip.test",
 						tfjsonpath.New("assigned_to"),
-						knownvalue.NotNull(),
+						knownvalue.Null(),
 					),
 				},
 			},
