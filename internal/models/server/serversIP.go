@@ -93,60 +93,52 @@ func IdentifierIPObjectType() types.ObjectType {
 
 func ServersIPDataSourceSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"ips": schema.ListNestedAttribute{
+		"id": schema.StringAttribute{
 			Computed:    true,
-			Description: "Server IPs",
+			Description: "IP identifier",
+		},
+		"ip": schema.StringAttribute{
+			Computed:    true,
+			Description: "IP",
+		},
+		"type": schema.StringAttribute{
+			Computed:    true,
+			Description: "IP type",
+		},
+		"reverse_dns": schema.StringAttribute{
+			Computed:    true,
+			Description: "Reverse name of the IP",
+		},
+		"main": schema.BoolAttribute{
+			Computed:    true,
+			Description: "Whether this is the main IP",
+		},
+		"firewall_policy": schema.SingleNestedAttribute{
+			Computed:    true,
+			Description: "Firewall policy assigned to IP",
+			Attributes: map[string]schema.Attribute{
+				"id": schema.StringAttribute{
+					Computed:    true,
+					Description: "Firewall policy ID",
+				},
+				"name": schema.StringAttribute{
+					Computed:    true,
+					Description: "Firewall policy name",
+				},
+			},
+		},
+		"load_balancers": schema.ListNestedAttribute{
+			Computed:    true,
+			Description: "Load balancer(s) assigned to IP",
 			NestedObject: schema.NestedAttributeObject{
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "IP identifier",
+						Description: "Load balancer ID",
 					},
-					"ip": schema.StringAttribute{
+					"name": schema.StringAttribute{
 						Computed:    true,
-						Description: "IP",
-					},
-					"type": schema.StringAttribute{
-						Computed:    true,
-						Description: "IP type",
-					},
-					"reverse_dns": schema.StringAttribute{
-						Computed:    true,
-						Description: "Reverse name of the IP",
-					},
-					"main": schema.BoolAttribute{ // <-- AGREGAR ESTE CAMPO
-						Computed:    true,
-						Description: "Whether this is the main IP",
-					},
-					"firewall_policy": schema.SingleNestedAttribute{
-						Computed:    true,
-						Description: "Firewall policy assigned to IP",
-						Attributes: map[string]schema.Attribute{
-							"id": schema.StringAttribute{
-								Computed:    true,
-								Description: "Firewall policy ID",
-							},
-							"name": schema.StringAttribute{
-								Computed:    true,
-								Description: "Firewall policy name",
-							},
-						},
-					},
-					"load_balancers": schema.ListNestedAttribute{
-						Computed:    true,
-						Description: "Load balancer(s) assigned to IP",
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"id": schema.StringAttribute{
-									Computed:    true,
-									Description: "Load balancer ID",
-								},
-								"name": schema.StringAttribute{
-									Computed:    true,
-									Description: "Load balancer name",
-								},
-							},
-						},
+						Description: "Load balancer name",
 					},
 				},
 			},
@@ -156,56 +148,52 @@ func ServersIPDataSourceSchema() map[string]schema.Attribute {
 
 func ServersIPResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
-		"ips": rschema.ListNestedAttribute{
+		"id": rschema.StringAttribute{
 			Computed:    true,
-			Description: "Server IPs",
+			Description: "IP identifier",
+		},
+		"ip": rschema.StringAttribute{
+			Computed:    true,
+			Description: "IP",
+		},
+		"type": rschema.StringAttribute{
+			Computed:    true,
+			Description: "IP type",
+		},
+		"reverse_dns": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Reverse name of the IP",
+		},
+		"main": schema.BoolAttribute{
+			Computed:    true,
+			Description: "Whether this is the main IP",
+		},
+		"firewall_policy": rschema.SingleNestedAttribute{
+			Computed:    true,
+			Description: "Firewall policy assigned to IP",
+			Attributes: map[string]rschema.Attribute{
+				"id": rschema.StringAttribute{
+					Computed:    true,
+					Description: "Firewall policy ID",
+				},
+				"name": rschema.StringAttribute{
+					Computed:    true,
+					Description: "Firewall policy name",
+				},
+			},
+		},
+		"load_balancers": rschema.ListNestedAttribute{
+			Computed:    true,
+			Description: "Load balancer(s) assigned to IP",
 			NestedObject: rschema.NestedAttributeObject{
 				Attributes: map[string]rschema.Attribute{
 					"id": rschema.StringAttribute{
 						Computed:    true,
-						Description: "IP identifier",
+						Description: "Load balancer ID",
 					},
-					"ip": rschema.StringAttribute{
+					"name": rschema.StringAttribute{
 						Computed:    true,
-						Description: "IP",
-					},
-					"type": rschema.StringAttribute{
-						Computed:    true,
-						Description: "IP type",
-					},
-					"reverse_dns": rschema.StringAttribute{
-						Computed:    true,
-						Description: "Reverse name of the IP",
-					},
-					"firewall_policy": rschema.SingleNestedAttribute{
-						Computed:    true,
-						Description: "Firewall policy assigned to IP",
-						Attributes: map[string]rschema.Attribute{
-							"id": rschema.StringAttribute{
-								Computed:    true,
-								Description: "Firewall policy ID",
-							},
-							"name": rschema.StringAttribute{
-								Computed:    true,
-								Description: "Firewall policy name",
-							},
-						},
-					},
-					"load_balancers": rschema.ListNestedAttribute{
-						Computed:    true,
-						Description: "Load balancer(s) assigned to IP",
-						NestedObject: rschema.NestedAttributeObject{
-							Attributes: map[string]rschema.Attribute{
-								"id": rschema.StringAttribute{
-									Computed:    true,
-									Description: "Load balancer ID",
-								},
-								"name": rschema.StringAttribute{
-									Computed:    true,
-									Description: "Load balancer name",
-								},
-							},
-						},
+						Description: "Load balancer name",
 					},
 				},
 			},

@@ -12,8 +12,8 @@ import (
 type HardwareResponse struct {
 	RAM                 int           `json:"ram"`
 	HDDs                []HDDResponse `json:"hdds"`
-	FixedInstanceSizeID string        `json:"fixed_instance_size_id"`
-	BaremetalModelID    string        `json:"baremetal_model_id"`
+	FixedInstanceSizeID *string       `json:"fixed_instance_size_id,omitempty"`
+	BaremetalModelID    *string       `json:"baremetal_model_id,omitempty"`
 	VCore               int           `json:"vcore"`
 	CoresPerProcessor   int           `json:"cores_per_processor"`
 }
@@ -56,12 +56,26 @@ func NewHardwareObject(hardware HardwareResponse) (types.Object, diag.Diagnostic
 	hddsList, listDiags := types.ListValue(HDDObjectType(), elements)
 	diags.Append(listDiags...)
 
+	var fixedInstanceSizeID types.String
+	if hardware.FixedInstanceSizeID != nil {
+		fixedInstanceSizeID = types.StringValue(*hardware.FixedInstanceSizeID)
+	} else {
+		fixedInstanceSizeID = types.StringNull()
+	}
+
+	var baremetalModelID types.String
+	if hardware.BaremetalModelID != nil {
+		baremetalModelID = types.StringValue(*hardware.BaremetalModelID)
+	} else {
+		baremetalModelID = types.StringNull()
+	}
+
 	hardwareObj, objDiags := types.ObjectValue(HardwareObjectType().AttrTypes,
 		map[string]attr.Value{
 			"ram":                    types.Int64Value(int64(hardware.RAM)),
 			"hdds":                   hddsList,
-			"fixed_instance_size_id": types.StringValue(hardware.FixedInstanceSizeID),
-			"baremetal_model_id":     types.StringValue(hardware.BaremetalModelID),
+			"fixed_instance_size_id": fixedInstanceSizeID,
+			"baremetal_model_id":     baremetalModelID,
 			"vcore":                  types.Int64Value(int64(hardware.VCore)),
 			"cores_per_processor":    types.Int64Value(int64(hardware.CoresPerProcessor)),
 		})

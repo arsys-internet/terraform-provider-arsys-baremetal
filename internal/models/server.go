@@ -37,6 +37,7 @@ type ServerModel struct {
 	MonitoringPolicy types.Object `tfsdk:"monitoring_policy"`
 	CloudPanelID     types.String `tfsdk:"cloudpanel_id"`
 	ServerType       types.String `tfsdk:"server_type"`
+	Hypervisor       types.String `tfsdk:"hypervisor"`
 	Hostname         types.String `tfsdk:"hostname"`
 	ConnectionSpeed  types.Object `tfsdk:"connection_speed"` // CORREGIDO: agregado
 	Redundancy       types.Object `tfsdk:"redundancy"`
@@ -48,7 +49,6 @@ type ServerModel struct {
 type ServerResourceModel struct {
 	ServerModel
 
-	// Campos específicos de resource (inputs del usuario)
 	ApplianceID            types.String  `tfsdk:"appliance_id"`
 	DatacenterID           types.String  `tfsdk:"datacenter_id"`
 	Password               types.String  `tfsdk:"password"`
@@ -89,7 +89,7 @@ type ServerResponse struct {
 	Description      *string                                `json:"description,omitempty"`
 	Datacenter       BaseDatacenterResponse                 `json:"datacenter"`
 	CreationDate     string                                 `json:"creation_date"`
-	FirstPassword    *string                                `json:"first_password"` // CORREGIDO: nullable
+	FirstPassword    *string                                `json:"first_password"`
 	Managed          bool                                   `json:"managed"`
 	Status           server.StatusResponse                  `json:"status"`
 	IPs              []server.ServersIPResponse             `json:"ips"`
@@ -98,13 +98,14 @@ type ServerResponse struct {
 	Hardware         server.HardwareResponse                `json:"hardware"`
 	DVD              *IdentifierResponse                    `json:"dvd,omitempty"`
 	Alerts           *server.AlertResponse                  `json:"alerts,omitempty"`
-	MonitoringPolicy *IdentifierResponse                    `json:"monitoring_policy,omitempty"` // CORREGIDO: nullable
-	CloudPanelID     *string                                `json:"cloudpanel_id,omitempty"`     // CORREGIDO: nullable
+	MonitoringPolicy *IdentifierResponse                    `json:"monitoring_policy,omitempty"`
+	CloudPanelID     *string                                `json:"cloudpanel_id,omitempty"`
 	ServerType       string                                 `json:"server_type"`
+	Hypervisor       *string                                `json:"hypervisor,omitempty"`
 	Hostname         string                                 `json:"hostname"`
-	ConnectionSpeed  *server.ConnectionSpeedResponse        `json:"connection_speed,omitempty"` // AGREGADO
-	Redundancy       *server.RedundancyResponse             `json:"redundancy,omitempty"`       // CORREGIDO: nullable
-	RSAKey           interface{}                            `json:"rsa_key"`                    // Puede ser int o bool
+	ConnectionSpeed  *server.ConnectionSpeedResponse        `json:"connection_speed,omitempty"`
+	Redundancy       *server.RedundancyResponse             `json:"redundancy,omitempty"`
+	RSAKey           interface{}                            `json:"rsa_key"`
 	Snapshot         *server.SnapshotResponse               `json:"snapshot,omitempty"`
 	PrivateNetworks  []server.ServersPrivateNetworkResponse `json:"private_networks"`
 }
@@ -167,7 +168,6 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 
 	model := &ServerModel{}
 
-	// Campos básicos siempre presentes
 	model.ID = types.StringValue(sr.ID)
 	model.Name = types.StringValue(sr.Name)
 	model.CreationDate = types.StringValue(sr.CreationDate)
@@ -176,7 +176,6 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 	model.ServerType = types.StringValue(sr.ServerType)
 	model.Hostname = types.StringValue(sr.Hostname)
 
-	// Campos nullable
 	if sr.Description != nil {
 		model.Description = types.StringValue(*sr.Description)
 	} else {
@@ -243,7 +242,6 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 		model.PrivateNetworks = pnList
 	}
 
-	// Objetos nullable
 	if sr.DVD != nil {
 		dvdObj, dvdDiags := NewIdentifierObject(*sr.DVD)
 		diags.Append(dvdDiags...)
@@ -272,6 +270,12 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 		}
 	} else {
 		model.MonitoringPolicy = types.ObjectNull(IdentifierObjectType().AttrTypes)
+	}
+
+	if sr.Hypervisor != nil {
+		model.Hypervisor = types.StringValue(*sr.Hypervisor)
+	} else {
+		model.Hypervisor = types.StringNull()
 	}
 
 	if sr.ConnectionSpeed != nil {
@@ -357,7 +361,6 @@ func NewServerResourceModel(ctx context.Context, sr *ServerResponse) (*ServerRes
 }
 
 func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
-	// Procesar hardware
 	hardwareAttrs := s.Hardware.Attributes()
 
 	var hdds []server.HDDCreateRequest
@@ -383,7 +386,6 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 		},
 	}
 
-	// Campos opcionales con valores por defecto
 	if !s.Description.IsNull() {
 		req.Description = s.Description.ValueString()
 	}
@@ -402,7 +404,6 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 		req.RSAKey = s.RSAKey.ValueBool()
 	}
 
-	// Hardware opcionales
 	if vcore, ok := hardwareAttrs["vcore"].(types.Int64); ok && !vcore.IsNull() {
 		req.Hardware.VCore = int(vcore.ValueInt64())
 	}
@@ -544,6 +545,7 @@ func serverModelObjectType() types.ObjectType {
 			"monitoring_policy": IdentifierObjectType(),
 			"cloudpanel_id":     types.StringType,
 			"server_type":       types.StringType,
+			"hypervisor":        types.StringType,
 			"hostname":          types.StringType,
 			"connection_speed":  server.ConnectionSpeedObjectType(),
 			"redundancy":        server.RedundancyObjectType(),
@@ -652,6 +654,10 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"server_type": schema.StringAttribute{
 				Computed: true,
+			},
+			"hypervisor": schema.StringAttribute{
+				Computed:    true,
+				Description: "Server hypervisor type",
 			},
 			"hostname": schema.StringAttribute{
 				Computed: true,
@@ -815,7 +821,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Availability zone identifier",
 			},
 
-			// Campos adicionales de tu versión original
 			"disabled_password": rschema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -911,6 +916,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"server_type": rschema.StringAttribute{
 				Computed: true,
+			},
+			"hypervisor": rschema.StringAttribute{
+				Computed:    true,
+				Description: "Server hypervisor type",
 			},
 			"hostname": rschema.StringAttribute{
 				Computed: true,
