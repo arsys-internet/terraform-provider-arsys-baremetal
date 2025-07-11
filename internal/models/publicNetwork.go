@@ -192,14 +192,12 @@ func NewPublicNetworkModel(ctx context.Context, pn *PublicNetworkResponse) (*Pub
 		model.Description = types.StringNull()
 	}
 
-	// Servers
 	serversList, serversDiags := NewPublicNetworkServerList(pn.Servers)
 	diags.Append(serversDiags...)
 	if !serversDiags.HasError() {
 		model.Servers = serversList
 	}
 
-	// IPs (simple string list)
 	if len(pn.Ips) > 0 {
 		ipValues := make([]attr.Value, 0, len(pn.Ips))
 		for _, ip := range pn.Ips {
@@ -218,14 +216,12 @@ func NewPublicNetworkModel(ctx context.Context, pn *PublicNetworkResponse) (*Pub
 		}
 	}
 
-	// Availability Zones
 	availabilityZonesList, azDiags := NewAvailabilityZoneList(pn.AvailabilityZones)
 	diags.Append(azDiags...)
 	if !azDiags.HasError() {
 		model.AvailabilityZones = availabilityZonesList
 	}
 
-	// Last Logs
 	if len(pn.LastLogs) > 0 {
 		logValues := make([]attr.Value, 0, len(pn.LastLogs))
 		for _, logEntry := range pn.LastLogs {
@@ -478,6 +474,12 @@ func (m *PublicNetworkModel) ToCreateRequest() PublicNetworkCreateRequest {
 	}
 }
 
+type PublicNetworkCreateResponse struct {
+	Sync   bool                  `json:"sync"`
+	Data   PublicNetworkResponse `json:"data"`
+	TaskID string                `json:"task_id"`
+}
+
 func PublicNetworkResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Public network resource",
@@ -507,7 +509,8 @@ func PublicNetworkResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"datacenter_id": rschema.StringAttribute{
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "Datacenter identifier where the network will be created",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
@@ -615,4 +618,20 @@ func PublicNetworkResourceSchema(_ context.Context) rschema.Schema {
 			},
 		},
 	}
+}
+
+type PublicNetworkUpdateRequest struct {
+	PublicName  string `json:"public_name"`
+	Description string `json:"description"`
+}
+
+func (m *PublicNetworkModel) ToUpdateRequest() PublicNetworkUpdateRequest {
+	return PublicNetworkUpdateRequest{
+		PublicName:  m.PublicName.ValueString(),
+		Description: m.Description.ValueString(),
+	}
+}
+
+func (m *PublicNetworkModel) GetState() string {
+	return m.State.ValueString()
 }
