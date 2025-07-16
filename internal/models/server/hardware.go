@@ -6,6 +6,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -183,56 +188,96 @@ func HardwareDataSourceSchema() map[string]schema.Attribute {
 func HardwareResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"baremetal_model_id": rschema.StringAttribute{
-			Required:    true,
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Baremetal model identifier",
 		},
 		"vcore": rschema.Int64Attribute{
-			Optional:    true,
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 			Description: "Number of virtual cores",
 		},
 		"cores_per_processor": rschema.Int64Attribute{
-			Optional:    true,
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 			Description: "Number of cores per processor",
 		},
 		"ram": rschema.Int64Attribute{
-			Optional:    true,
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Int64{
+				int64planmodifier.UseStateForUnknown(),
+			},
 			Description: "Amount of RAM in GB",
 		},
 		"fixed_instance_size_id": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Fixed instance size identifier",
 		},
 		"hdds": rschema.ListNestedAttribute{
-			Required:    true,
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			Description: "List of hard disk drives",
 			NestedObject: rschema.NestedAttributeObject{
 				Attributes: map[string]rschema.Attribute{
 					"size": rschema.Int64Attribute{
-						Required:    true,
+						Required: true,
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
 						Description: "HDD size in GB",
 					},
 					"is_main": rschema.BoolAttribute{
-						Optional:    true,
-						Computed:    true,
+						Optional: true,
+						Computed: true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 						Default:     booldefault.StaticBool(false),
 						Description: "Whether this is the main HDD",
 					},
-					// Computed fields
 					"id": rschema.StringAttribute{
 						Computed:    true,
 						Description: "HDD identifier",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"disk_type": rschema.StringAttribute{
 						Computed:    true,
 						Description: "Type of disk",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"disk_raid": rschema.StringAttribute{
 						Computed:    true,
 						Description: "RAID configuration",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 					},
 					"disk_raid_count": rschema.Int64Attribute{
 						Computed:    true,
 						Description: "Number of disks in RAID",
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},

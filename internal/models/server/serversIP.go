@@ -5,6 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -149,19 +152,31 @@ func ServersIPDataSourceSchema() map[string]schema.Attribute {
 func ServersIPResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"id": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "IP identifier",
 		},
 		"ip": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "IP",
 		},
 		"type": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "IP type",
 		},
 		"reverse_dns": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Reverse name of the IP",
 		},
 		"main": schema.BoolAttribute{
@@ -169,15 +184,24 @@ func ServersIPResourceSchema() map[string]rschema.Attribute {
 			Description: "Whether this is the main IP",
 		},
 		"firewall_policy": rschema.SingleNestedAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Firewall policy assigned to IP",
 			Attributes: map[string]rschema.Attribute{
 				"id": rschema.StringAttribute{
-					Computed:    true,
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 					Description: "Firewall policy ID",
 				},
 				"name": rschema.StringAttribute{
-					Computed:    true,
+					Computed: true,
+					PlanModifiers: []planmodifier.String{
+						stringplanmodifier.UseStateForUnknown(),
+					},
 					Description: "Firewall policy name",
 				},
 			},
@@ -188,11 +212,17 @@ func ServersIPResourceSchema() map[string]rschema.Attribute {
 			NestedObject: rschema.NestedAttributeObject{
 				Attributes: map[string]rschema.Attribute{
 					"id": rschema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 						Description: "Load balancer ID",
 					},
 					"name": rschema.StringAttribute{
-						Computed:    true,
+						Computed: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
 						Description: "Load balancer name",
 					},
 				},

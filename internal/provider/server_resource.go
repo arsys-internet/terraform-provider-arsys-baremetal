@@ -9,6 +9,8 @@ import (
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/server"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"time"
 )
 
 var (
@@ -83,12 +85,11 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	if (data.DatacenterID.IsNull() || data.DatacenterID.ValueString() == "") &&
-		(data.SiteID.IsNull() || data.SiteID.ValueString() == "") {
+	if data.DatacenterID.IsNull() || data.DatacenterID.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
-			"Either 'datacenter_id' or 'site_id' field is required when creating a server",
+			"Either 'datacenter_id' field is required when creating a server",
 		)
 	}
 
@@ -117,15 +118,51 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	model, diags := models.NewServerResourceModel(ctx, apiResponse)
+	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getServerTimeout()
+
+	waitOptions := util.NewWaitOptions(
+		defaultTimeout,
+		defaultRetryInterval,
+		defaultMinTimeout,
+		[]string{util.StateDeploying},
+		[]string{util.StatePoweredOn, util.StatePoweredOff, util.StateActive},
+	)
+
+	_, diags := util.WaitForResourceState(
+		ctx,
+		apiResponse.ID,
+		r.client,
+		waitOptions,
+	)
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Wait for server state failed")
+		return
+	}
+	tflog.Info(ctx, fmt.Sprintf("apiResponse: %+v", apiResponse))
+
+	finalServer, err := r.client.GetServer(apiResponse.ID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error getting final server state",
+			fmt.Sprintf("Could not get final server state: %s", err),
+		)
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created server with ID: %s", model.ID.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Create - finalServer: %+v", finalServer))
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
+	finalModel, diags := models.NewServerResourceModelFromCreate(ctx, finalServer, &data)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Failed to create final resource model")
+		return
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("Created server with ID: %s", finalModel.ID.ValueString()))
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
 func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -139,6 +176,9 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 	id := data.ID.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Reading server with ID: %s", id))
+
+	tflog.Info(ctx, fmt.Sprintf("🔍 BEFORE API CALL - State Hardware: %v", data.Hardware))
+	tflog.Info(ctx, fmt.Sprintf("🔍 BEFORE API CALL - State ConnectionSpeed: %v", data.ConnectionSpeed))
 
 	apiResponse, err := r.client.GetServer(id)
 	if err != nil {
@@ -155,18 +195,22 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
+	tflog.Info(ctx, fmt.Sprintf("Read - apiResponse: %+v", apiResponse))
+
 	if apiResponse == nil {
 		tflog.Info(ctx, fmt.Sprintf("Server with ID %s not found, removing from state", id))
 		resp.State.RemoveResource(ctx)
 		return
 	}
 
-	readModel, diags := models.NewServerResourceModel(ctx, apiResponse)
+	readModel, diags := models.NewServerResourceModelFromRead(ctx, apiResponse, &data)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	tflog.Info(ctx, fmt.Sprintf("🔍 AFTER NewServerResourceModel - Hardware: %v", readModel.Hardware))
+	tflog.Info(ctx, fmt.Sprintf("🔍 AFTER NewServerResourceModel - ConnectionSpeed: %v", readModel.ConnectionSpeed))
 	resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
 }
 
@@ -187,7 +231,26 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 	id := state.ID.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating server with ID: %s", id))
 
+	hasChanges := false
+	if !plan.Name.Equal(state.Name) {
+		hasChanges = true
+		tflog.Info(ctx, "Name changed")
+	}
+
+	if !plan.Description.Equal(state.Description) {
+		hasChanges = true
+		tflog.Info(ctx, "Description changed")
+	}
+
+	if !hasChanges {
+		tflog.Info(ctx, "No changes detected, skipping API call")
+		resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+		return
+	}
+
 	updateRequest := plan.ToUpdateRequest()
+	tflog.Info(ctx, fmt.Sprintf("Update request: name=%s, description=%s",
+		updateRequest.Name, updateRequest.Description))
 
 	updatedServer, err := r.client.UpdateServer(id, &updateRequest)
 	if err != nil {
@@ -198,16 +261,11 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	updatedModel, diags := models.NewServerResourceModel(ctx, updatedServer)
+	finalModel, diags := models.NewServerResourceModelFromUpdate(ctx, updatedServer, &state)
 	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	tflog.Info(ctx, fmt.Sprintf("Successfully updated server with ID: %s", id))
-
-	diags = resp.State.Set(ctx, updatedModel)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
 func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -236,9 +294,50 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
+	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getServerTimeout()
+
+	waitOptions := util.NewWaitOptions(
+		defaultTimeout,
+		defaultRetryInterval,
+		defaultMinTimeout,
+		[]string{util.StateRemoving},
+		[]string{util.StateDeleted},
+	)
+
+	_, diags := util.WaitForResourceState(
+		ctx,
+		id,
+		r.client,
+		waitOptions,
+	)
+
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	tflog.Info(ctx, fmt.Sprintf("Deleted server with ID: %s", id))
 }
 
 func (r *ServerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func getServerTimeout() (time.Duration, time.Duration, time.Duration) {
+	timeout, err := util.GetEnvTimeValues("SERVER_DEFAULT_TIMEOUT", time.Minute)
+	if err != nil {
+		timeout = 40 * time.Minute
+	}
+
+	retryInterval, err := util.GetEnvTimeValues("SERVER_DEFAULT_RETRY_INTERVAL", time.Second)
+	if err != nil {
+		retryInterval = 30 * time.Second
+	}
+
+	minTimeout, err := util.GetEnvTimeValues("SERVER_DEFAULT_MIN_TIMEOUT", time.Second)
+	if err != nil {
+		minTimeout = 10 * time.Second
+	}
+
+	return timeout, retryInterval, minTimeout
 }

@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -14,7 +16,13 @@ type SnapshotResponse struct {
 	DeletionDate string `json:"deletion_date"`
 }
 
-func NewSnapshotObject(snapshot SnapshotResponse) (types.Object, diag.Diagnostics) {
+func NewSnapshotObject(snapshot *SnapshotResponse) (types.Object, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	if snapshot == nil {
+		return types.ObjectNull(SnapshotObjectType().AttrTypes), diags
+	}
+
 	attrs := map[string]attr.Value{
 		"id":            types.StringValue(snapshot.ID),
 		"creation_date": types.StringValue(snapshot.CreationDate),
@@ -53,15 +61,24 @@ func SnapshotDataSourceSchema() map[string]schema.Attribute {
 func SnapshotResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"id": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Snapshot identifier",
 		},
 		"creation_date": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Snapshot creation date",
 		},
 		"deletion_date": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Snapshot deletion date",
 		},
 	}

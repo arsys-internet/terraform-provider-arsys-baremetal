@@ -20,9 +20,9 @@ type ApiServerService struct {
 type ApiServerServiceInterface interface {
 	GetServer(id string) (*models.ServerResponse, error)
 	GetServers() ([]models.ServerResponse, error)
-	//CreateServer(request *models.ServerCreateRequest) (*models.ServerResponse, error)
-	//UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerResponse, error)
-	//DeleteServer(id string) error
+	CreateServer(request *models.ServerCreateRequest) (*models.ServerResponse, error)
+	UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerResponse, error)
+	DeleteServer(id string) error
 }
 
 func NewApiServerService(client *client.APIClient) *ApiServerService {
@@ -182,7 +182,7 @@ func (s *ApiServerService) GetResource(id string) (util.ResourceModel, error) {
 		return nil, nil
 	}
 
-	model, diags := models.NewServerResourceModel(context.Background(), server)
+	model, diags := models.NewServerResourceModelFromRead(context.Background(), server, nil)
 	if diags.HasError() {
 		return nil, fmt.Errorf("error converting to model: %v", diags)
 	}

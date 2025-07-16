@@ -9,15 +9,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/models/server"
 	"terraform-provider-arsys-baremetal/internal/util"
 )
+
+//func (m *ServerResourceModel) ReadPath() (string, diag.Diagnostics) {
+//	var diags diag.Diagnostics
+//	path := "/servers/" + m.ID.ValueString()
+//	if len(path) == 0 || m.ID.IsNull() {
+//		diags.AddError("No read path defined for model", fmt.Sprintf("Type:%T, Model:%v", m, m))
+//		return path, diags
+//	}
+//	return path, diags
+//}
 
 type ServerModel struct {
 	ID               types.String `tfsdk:"id"`
@@ -58,7 +72,6 @@ type ServerResourceModel struct {
 	LoadBalancerID         types.String  `tfsdk:"load_balancer_id"`
 	MonitoringPolicyID     types.String  `tfsdk:"monitoring_policy_id"`
 	PrivateNetworkID       types.String  `tfsdk:"private_network_id"`
-	SiteID                 types.String  `tfsdk:"site_id"`
 	PublicKey              types.String  `tfsdk:"public_key"`
 	ExecutionGroup         types.String  `tfsdk:"execution_group"`
 	UserData               types.String  `tfsdk:"user_data"`
@@ -126,7 +139,6 @@ type ServerCreateRequest struct {
 	LoadBalancerID         string                       `json:"load_balancer_id,omitempty"`
 	MonitoringPolicyID     string                       `json:"monitoring_policy_id,omitempty"`
 	PrivateNetworkID       string                       `json:"private_network_id,omitempty"`
-	SiteID                 string                       `json:"site_id,omitempty"`
 	PublicKey              string                       `json:"public_key,omitempty"`
 	ExecutionGroup         string                       `json:"execution_group,omitempty"`
 	UserData               string                       `json:"user_data,omitempty"`
@@ -158,7 +170,7 @@ func (s *ServerResourceModel) GetState() string {
 	return status.State.ValueString()
 }
 
-func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerModel, diag.Diagnostics) {
+func newServerModelFromResponse(ctx context.Context, sr *ServerResponse) (*ServerModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	if sr == nil {
@@ -205,7 +217,6 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 		model.RSAKey = types.BoolValue(false)
 	}
 
-	// Objetos complejos siempre presentes
 	datacenterObj, datacenterDiags := NewBaseDatacenterObject(sr.Datacenter)
 	diags.Append(datacenterDiags...)
 	if !datacenterDiags.HasError() {
@@ -283,6 +294,7 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 		diags.Append(connectionDiags...)
 		if !connectionDiags.HasError() {
 			model.ConnectionSpeed = connectionObj
+			tflog.Info(ctx, fmt.Sprintf("🔍 BASE MODEL - ConnectionSpeed after NewConnectionSpeedObject: %v", connectionObj))
 		}
 	} else {
 		model.ConnectionSpeed = types.ObjectNull(server.ConnectionSpeedObjectType().AttrTypes)
@@ -299,7 +311,7 @@ func newServerModelFromResponse(_ context.Context, sr *ServerResponse) (*ServerM
 	}
 
 	if sr.Snapshot != nil {
-		snapshotObj, snapshotDiags := server.NewSnapshotObject(*sr.Snapshot)
+		snapshotObj, snapshotDiags := server.NewSnapshotObject(sr.Snapshot)
 		diags.Append(snapshotDiags...)
 		if !snapshotDiags.HasError() {
 			model.Snapshot = snapshotObj
@@ -315,50 +327,507 @@ func NewServerModel(ctx context.Context, sr *ServerResponse) (*ServerModel, diag
 	return newServerModelFromResponse(ctx, sr)
 }
 
-func NewServerResourceModel(ctx context.Context, sr *ServerResponse) (*ServerResourceModel, diag.Diagnostics) {
-	baseModel, diags := newServerModelFromResponse(ctx, sr)
-	if diags.HasError() {
+func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerResponse, plan *ServerResourceModel) (*ServerResourceModel, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	baseModel, baseDiags := newServerModelFromResponse(ctx, sr)
+	if baseDiags.HasError() {
+		diags.Append(baseDiags...)
 		return nil, diags
 	}
 
-	resourceModel := &ServerResourceModel{
+	model := &ServerResourceModel{
 		ServerModel: *baseModel,
-		// Los campos específicos de resource se mantienen null en lectura
-		ApplianceID:            types.StringNull(),
-		DatacenterID:           types.StringNull(),
-		Password:               types.StringNull(),
-		PowerOn:                types.BoolNull(),
-		FirewallPolicyID:       types.StringNull(),
-		IPID:                   types.StringNull(),
-		LoadBalancerID:         types.StringNull(),
-		MonitoringPolicyID:     types.StringNull(),
-		PrivateNetworkID:       types.StringNull(),
-		SiteID:                 types.StringNull(),
-		PublicKey:              types.StringNull(),
-		ExecutionGroup:         types.StringNull(),
-		UserData:               types.StringNull(),
-		UserDataContentType:    types.StringNull(),
-		PublicConnectionSpeed:  types.Float64Null(),
-		PrivateConnectionSpeed: types.Float64Null(),
-		BondingAllowed:         types.BoolNull(),
-		InstallBackupAgent:     types.BoolNull(),
-		BackupAgentTenantData:  types.StringNull(),
-		BackupSize:             types.StringNull(),
-		AvailabilityZoneID:     types.StringNull(),
-		DisabledPassword:       types.BoolNull(),
-		ReservedCPU:            types.BoolNull(),
-		ReservedRAM:            types.BoolNull(),
-		BackupPolicyID:         types.StringNull(),
-		ConfigurationID:        types.StringNull(),
-		MonitorID:              types.StringNull(),
-		FirewallID:             types.StringNull(),
-		SSHIDs:                 types.ListNull(types.StringType),
-		SSHPublicKeys:          types.ListNull(types.StringType),
-		Locale:                 types.StringNull(),
 	}
 
-	return resourceModel, diags
+	model.ApplianceID = plan.ApplianceID
+	model.DatacenterID = plan.DatacenterID
+
+	hardwareFromAPI := true // Por defecto usar hardware de la API
+
+	if !plan.Hardware.IsNull() && !plan.Hardware.IsUnknown() {
+		hardwareAttrs := plan.Hardware.Attributes()
+
+		// Verificar campos críticos del hardware
+		allHardwareFieldsKnown := true
+
+		if vcore, exists := hardwareAttrs["vcore"]; exists && vcore.IsUnknown() {
+			allHardwareFieldsKnown = false
+			tflog.Debug(ctx, "Hardware vcore is unknown in plan")
+		}
+		if ram, exists := hardwareAttrs["ram"]; exists && ram.IsUnknown() {
+			allHardwareFieldsKnown = false
+			tflog.Debug(ctx, "Hardware ram is unknown in plan")
+		}
+		if hdds, exists := hardwareAttrs["hdds"]; exists && hdds.IsUnknown() {
+			allHardwareFieldsKnown = false
+			tflog.Debug(ctx, "Hardware hdds is unknown in plan")
+		}
+		if cores, exists := hardwareAttrs["cores_per_processor"]; exists && cores.IsUnknown() {
+			allHardwareFieldsKnown = false
+			tflog.Debug(ctx, "Hardware cores_per_processor is unknown in plan")
+		}
+
+		if allHardwareFieldsKnown {
+			model.Hardware = plan.Hardware
+			hardwareFromAPI = false
+			tflog.Info(ctx, "Using hardware from plan (all fields known)")
+		}
+	}
+
+	if hardwareFromAPI {
+		tflog.Info(ctx, "Using hardware from API (plan has unknown fields)")
+	}
+
+	if !plan.Password.IsUnknown() {
+		model.Password = plan.Password
+	} else {
+		model.Password = types.StringNull()
+	}
+
+	// Campos booleanos con defaults
+	if !plan.PowerOn.IsUnknown() {
+		model.PowerOn = plan.PowerOn
+	} else {
+		model.PowerOn = types.BoolValue(true)
+	}
+
+	if !plan.BondingAllowed.IsUnknown() {
+		model.BondingAllowed = plan.BondingAllowed
+	} else {
+		model.BondingAllowed = types.BoolValue(false)
+	}
+
+	if !plan.InstallBackupAgent.IsUnknown() {
+		model.InstallBackupAgent = plan.InstallBackupAgent
+	} else {
+		model.InstallBackupAgent = types.BoolValue(false)
+	}
+
+	if !plan.DisabledPassword.IsUnknown() {
+		model.DisabledPassword = plan.DisabledPassword
+	} else {
+		model.DisabledPassword = types.BoolValue(false)
+	}
+
+	if !plan.ReservedCPU.IsUnknown() {
+		model.ReservedCPU = plan.ReservedCPU
+	} else {
+		model.ReservedCPU = types.BoolValue(false)
+	}
+
+	if !plan.ReservedRAM.IsUnknown() {
+		model.ReservedRAM = plan.ReservedRAM
+	} else {
+		model.ReservedRAM = types.BoolValue(false)
+	}
+
+	// Campos de configuración opcionales
+	if !plan.FirewallPolicyID.IsUnknown() {
+		model.FirewallPolicyID = plan.FirewallPolicyID
+	} else {
+		model.FirewallPolicyID = types.StringNull()
+	}
+
+	if !plan.IPID.IsUnknown() {
+		model.IPID = plan.IPID
+	} else {
+		model.IPID = types.StringNull()
+	}
+
+	if !plan.LoadBalancerID.IsUnknown() {
+		model.LoadBalancerID = plan.LoadBalancerID
+	} else {
+		model.LoadBalancerID = types.StringNull()
+	}
+
+	if !plan.MonitoringPolicyID.IsUnknown() {
+		model.MonitoringPolicyID = plan.MonitoringPolicyID
+	} else {
+		model.MonitoringPolicyID = types.StringNull()
+	}
+
+	if !plan.PrivateNetworkID.IsUnknown() {
+		model.PrivateNetworkID = plan.PrivateNetworkID
+	} else {
+		model.PrivateNetworkID = types.StringNull()
+	}
+
+	if !plan.PublicKey.IsUnknown() {
+		model.PublicKey = plan.PublicKey
+	} else {
+		model.PublicKey = types.StringNull()
+	}
+
+	if !plan.ExecutionGroup.IsUnknown() {
+		model.ExecutionGroup = plan.ExecutionGroup
+	} else {
+		model.ExecutionGroup = types.StringNull()
+	}
+
+	if !plan.UserData.IsUnknown() {
+		model.UserData = plan.UserData
+	} else {
+		model.UserData = types.StringNull()
+	}
+
+	if !plan.UserDataContentType.IsUnknown() {
+		model.UserDataContentType = plan.UserDataContentType
+	} else {
+		model.UserDataContentType = types.StringNull()
+	}
+
+	if !plan.PublicConnectionSpeed.IsUnknown() {
+		model.PublicConnectionSpeed = plan.PublicConnectionSpeed
+	} else {
+		model.PublicConnectionSpeed = types.Float64Null()
+	}
+
+	if !plan.PrivateConnectionSpeed.IsUnknown() {
+		model.PrivateConnectionSpeed = plan.PrivateConnectionSpeed
+	} else {
+		model.PrivateConnectionSpeed = types.Float64Null()
+	}
+
+	if !plan.BackupAgentTenantData.IsUnknown() {
+		model.BackupAgentTenantData = plan.BackupAgentTenantData
+	} else {
+		model.BackupAgentTenantData = types.StringNull()
+	}
+
+	if !plan.BackupSize.IsUnknown() {
+		model.BackupSize = plan.BackupSize
+	} else {
+		model.BackupSize = types.StringNull()
+	}
+
+	if !plan.AvailabilityZoneID.IsUnknown() {
+		model.AvailabilityZoneID = plan.AvailabilityZoneID
+	} else {
+		model.AvailabilityZoneID = types.StringNull()
+	}
+
+	if !plan.BackupPolicyID.IsUnknown() {
+		model.BackupPolicyID = plan.BackupPolicyID
+	} else {
+		model.BackupPolicyID = types.StringNull()
+	}
+
+	if !plan.ConfigurationID.IsUnknown() {
+		model.ConfigurationID = plan.ConfigurationID
+	} else {
+		model.ConfigurationID = types.StringNull()
+	}
+
+	if !plan.MonitorID.IsUnknown() {
+		model.MonitorID = plan.MonitorID
+	} else {
+		model.MonitorID = types.StringNull()
+	}
+
+	if !plan.FirewallID.IsUnknown() {
+		model.FirewallID = plan.FirewallID
+	} else {
+		model.FirewallID = types.StringNull()
+	}
+
+	if !plan.SSHIDs.IsUnknown() {
+		model.SSHIDs = plan.SSHIDs
+	} else {
+		model.SSHIDs = types.ListNull(types.StringType)
+	}
+
+	if !plan.SSHPublicKeys.IsUnknown() {
+		model.SSHPublicKeys = plan.SSHPublicKeys
+	} else {
+		model.SSHPublicKeys = types.ListNull(types.StringType)
+	}
+
+	if !plan.Locale.IsUnknown() {
+		model.Locale = plan.Locale
+	} else {
+		model.Locale = types.StringNull()
+	}
+
+	return model, diags
 }
+func NewServerResourceModelFromRead(ctx context.Context, sr *ServerResponse, currentState *ServerResourceModel) (*ServerResourceModel, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	if currentState == nil {
+		baseModel, baseDiags := newServerModelFromResponse(ctx, sr)
+		if baseDiags.HasError() {
+			diags.Append(baseDiags...)
+			return nil, diags
+		}
+
+		model := &ServerResourceModel{
+			ServerModel: *baseModel,
+		}
+
+		model.Password = types.StringNull()
+		model.PowerOn = types.BoolValue(true)
+		model.FirewallPolicyID = types.StringNull()
+		model.IPID = types.StringNull()
+		model.LoadBalancerID = types.StringNull()
+		model.MonitoringPolicyID = types.StringNull()
+		model.PrivateNetworkID = types.StringNull()
+		model.PublicKey = types.StringNull()
+		model.ExecutionGroup = types.StringNull()
+		model.UserData = types.StringNull()
+		model.UserDataContentType = types.StringNull()
+		model.PublicConnectionSpeed = types.Float64Null()
+		model.PrivateConnectionSpeed = types.Float64Null()
+		model.BondingAllowed = types.BoolValue(false)
+		model.InstallBackupAgent = types.BoolValue(false)
+		model.BackupAgentTenantData = types.StringNull()
+		model.BackupSize = types.StringNull()
+		model.AvailabilityZoneID = types.StringNull()
+		model.DisabledPassword = types.BoolValue(false)
+		model.ReservedCPU = types.BoolValue(false)
+		model.ReservedRAM = types.BoolValue(false)
+		model.BackupPolicyID = types.StringNull()
+		model.ConfigurationID = types.StringNull()
+		model.MonitorID = types.StringNull()
+		model.FirewallID = types.StringNull()
+		model.SSHIDs = types.ListNull(types.StringType)
+		model.SSHPublicKeys = types.ListNull(types.StringType)
+		model.Locale = types.StringNull()
+
+		return model, diags
+	}
+
+	model := *currentState
+
+	model.Name = types.StringValue(sr.Name)
+	if sr.Description != nil {
+		model.Description = types.StringValue(*sr.Description)
+	} else {
+		model.Description = types.StringNull()
+	}
+
+	currentStatus := currentState.GetState()
+	if sr.Status.State != currentStatus {
+		statusObj, statusDiags := server.NewStatusObject(sr.Status)
+		diags.Append(statusDiags...)
+		if !statusDiags.HasError() {
+			model.Status = statusObj
+		}
+	}
+
+	if sr.FirstPassword != nil {
+		newPassword := *sr.FirstPassword
+		if currentState.FirstPassword.IsNull() || newPassword != currentState.FirstPassword.ValueString() {
+			model.FirstPassword = types.StringValue(newPassword)
+		}
+	}
+
+	if sr.Hostname != currentState.Hostname.ValueString() {
+		model.Hostname = types.StringValue(sr.Hostname)
+	}
+
+	if sr.CloudPanelID != nil {
+		model.CloudPanelID = types.StringValue(*sr.CloudPanelID)
+	} else {
+		model.CloudPanelID = types.StringNull()
+	}
+
+	if sr.Hypervisor != nil {
+		model.Hypervisor = types.StringValue(*sr.Hypervisor)
+	} else {
+		model.Hypervisor = types.StringNull()
+	}
+
+	if sr.Alerts != nil {
+		alertsObj, alertsDiags := server.NewAlertsObject(sr.Alerts)
+		diags.Append(alertsDiags...)
+		if !alertsDiags.HasError() {
+			model.Alerts = alertsObj
+		}
+	} else {
+		model.Alerts = types.ObjectNull(server.AlertsObjectType().AttrTypes)
+	}
+
+	if sr.DVD != nil {
+		dvdObj, dvdDiags := NewIdentifierObject(*sr.DVD)
+		diags.Append(dvdDiags...)
+		if !dvdDiags.HasError() {
+			model.DVD = dvdObj
+		}
+	} else {
+		model.DVD = types.ObjectNull(IdentifierObjectType().AttrTypes)
+	}
+
+	if sr.MonitoringPolicy != nil {
+		monitoringObj, monitoringDiags := NewIdentifierObject(*sr.MonitoringPolicy)
+		diags.Append(monitoringDiags...)
+		if !monitoringDiags.HasError() {
+			model.MonitoringPolicy = monitoringObj
+		}
+	} else {
+		model.MonitoringPolicy = types.ObjectNull(IdentifierObjectType().AttrTypes)
+	}
+
+	if sr.Snapshot != nil {
+		snapshotObj, snapshotDiags := server.NewSnapshotObject(sr.Snapshot)
+		diags.Append(snapshotDiags...)
+		if !snapshotDiags.HasError() {
+			model.Snapshot = snapshotObj
+		}
+	} else {
+		model.Snapshot = types.ObjectNull(server.SnapshotObjectType().AttrTypes)
+	}
+
+	return &model, diags
+}
+
+func NewServerResourceModelFromUpdate(_ context.Context, sr *ServerResponse, currentState *ServerResourceModel) (*ServerResourceModel, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	model := *currentState
+
+	model.Name = types.StringValue(sr.Name)
+	if sr.Description != nil {
+		model.Description = types.StringValue(*sr.Description)
+	} else {
+		model.Description = types.StringNull()
+	}
+
+	return &model, diags
+}
+
+//func NewServerResourceModel(ctx context.Context, sr *ServerResponse, currentState *ServerResourceModel) (*ServerResourceModel, diag.Diagnostics) {
+//	baseModel, diags := newServerModelFromResponse(ctx, sr)
+//	if diags.HasError() {
+//		return nil, diags
+//	}
+//
+//	resourceModel := &ServerResourceModel{
+//		ServerModel: *baseModel,
+//	}
+//
+//	if currentState != nil {
+//		resourceModel.ConnectionSpeed = currentState.ConnectionSpeed
+//		resourceModel.ApplianceID = currentState.ApplianceID
+//		resourceModel.DatacenterID = currentState.DatacenterID
+//		resourceModel.Password = currentState.Password
+//		resourceModel.FirewallPolicyID = currentState.FirewallPolicyID
+//		resourceModel.IPID = currentState.IPID
+//		resourceModel.LoadBalancerID = currentState.LoadBalancerID
+//		resourceModel.MonitoringPolicyID = currentState.MonitoringPolicyID
+//		resourceModel.PrivateNetworkID = currentState.PrivateNetworkID
+//		resourceModel.PublicKey = currentState.PublicKey
+//		resourceModel.ExecutionGroup = currentState.ExecutionGroup
+//		resourceModel.UserData = currentState.UserData
+//		resourceModel.UserDataContentType = currentState.UserDataContentType
+//		resourceModel.PublicConnectionSpeed = currentState.PublicConnectionSpeed
+//		resourceModel.PrivateConnectionSpeed = currentState.PrivateConnectionSpeed
+//		resourceModel.BackupAgentTenantData = currentState.BackupAgentTenantData
+//		resourceModel.BackupSize = currentState.BackupSize
+//		resourceModel.AvailabilityZoneID = currentState.AvailabilityZoneID
+//		resourceModel.BackupPolicyID = currentState.BackupPolicyID
+//		resourceModel.ConfigurationID = currentState.ConfigurationID
+//		resourceModel.MonitorID = currentState.MonitorID
+//		resourceModel.FirewallID = currentState.FirewallID
+//		resourceModel.SSHIDs = currentState.SSHIDs
+//		resourceModel.SSHPublicKeys = currentState.SSHPublicKeys
+//		resourceModel.Locale = currentState.Locale
+//		resourceModel.Name = currentState.Name
+//		resourceModel.Description = currentState.Description
+//		resourceModel.Hardware = currentState.Hardware
+//		resourceModel.ID = currentState.ID
+//		resourceModel.CreationDate = currentState.CreationDate
+//		resourceModel.FirstPassword = currentState.FirstPassword
+//		resourceModel.Managed = currentState.Managed
+//		resourceModel.Status = currentState.Status
+//		resourceModel.IPs = currentState.IPs
+//		resourceModel.SSHPassword = currentState.SSHPassword
+//		resourceModel.Image = currentState.Image
+//		resourceModel.DVD = currentState.DVD
+//		resourceModel.Alerts = currentState.Alerts
+//		resourceModel.MonitoringPolicy = currentState.MonitoringPolicy
+//		resourceModel.CloudPanelID = currentState.CloudPanelID
+//		resourceModel.ServerType = currentState.ServerType
+//		resourceModel.Hypervisor = currentState.Hypervisor
+//		resourceModel.Hostname = currentState.Hostname
+//		resourceModel.ConnectionSpeed = currentState.ConnectionSpeed
+//		resourceModel.Redundancy = currentState.Redundancy
+//		resourceModel.RSAKey = currentState.RSAKey
+//		resourceModel.Snapshot = currentState.Snapshot
+//		resourceModel.PrivateNetworks = currentState.PrivateNetworks
+//		resourceModel.Datacenter = currentState.Datacenter
+//
+//		if !currentState.PowerOn.IsUnknown() {
+//			resourceModel.PowerOn = currentState.PowerOn
+//		} else {
+//			resourceModel.PowerOn = types.BoolValue(true)
+//		}
+//
+//		if !currentState.BondingAllowed.IsUnknown() {
+//			resourceModel.BondingAllowed = currentState.BondingAllowed
+//		} else {
+//			resourceModel.BondingAllowed = types.BoolValue(false)
+//		}
+//
+//		if !currentState.InstallBackupAgent.IsUnknown() {
+//			resourceModel.InstallBackupAgent = currentState.InstallBackupAgent
+//		} else {
+//			resourceModel.InstallBackupAgent = types.BoolValue(false)
+//		}
+//
+//		if !currentState.DisabledPassword.IsUnknown() {
+//			resourceModel.DisabledPassword = currentState.DisabledPassword
+//		} else {
+//			resourceModel.DisabledPassword = types.BoolValue(false)
+//		}
+//
+//		if !currentState.ReservedCPU.IsUnknown() {
+//			resourceModel.ReservedCPU = currentState.ReservedCPU
+//		} else {
+//			resourceModel.ReservedCPU = types.BoolValue(false)
+//		}
+//
+//		if !currentState.ReservedRAM.IsUnknown() {
+//			resourceModel.ReservedRAM = currentState.ReservedRAM
+//		} else {
+//			resourceModel.ReservedRAM = types.BoolValue(false)
+//		}
+//
+//	} else {
+//		resourceModel.ApplianceID = types.StringValue(sr.Image.ID)
+//		resourceModel.DatacenterID = types.StringValue(sr.Datacenter.ID)
+//		resourceModel.Password = types.StringNull()
+//		resourceModel.PowerOn = types.BoolValue(true)
+//		resourceModel.FirewallPolicyID = types.StringNull()
+//		resourceModel.IPID = types.StringNull()
+//		resourceModel.LoadBalancerID = types.StringNull()
+//		resourceModel.MonitoringPolicyID = types.StringNull()
+//		resourceModel.PrivateNetworkID = types.StringNull()
+//		resourceModel.PublicKey = types.StringNull()
+//		resourceModel.ExecutionGroup = types.StringNull()
+//		resourceModel.UserData = types.StringNull()
+//		resourceModel.UserDataContentType = types.StringNull()
+//		resourceModel.PublicConnectionSpeed = types.Float64Null()
+//		resourceModel.PrivateConnectionSpeed = types.Float64Null()
+//		resourceModel.BondingAllowed = types.BoolValue(false)
+//		resourceModel.InstallBackupAgent = types.BoolValue(false)
+//		resourceModel.BackupAgentTenantData = types.StringNull()
+//		resourceModel.BackupSize = types.StringNull()
+//		resourceModel.AvailabilityZoneID = types.StringNull()
+//		resourceModel.DisabledPassword = types.BoolValue(false)
+//		resourceModel.ReservedCPU = types.BoolValue(false)
+//		resourceModel.ReservedRAM = types.BoolValue(false)
+//		resourceModel.BackupPolicyID = types.StringNull()
+//		resourceModel.ConfigurationID = types.StringNull()
+//		resourceModel.MonitorID = types.StringNull()
+//		resourceModel.FirewallID = types.StringNull()
+//		resourceModel.SSHIDs = types.ListNull(types.StringType)
+//		resourceModel.SSHPublicKeys = types.ListNull(types.StringType)
+//		resourceModel.Locale = types.StringNull()
+//	}
+//
+//	return resourceModel, diags
+//}
 
 func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	hardwareAttrs := s.Hardware.Attributes()
@@ -377,7 +846,7 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 
 	req := ServerCreateRequest{
 		Name:         s.Name.ValueString(),
-		ServerType:   "baremetal", // Fijo para baremetal
+		ServerType:   "baremetal",
 		ApplianceID:  s.ApplianceID.ValueString(),
 		DatacenterID: s.DatacenterID.ValueString(),
 		Hardware: server.HardwareCreateRequest{
@@ -397,7 +866,7 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	if !s.PowerOn.IsNull() {
 		req.PowerOn = s.PowerOn.ValueBool()
 	} else {
-		req.PowerOn = true // Default
+		req.PowerOn = true
 	}
 
 	if !s.RSAKey.IsNull() {
@@ -416,7 +885,6 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 		req.Hardware.RAM = int(ram.ValueInt64())
 	}
 
-	// Campos específicos del SDKv2
 	if !s.Password.IsNull() {
 		req.Password = s.Password.ValueString()
 	}
@@ -439,10 +907,6 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 
 	if !s.PrivateNetworkID.IsNull() {
 		req.PrivateNetworkID = s.PrivateNetworkID.ValueString()
-	}
-
-	if !s.SiteID.IsNull() {
-		req.SiteID = s.SiteID.ValueString()
 	}
 
 	if !s.PublicKey.IsNull() {
@@ -508,7 +972,7 @@ func NewServerFromList(ctx context.Context, serverList []ServerResponse) ([]Serv
 	}
 
 	for i, serverModel := range serverList {
-		model, modelDiags := NewServerModel(ctx, &serverModel) // <-- CORREGIDO: era NewServer
+		model, modelDiags := NewServerModel(ctx, &serverModel)
 		if modelDiags.HasError() {
 			diags.AddError(
 				"Build error",
@@ -711,6 +1175,9 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Server description",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(256),
+				},
 			},
 			"appliance_id": rschema.StringAttribute{
 				Required:    true,
@@ -734,8 +1201,11 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"password": rschema.StringAttribute{
 				Optional:    true,
-				Sensitive:   true,
 				Description: "Server password",
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(8),
+					stringvalidator.LengthAtMost(64),
+				},
 			},
 			"power_on": rschema.BoolAttribute{
 				Optional:    true,
@@ -744,33 +1214,62 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Whether to power on the server after creation",
 			},
 			"ssh_password": rschema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 				Description: "Whether SSH password authentication is enabled",
 			},
 			"firewall_policy_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Firewall policy identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid firewall_policy_id",
+					),
+				},
 			},
 			"ip_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "IP identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid ip_id",
+					),
+				},
 			},
 			"load_balancer_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Load balancer identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid load_balancer_id",
+					),
+				},
 			},
 			"monitoring_policy_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Monitoring policy identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid monitoring_policy_id",
+					),
+				},
 			},
 			"private_network_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Private network identifier",
-			},
-			"site_id": rschema.StringAttribute{
-				Optional:    true,
-				Description: "Site identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid private_network_id",
+					),
+				},
 			},
 			"public_key": rschema.StringAttribute{
 				Optional:    true,
@@ -834,26 +1333,49 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Whether to reserve CPU",
 			},
 			"reserved_ram": rschema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(false),
-				Description: "Whether to reserve RAM",
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false), Description: "Whether to reserve RAM",
 			},
 			"backup_policy_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Backup policy identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid backup_policy_id",
+					),
+				},
 			},
 			"configuration_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Configuration identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid backup_policy_id",
+					),
+				},
 			},
 			"monitor_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Monitor identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid backup_policy_id",
+					),
+				},
 			},
 			"firewall_id": rschema.StringAttribute{
 				Optional:    true,
 				Description: "Firewall identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid backup_policy_id",
+					),
+				},
 			},
 			"ssh_ids": rschema.ListAttribute{
 				Optional:    true,
@@ -873,75 +1395,132 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			"datacenter": BaseDatacenterResourceNestedAttribute(),
 			"creation_date": rschema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"first_password": rschema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"managed": rschema.BoolAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"status": rschema.SingleNestedAttribute{
-				Computed:   true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: server.StatusResourceSchema(),
 			},
 			"ips": rschema.ListNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: server.ServersIPResourceSchema(),
 				},
 			},
 			"image": rschema.SingleNestedAttribute{
-				Computed:   true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: BaseIdentifierResourceAttributes(),
 			},
 			"hardware": rschema.SingleNestedAttribute{
-				Required:   true,
+				Required: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: server.HardwareResourceSchema(),
 			},
 			"dvd": rschema.SingleNestedAttribute{
-				Computed:   true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: BaseIdentifierResourceAttributes(),
 			},
 			"alerts": rschema.SingleNestedAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Description: "Server alerts",
 				Attributes:  server.AlertsResourceSchema(),
 			},
 			"monitoring_policy": rschema.SingleNestedAttribute{
-				Computed:   true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: BaseIdentifierResourceAttributes(),
 			},
 			"cloudpanel_id": rschema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"server_type": rschema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"hypervisor": rschema.StringAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 				Description: "Server hypervisor type",
 			},
 			"hostname": rschema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"connection_speed": rschema.SingleNestedAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Description: "Connection speed configuration",
 				Attributes:  server.ConnectionSpeedResourceSchema(),
 			},
 			"redundancy": rschema.SingleNestedAttribute{
-				Computed:   true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: server.RedundancyResourceSchema(),
 			},
 			"rsa_key": rschema.BoolAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"snapshot": rschema.SingleNestedAttribute{
-				Computed:   true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: server.SnapshotResourceSchema(),
 			},
 			"private_networks": rschema.ListNestedAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: server.ServersPrivateNetworksResourceSchema(),
 				},

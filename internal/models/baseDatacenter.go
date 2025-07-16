@@ -5,6 +5,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -61,13 +64,22 @@ func BaseDatacenterResourceAttributes() map[string]rschema.Attribute {
 		"id": rschema.StringAttribute{
 			Computed:    true,
 			Description: "Datacenter ID",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"country_code": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Country code",
 		},
 		"location": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Location",
 		},
 	}
@@ -83,7 +95,10 @@ func BaseDatacenterNestedAttribute() schema.SingleNestedAttribute {
 
 func BaseDatacenterResourceNestedAttribute() rschema.SingleNestedAttribute {
 	return rschema.SingleNestedAttribute{
-		Computed:    true,
+		Computed: true,
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.UseStateForUnknown(),
+		},
 		Description: "Datacenter information",
 		Attributes:  BaseDatacenterResourceAttributes(),
 	}

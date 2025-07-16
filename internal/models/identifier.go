@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -95,9 +97,15 @@ func BaseIdentifierResourceAttributes() map[string]rschema.Attribute {
 		"id": rschema.StringAttribute{
 			Computed:    true,
 			Description: "Identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"name": rschema.StringAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Name",
 		},
 	}
@@ -106,13 +114,5 @@ func BaseIdentifierResourceAttributes() map[string]rschema.Attribute {
 func IdentifierNestedObject() schema.NestedAttributeObject {
 	return schema.NestedAttributeObject{
 		Attributes: BaseIdentifierAttributes(),
-	}
-}
-
-func BaseIdentifierResourceNestedAttribute() rschema.SingleNestedAttribute {
-	return rschema.SingleNestedAttribute{
-		Computed:    true,
-		Description: "Identifier information",
-		Attributes:  BaseIdentifierResourceAttributes(),
 	}
 }

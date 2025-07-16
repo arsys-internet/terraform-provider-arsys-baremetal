@@ -5,6 +5,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -147,49 +151,70 @@ func ConnectionSpeedDataSourceSchema() map[string]schema.Attribute {
 		},
 	}
 }
-
 func ConnectionSpeedResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"available": rschema.ListAttribute{
 			ElementType: types.Float64Type,
 			Computed:    true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Available connection speeds for cloud servers",
 		},
 		"current": rschema.Float64Attribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Float64{
+				float64planmodifier.UseStateForUnknown(),
+			},
 			Description: "Current connection speed for cloud servers",
 		},
 		"private": rschema.SingleNestedAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]rschema.Attribute{
 				"available": rschema.ListAttribute{
 					ElementType: types.Float64Type,
 					Computed:    true,
+					PlanModifiers: []planmodifier.List{
+						listplanmodifier.UseStateForUnknown(),
+					},
 					Description: "Available private connection speeds for baremetal servers",
 				},
 				"current": rschema.Float64Attribute{
-					Computed:    true,
+					Computed: true,
+					PlanModifiers: []planmodifier.Float64{
+						float64planmodifier.UseStateForUnknown(),
+					},
 					Description: "Current private connection speed for baremetal servers",
 				},
 			},
-			Computed:    true,
 			Description: "Private connection speed details for baremetal servers",
 		},
 		"public": rschema.SingleNestedAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.Object{
+				objectplanmodifier.UseStateForUnknown(),
+			},
 			Attributes: map[string]rschema.Attribute{
 				"available": rschema.ListAttribute{
 					ElementType: types.Float64Type,
 					Computed:    true,
+					PlanModifiers: []planmodifier.List{
+						listplanmodifier.UseStateForUnknown(),
+					},
 					Description: "Available public connection speeds for baremetal servers",
 				},
 				"current": rschema.Float64Attribute{
-					Computed:    true,
+					Computed: true,
+					PlanModifiers: []planmodifier.Float64{
+						float64planmodifier.UseStateForUnknown(),
+					},
 					Description: "Current public connection speed for baremetal servers",
 				},
 			},
-			Computed:    true,
 			Description: "Public connection speed details for baremetal servers",
 		},
 	}
 }
-
-// ... resto de tu código existente ...

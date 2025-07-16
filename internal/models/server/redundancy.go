@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -46,11 +48,17 @@ func RedundancyDataSourceSchema() map[string]schema.Attribute {
 func RedundancyResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"available": rschema.BoolAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Whether redundancy is available for this server",
 		},
 		"enabled": rschema.BoolAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Whether redundancy is currently enabled",
 		},
 	}
