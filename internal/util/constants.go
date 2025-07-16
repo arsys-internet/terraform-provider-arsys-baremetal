@@ -11,4 +11,5 @@ const (
 	StatePoweredOff             = "POWERED_OFF"
 	StatusAvailable             = "AVAILABLE"
 	StatusCreating              = "CREATING"
+	StatusConfiguring           = "CONFIGURING"
 )
