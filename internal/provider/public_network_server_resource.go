@@ -55,7 +55,6 @@ func (r *PublicNetworkServerResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	// Convertir los tipos de Terraform a strings
 	servers := make([]string, len(data.Servers))
 	for i, server := range data.Servers {
 		servers[i] = server.ValueString()
@@ -117,7 +116,6 @@ func (r *PublicNetworkServerResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	// Verificar que la red pública existe
 	publicNetwork, err := r.client.GetPublicNetwork(data.PublicNetworkId.ValueString())
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
@@ -208,7 +206,6 @@ func (r *PublicNetworkServerResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	// Para eliminar, enviamos una lista vacía de servidores
 	request := &models.PublicNetworkServerRequest{
 		Servers: []string{},
 	}
