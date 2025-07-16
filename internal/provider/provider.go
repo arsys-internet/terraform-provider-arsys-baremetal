@@ -142,6 +142,7 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 	return []func() resource.Resource{
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
+		NewPublicNetworkResource,
 	}
 }
 
@@ -157,6 +158,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewPrivateNetworksDataSource,
 		NewPublicIpDataSource,
 		NewPublicIpsDataSource,
+		NewPublicNetworkDataSource,
+		NewPublicNetworksDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
 	}
