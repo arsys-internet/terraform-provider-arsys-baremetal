@@ -143,6 +143,7 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
 		NewPublicNetworkResource,
+		NewPublicNetworkServerResource,
 	}
 }
 

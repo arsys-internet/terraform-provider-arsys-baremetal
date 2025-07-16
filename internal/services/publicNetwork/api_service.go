@@ -23,6 +23,8 @@ type ApiPublicNetworkServiceInterface interface {
 	CreatePublicNetwork(request *models.PublicNetworkCreateRequest) (*models.PublicNetworkResponse, error)
 	UpdatePublicNetwork(id string, request *models.PublicNetworkUpdateRequest) (*models.PublicNetworkResponse, error)
 	DeletePublicNetwork(id string) error
+	AssignServersToPublicNetwork(id string, request *models.PublicNetworkServerRequest) error
+	GetResource(id string) (util.ResourceModel, error)
 }
 
 func NewApiPublicNetworkService(client *client.APIClient) *ApiPublicNetworkService {
@@ -161,6 +163,27 @@ func (s *ApiPublicNetworkService) DeletePublicNetwork(id string) error {
 	if resp.StatusCode != http.StatusAccepted {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("error deleting public network: %s", string(body))
+	}
+
+	return nil
+}
+
+func (s *ApiPublicNetworkService) AssignServersToPublicNetwork(id string, request *models.PublicNetworkServerRequest) error {
+	resp, err := s.client.Put(fmt.Sprintf("/public_networks/%s/servers", id), request)
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusAccepted {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("error assigning servers to public network: %s", string(body))
 	}
 
 	return nil
