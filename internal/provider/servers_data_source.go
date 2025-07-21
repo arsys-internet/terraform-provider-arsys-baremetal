@@ -10,6 +10,7 @@ import (
 )
 
 var _ datasource.DataSource = &ServersDataSource{}
+var _ datasource.DataSourceWithConfigure = &ServersDataSource{}
 
 func NewServersDataSource() datasource.DataSource {
 	return &ServersDataSource{}
@@ -33,11 +34,10 @@ func (d *ServersDataSource) Configure(_ context.Context, req datasource.Configur
 	}
 
 	client := service.GetServerService(req.ProviderData)
-
 	if client == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected DataSource Configure Type",
-			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
+			"An internal error occurred. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -46,7 +46,7 @@ func (d *ServersDataSource) Configure(_ context.Context, req datasource.Configur
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected DataSource Configure Type",
-			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
+			"An internal error occurred. Please report this issue to the provider developers.",
 		)
 		return
 	}

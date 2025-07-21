@@ -48,18 +48,18 @@ func RedundancyDataSourceSchema() map[string]schema.Attribute {
 func RedundancyResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"available": rschema.BoolAttribute{
-			Computed: true,
+			Computed:    true,
+			Description: "Whether redundancy is available for this server",
 			PlanModifiers: []planmodifier.Bool{
 				boolplanmodifier.UseStateForUnknown(),
 			},
-			Description: "Whether redundancy is available for this server",
 		},
 		"enabled": rschema.BoolAttribute{
-			Computed: true,
+			Computed:    true,
+			Description: "Whether redundancy is currently enabled",
 			PlanModifiers: []planmodifier.Bool{
 				boolplanmodifier.UseStateForUnknown(),
 			},
-			Description: "Whether redundancy is currently enabled",
 		},
 	}
 }

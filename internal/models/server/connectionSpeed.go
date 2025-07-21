@@ -13,11 +13,11 @@ import (
 )
 
 type ConnectionSpeedResponse struct {
-	// For servers cloud (estructura simple)
+	// Cloud servers
 	Available []float64 `json:"available,omitempty"`
 	Current   *float64  `json:"current,omitempty"`
 
-	// For servers baremetal (estructura anidada)
+	// Baremetal servers
 	Private *ConnectionSpeedDetailResponse `json:"private,omitempty"`
 	Public  *ConnectionSpeedDetailResponse `json:"public,omitempty"`
 }
@@ -28,15 +28,17 @@ type ConnectionSpeedDetailResponse struct {
 }
 
 func NewConnectionSpeedObject(cs ConnectionSpeedResponse) (types.Object, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
 	attrs := map[string]attr.Value{}
 
-	// For cloud servers (estructura simple)
+	// For cloud servers
 	if len(cs.Available) > 0 {
 		availableElements := make([]attr.Value, len(cs.Available))
 		for i, v := range cs.Available {
 			availableElements[i] = types.Float64Value(v)
 		}
-		availableList, _ := types.ListValue(types.Float64Type, availableElements)
+		availableList, listDiags := types.ListValue(types.Float64Type, availableElements)
+		diags.Append(listDiags...)
 		attrs["available"] = availableList
 	} else {
 		attrs["available"] = types.ListNull(types.Float64Type)
@@ -48,53 +50,58 @@ func NewConnectionSpeedObject(cs ConnectionSpeedResponse) (types.Object, diag.Di
 		attrs["current"] = types.Float64Null()
 	}
 
-	// For baremetal servers (estructura anidada)
+	// For baremetal servers
 	if cs.Private != nil {
-		privateAttrs := map[string]attr.Value{}
-
-		privAvailableElements := make([]attr.Value, len(cs.Private.Available))
-		for i, v := range cs.Private.Available {
-			privAvailableElements[i] = types.Float64Value(v)
-		}
-		privAvailableList, _ := types.ListValue(types.Float64Type, privAvailableElements)
-		privateAttrs["available"] = privAvailableList
-		privateAttrs["current"] = types.Float64Value(cs.Private.Current)
-
-		privateObj, _ := types.ObjectValue(ConnectionSpeedDetailObjectType().AttrTypes, privateAttrs)
+		privateObj, privateDiags := newConnectionSpeedDetailObject(*cs.Private)
+		diags.Append(privateDiags...)
 		attrs["private"] = privateObj
 	} else {
 		attrs["private"] = types.ObjectNull(ConnectionSpeedDetailObjectType().AttrTypes)
 	}
 
 	if cs.Public != nil {
-		publicAttrs := map[string]attr.Value{}
-
-		pubAvailableElements := make([]attr.Value, len(cs.Public.Available))
-		for i, v := range cs.Public.Available {
-			pubAvailableElements[i] = types.Float64Value(v)
-		}
-		pubAvailableList, _ := types.ListValue(types.Float64Type, pubAvailableElements)
-		publicAttrs["available"] = pubAvailableList
-		publicAttrs["current"] = types.Float64Value(cs.Public.Current)
-
-		publicObj, _ := types.ObjectValue(ConnectionSpeedDetailObjectType().AttrTypes, publicAttrs)
+		publicObj, publicDiags := newConnectionSpeedDetailObject(*cs.Public)
+		diags.Append(publicDiags...)
 		attrs["public"] = publicObj
 	} else {
 		attrs["public"] = types.ObjectNull(ConnectionSpeedDetailObjectType().AttrTypes)
 	}
 
-	return types.ObjectValue(ConnectionSpeedObjectType().AttrTypes, attrs)
+	obj, objDiags := types.ObjectValue(ConnectionSpeedObjectType().AttrTypes, attrs)
+	diags.Append(objDiags...)
+
+	return obj, diags
+}
+
+func newConnectionSpeedDetailObject(detail ConnectionSpeedDetailResponse) (types.Object, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	availableElements := make([]attr.Value, len(detail.Available))
+	for i, v := range detail.Available {
+		availableElements[i] = types.Float64Value(v)
+	}
+
+	availableList, listDiags := types.ListValue(types.Float64Type, availableElements)
+	diags.Append(listDiags...)
+
+	attrs := map[string]attr.Value{
+		"available": availableList,
+		"current":   types.Float64Value(detail.Current),
+	}
+
+	obj, objDiags := types.ObjectValue(ConnectionSpeedDetailObjectType().AttrTypes, attrs)
+	diags.Append(objDiags...)
+
+	return obj, diags
 }
 
 func ConnectionSpeedObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			// For cloud servers
 			"available": types.ListType{ElemType: types.Float64Type},
 			"current":   types.Float64Type,
-			// For baremetal servers
-			"private": ConnectionSpeedDetailObjectType(),
-			"public":  ConnectionSpeedDetailObjectType(),
+			"private":   ConnectionSpeedDetailObjectType(),
+			"public":    ConnectionSpeedDetailObjectType(),
 		},
 	}
 }
@@ -151,6 +158,7 @@ func ConnectionSpeedDataSourceSchema() map[string]schema.Attribute {
 		},
 	}
 }
+
 func ConnectionSpeedResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"available": rschema.ListAttribute{

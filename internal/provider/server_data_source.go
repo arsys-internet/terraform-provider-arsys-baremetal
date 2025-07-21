@@ -57,7 +57,7 @@ func (d *ServerDataSource) Configure(_ context.Context, req datasource.Configure
 }
 
 func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data models.ServerModel
+	var data models.ServerDetailModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -93,7 +93,7 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	model, diags := models.NewServerModel(ctx, apiResponse)
+	model, diags := models.NewServerDetailModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

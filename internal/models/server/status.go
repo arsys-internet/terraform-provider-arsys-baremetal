@@ -11,32 +11,45 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type StatusModel struct {
+type StatusDetailModel struct {
 	State   types.String `tfsdk:"state"`
 	Percent types.Int64  `tfsdk:"percent"`
 }
 
-func NewStatusModel(status StatusResponse) StatusModel {
-	return StatusModel{
-		State:   types.StringValue(status.State),
-		Percent: types.Int64Value(int64(status.Percent)),
-	}
+type StatusBaseModel struct {
+	State types.String `tfsdk:"state"`
 }
 
-type StatusResponse struct {
+type StatusDetailResponse struct {
 	State   string `json:"state"`
-	Percent int    `json:"percent"`
+	Percent *int   `json:"percent,omitempty"`
+}
+type StatusBaseResponse struct {
+	State string `json:"state"`
 }
 
-func NewStatusObject(status StatusResponse) (types.Object, diag.Diagnostics) {
+func NewStatusDetailObject(status StatusDetailResponse) (types.Object, diag.Diagnostics) {
 	attrs := map[string]attr.Value{
-		"state":   types.StringValue(status.State),
-		"percent": types.Int64Value(int64(status.Percent)),
+		"state": types.StringValue(status.State),
 	}
-	return types.ObjectValue(StatusObjectType().AttrTypes, attrs)
+
+	if status.Percent != nil {
+		attrs["percent"] = types.Int64Value(int64(*status.Percent))
+	} else {
+		attrs["percent"] = types.Int64Null()
+	}
+
+	return types.ObjectValue(StatusDetailObjectType().AttrTypes, attrs)
 }
 
-func StatusObjectType() types.ObjectType {
+func NewStatusBaseObject(status StatusBaseResponse) (types.Object, diag.Diagnostics) {
+	attrs := map[string]attr.Value{
+		"state": types.StringValue(status.State),
+	}
+	return types.ObjectValue(StatusBaseObjectType().AttrTypes, attrs)
+}
+
+func StatusDetailObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
 			"state":   types.StringType,
@@ -45,7 +58,15 @@ func StatusObjectType() types.ObjectType {
 	}
 }
 
-func StatusDataSourceSchema() map[string]schema.Attribute {
+func StatusBaseObjectType() types.ObjectType {
+	return types.ObjectType{
+		AttrTypes: map[string]attr.Type{
+			"state": types.StringType,
+		},
+	}
+}
+
+func StatusDetailDataSourceSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"state": schema.StringAttribute{
 			Computed:    true,

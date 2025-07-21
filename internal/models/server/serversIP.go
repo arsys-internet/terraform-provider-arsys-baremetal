@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -179,8 +181,11 @@ func ServersIPResourceSchema() map[string]rschema.Attribute {
 			},
 			Description: "Reverse name of the IP",
 		},
-		"main": schema.BoolAttribute{
-			Computed:    true,
+		"main": rschema.BoolAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.Bool{
+				boolplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Whether this is the main IP",
 		},
 		"firewall_policy": rschema.SingleNestedAttribute{
@@ -207,7 +212,10 @@ func ServersIPResourceSchema() map[string]rschema.Attribute {
 			},
 		},
 		"load_balancers": rschema.ListNestedAttribute{
-			Computed:    true,
+			Computed: true,
+			PlanModifiers: []planmodifier.List{
+				listplanmodifier.UseStateForUnknown(),
+			},
 			Description: "Load balancer(s) assigned to IP",
 			NestedObject: rschema.NestedAttributeObject{
 				Attributes: map[string]rschema.Attribute{

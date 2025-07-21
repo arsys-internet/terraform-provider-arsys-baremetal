@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-// Configuración por defecto para rate limiting
 const (
 	DefaultRateLimitMultiplier = 3
 	RateLimitErrorSubstring    = "429"
@@ -44,19 +43,6 @@ func NewWaitOptions(timeout, retryInterval, minTimeout time.Duration, pendingSta
 		RateLimitMultiplier:  DefaultRateLimitMultiplier,
 		IgnoreNotFoundErrors: false,
 	}
-}
-
-func NewWaitOptionsWithDefaults(opts WaitOptions) WaitOptions {
-	if opts.RateLimitMultiplier <= 0 {
-		opts.RateLimitMultiplier = DefaultRateLimitMultiplier
-	}
-	if opts.RetryInterval == 0 {
-		opts.RetryInterval = 5 * time.Second
-	}
-	if opts.MinTimeout == 0 {
-		opts.MinTimeout = 1 * time.Second
-	}
-	return opts
 }
 
 type WaitResult struct {

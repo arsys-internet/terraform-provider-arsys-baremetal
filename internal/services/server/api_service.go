@@ -18,10 +18,10 @@ type ApiServerService struct {
 }
 
 type ApiServerServiceInterface interface {
-	GetServer(id string) (*models.ServerResponse, error)
-	GetServers() ([]models.ServerResponse, error)
-	CreateServer(request *models.ServerCreateRequest) (*models.ServerResponse, error)
-	UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerResponse, error)
+	GetServer(id string) (*models.ServerDetailResponse, error)
+	GetServers() ([]models.ServerListResponse, error)
+	CreateServer(request *models.ServerCreateRequest) (*models.ServerBaseResponse, error)
+	UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerBaseResponse, error)
 	DeleteServer(id string) error
 }
 
@@ -41,7 +41,7 @@ func GetServerService(m interface{}) ApiServerServiceInterface {
 	return nil
 }
 
-func (s *ApiServerService) GetServer(id string) (*models.ServerResponse, error) {
+func (s *ApiServerService) GetServer(id string) (*models.ServerDetailResponse, error) {
 	resp, err := s.client.Get(fmt.Sprintf("/servers/%s", id))
 
 	if err != nil {
@@ -61,14 +61,14 @@ func (s *ApiServerService) GetServer(id string) (*models.ServerResponse, error) 
 		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
 	}
 
-	var server models.ServerResponse
+	var server models.ServerDetailResponse
 	if err := json.NewDecoder(resp.Body).Decode(&server); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 	return &server, nil
 }
 
-func (s *ApiServerService) GetServers() ([]models.ServerResponse, error) {
+func (s *ApiServerService) GetServers() ([]models.ServerListResponse, error) {
 	resp, err := s.client.Get("/servers")
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (s *ApiServerService) GetServers() ([]models.ServerResponse, error) {
 		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
 	}
 
-	var servers []models.ServerResponse
+	var servers []models.ServerListResponse
 	if err := json.NewDecoder(resp.Body).Decode(&servers); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
@@ -93,7 +93,7 @@ func (s *ApiServerService) GetServers() ([]models.ServerResponse, error) {
 	return servers, nil
 }
 
-func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*models.ServerResponse, error) {
+func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*models.ServerBaseResponse, error) {
 	resp, err := s.client.Post("/servers", request)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*m
 		return nil, fmt.Errorf("error creating server: %s", string(body))
 	}
 
-	var createdServer models.ServerResponse
+	var createdServer models.ServerBaseResponse
 	if err := json.NewDecoder(resp.Body).Decode(&createdServer); err != nil {
 		fmt.Printf("JSON Decode Error: %v\n", err)
 		return nil, err
@@ -120,7 +120,7 @@ func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*m
 	return &createdServer, nil
 }
 
-func (s *ApiServerService) UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerResponse, error) {
+func (s *ApiServerService) UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerBaseResponse, error) {
 	resp, err := s.client.Put(fmt.Sprintf("/servers/%s", id), request)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (s *ApiServerService) UpdateServer(id string, request *models.ServerUpdateR
 		return nil, fmt.Errorf("error updating server: %s", string(body))
 	}
 
-	var updatedServer models.ServerResponse
+	var updatedServer models.ServerBaseResponse
 	if err := json.NewDecoder(resp.Body).Decode(&updatedServer); err != nil {
 		fmt.Printf("JSON Decode Error: %v\n", err)
 		return nil, err
@@ -182,7 +182,7 @@ func (s *ApiServerService) GetResource(id string) (util.ResourceModel, error) {
 		return nil, nil
 	}
 
-	model, diags := models.NewServerResourceModelFromRead(context.Background(), server, nil)
+	model, diags := models.NewServerResourceModelFromAPI(context.Background(), server)
 	if diags.HasError() {
 		return nil, fmt.Errorf("error converting to model: %v", diags)
 	}
