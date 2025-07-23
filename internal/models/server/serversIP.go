@@ -17,7 +17,7 @@ type ServersIPResponse struct {
 	ID             string                 `json:"id"`
 	IP             string                 `json:"ip"`
 	Type           string                 `json:"type"`
-	ReverseDNS     interface{}            `json:"reverse_dns,omitempty"`
+	ReverseDNS     interface{}            `json:"reverse_dns"`
 	Main           bool                   `json:"main"`
 	FirewallPolicy IdentifierIPResponse   `json:"firewall_policy"`
 	LoadBalancers  []IdentifierIPResponse `json:"load_balancers"`

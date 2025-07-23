@@ -11,13 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-arsys-baremetal/internal/util/helper"
 )
 
 type HardwareResponse struct {
 	RAM                 int           `json:"ram"`
 	HDDs                []HDDResponse `json:"hdds"`
-	FixedInstanceSizeID *string       `json:"fixed_instance_size_id,omitempty"`
-	BaremetalModelID    *string       `json:"baremetal_model_id,omitempty"`
+	FixedInstanceSizeID *string       `json:"fixed_instance_size_id"`
+	BaremetalModelID    string        `json:"baremetal_model_id"`
 	VCore               int           `json:"vcore"`
 	CoresPerProcessor   int           `json:"cores_per_processor"`
 }
@@ -66,25 +67,53 @@ func NewHardwareObject(hardware HardwareResponse) (types.Object, diag.Diagnostic
 		fixedInstanceSizeID = types.StringNull()
 	}
 
-	var baremetalModelID types.String
-	if hardware.BaremetalModelID != nil {
-		baremetalModelID = types.StringValue(*hardware.BaremetalModelID)
-	} else {
-		baremetalModelID = types.StringNull()
-	}
-
 	hardwareObj, objDiags := types.ObjectValue(HardwareObjectType().AttrTypes,
 		map[string]attr.Value{
 			"ram":                    types.Int64Value(int64(hardware.RAM)),
 			"hdds":                   hddsList,
 			"fixed_instance_size_id": fixedInstanceSizeID,
-			"baremetal_model_id":     baremetalModelID,
+			"baremetal_model_id":     types.StringValue(hardware.BaremetalModelID),
 			"vcore":                  types.Int64Value(int64(hardware.VCore)),
 			"cores_per_processor":    types.Int64Value(int64(hardware.CoresPerProcessor)),
 		})
 	diags.Append(objDiags...)
 
 	return hardwareObj, diags
+}
+
+func NeedsHardwareUpdate(hardwareAttrs map[string]attr.Value, apiHardware HardwareResponse) bool {
+	if fixedID, exists := hardwareAttrs["fixed_instance_size_id"]; exists {
+		if helper.GetStringValue(fixedID) != helper.GetStringPtr(apiHardware.FixedInstanceSizeID) {
+			return true
+		}
+	}
+
+	if modelID, exists := hardwareAttrs["baremetal_model_id"]; exists {
+		if helper.GetStringValue(modelID) != apiHardware.BaremetalModelID {
+			return true
+		}
+	}
+
+	if ram, exists := hardwareAttrs["ram"]; exists {
+		if ram.(types.Int64).ValueInt64() != int64(apiHardware.RAM) {
+			return true
+		}
+	}
+
+	if cores, exists := hardwareAttrs["cores_per_processor"]; exists {
+		if cores.(types.Int64).ValueInt64() != int64(apiHardware.CoresPerProcessor) {
+			return true
+		}
+	}
+
+	if hdds, exists := hardwareAttrs["hdds"]; exists {
+		currentCount := len(hdds.(types.List).Elements())
+		if currentCount != len(apiHardware.HDDs) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func HardwareObjectType() types.ObjectType {

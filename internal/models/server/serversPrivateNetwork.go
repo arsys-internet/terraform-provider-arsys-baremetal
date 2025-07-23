@@ -14,7 +14,7 @@ type ServersPrivateNetworkResponse struct {
 	ID       string  `json:"id"`
 	Name     string  `json:"name"`
 	ServerIP string  `json:"server_ip"`
-	VlanID   *string `json:"vlan_id,omitempty"`
+	VlanID   *string `json:"vlan_id"`
 }
 
 func NewServersPrivateNetworkObject(pn ServersPrivateNetworkResponse) (types.Object, diag.Diagnostics) {

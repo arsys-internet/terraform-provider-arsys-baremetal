@@ -25,12 +25,10 @@ type AlertItemResponse struct {
 func NewAlertsObject(alerts *AlertResponse) (types.Object, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	// Si alerts es nil, devolver objeto null
 	if alerts == nil {
 		return types.ObjectNull(AlertsObjectType().AttrTypes), diags
 	}
 
-	// Procesar critical alerts
 	criticalElements := make([]attr.Value, 0, len(alerts.Critical))
 	for _, alert := range alerts.Critical {
 		alertObj, objDiags := NewAlertItemObject(alert)

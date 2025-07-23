@@ -65,7 +65,6 @@ func WaitForResourceState(ctx context.Context, resourceID string, service Resour
 
 	isDeleting := isDeletionOperation(options.PendingStates, options.TargetStates)
 
-	// Verificación inicial del recurso
 	resource, err := service.GetResource(resourceID)
 	if err != nil && (!isDeleting || !options.IgnoreNotFoundErrors) {
 		diags.AddError(
@@ -75,7 +74,6 @@ func WaitForResourceState(ctx context.Context, resourceID string, service Resour
 		return nil, diags
 	}
 
-	// Caso especial: recurso no encontrado durante eliminación
 	if resource == nil && isDeleting {
 		tflog.Info(ctx, "Resource not found during deletion - considering as deleted")
 		return &WaitResult{
@@ -281,7 +279,6 @@ func evaluateState(ctx context.Context, resourceID string, resource ResourceMode
 	return nil, true, diags // Continuar polling
 }
 
-// Funciones utilitarias
 func isDeletionOperation(pendingStates, targetStates []string) bool {
 	return (contains(pendingStates, StateRemoving) || contains(pendingStates, StateRemoving)) &&
 		contains(targetStates, StateDeleted)

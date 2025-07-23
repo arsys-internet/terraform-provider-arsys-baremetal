@@ -11,8 +11,7 @@ import (
 
 type ServerListModel struct {
 	ServerBaseModel
-	Status     types.Object `tfsdk:"status"`
-	Hypervisor types.String `tfsdk:"hypervisor"`
+	Status types.Object `tfsdk:"status"`
 }
 
 type ServersModel struct {
@@ -22,8 +21,7 @@ type ServersModel struct {
 
 type ServerListResponse struct {
 	ServerBaseResponse
-	Hypervisor string                    `json:"hypervisor"`
-	Status     server.StatusBaseResponse `json:"status"`
+	Status server.StatusBaseResponse `json:"status"`
 }
 
 func serverListModelObjectType() types.ObjectType {
@@ -34,7 +32,6 @@ func serverListModelObjectType() types.ObjectType {
 		attrs[k] = v
 	}
 	attrs["status"] = server.StatusBaseObjectType()
-	attrs["hypervisor"] = types.StringType
 
 	return types.ObjectType{AttrTypes: attrs}
 }
@@ -114,10 +111,18 @@ func serverNestedAttributeObject() schema.NestedAttributeObject {
 		}
 	}
 
-	delete(attributes, "recovery_mode")
-	delete(attributes, "recovery_image_os")
-	delete(attributes, "recovery_user")
-	delete(attributes, "recovery_password")
+	if _, exists := attributes["recovery_mode"]; exists {
+		delete(attributes, "recovery_mode")
+	}
+	if _, exists := attributes["recovery_image_os"]; exists {
+		delete(attributes, "recovery_image_os")
+	}
+	if _, exists := attributes["recovery_user"]; exists {
+		delete(attributes, "recovery_user")
+	}
+	if _, exists := attributes["recovery_password"]; exists {
+		delete(attributes, "recovery_password")
+	}
 
 	return schema.NestedAttributeObject{
 		Attributes: attributes,

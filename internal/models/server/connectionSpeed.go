@@ -13,13 +13,8 @@ import (
 )
 
 type ConnectionSpeedResponse struct {
-	// Cloud servers
-	Available []float64 `json:"available,omitempty"`
-	Current   *float64  `json:"current,omitempty"`
-
-	// Baremetal servers
-	Private *ConnectionSpeedDetailResponse `json:"private,omitempty"`
-	Public  *ConnectionSpeedDetailResponse `json:"public,omitempty"`
+	Private ConnectionSpeedDetailResponse `json:"private"`
+	Public  ConnectionSpeedDetailResponse `json:"public"`
 }
 
 type ConnectionSpeedDetailResponse struct {
@@ -31,41 +26,13 @@ func NewConnectionSpeedObject(cs ConnectionSpeedResponse) (types.Object, diag.Di
 	diags := diag.Diagnostics{}
 	attrs := map[string]attr.Value{}
 
-	// For cloud servers
-	if len(cs.Available) > 0 {
-		availableElements := make([]attr.Value, len(cs.Available))
-		for i, v := range cs.Available {
-			availableElements[i] = types.Float64Value(v)
-		}
-		availableList, listDiags := types.ListValue(types.Float64Type, availableElements)
-		diags.Append(listDiags...)
-		attrs["available"] = availableList
-	} else {
-		attrs["available"] = types.ListNull(types.Float64Type)
-	}
+	privateObj, privateDiags := newConnectionSpeedDetailObject(cs.Private)
+	diags.Append(privateDiags...)
+	attrs["private"] = privateObj
 
-	if cs.Current != nil {
-		attrs["current"] = types.Float64Value(*cs.Current)
-	} else {
-		attrs["current"] = types.Float64Null()
-	}
-
-	// For baremetal servers
-	if cs.Private != nil {
-		privateObj, privateDiags := newConnectionSpeedDetailObject(*cs.Private)
-		diags.Append(privateDiags...)
-		attrs["private"] = privateObj
-	} else {
-		attrs["private"] = types.ObjectNull(ConnectionSpeedDetailObjectType().AttrTypes)
-	}
-
-	if cs.Public != nil {
-		publicObj, publicDiags := newConnectionSpeedDetailObject(*cs.Public)
-		diags.Append(publicDiags...)
-		attrs["public"] = publicObj
-	} else {
-		attrs["public"] = types.ObjectNull(ConnectionSpeedDetailObjectType().AttrTypes)
-	}
+	publicObj, publicDiags := newConnectionSpeedDetailObject(cs.Public)
+	diags.Append(publicDiags...)
+	attrs["public"] = publicObj
 
 	obj, objDiags := types.ObjectValue(ConnectionSpeedObjectType().AttrTypes, attrs)
 	diags.Append(objDiags...)
@@ -98,10 +65,8 @@ func newConnectionSpeedDetailObject(detail ConnectionSpeedDetailResponse) (types
 func ConnectionSpeedObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
-			"available": types.ListType{ElemType: types.Float64Type},
-			"current":   types.Float64Type,
-			"private":   ConnectionSpeedDetailObjectType(),
-			"public":    ConnectionSpeedDetailObjectType(),
+			"private": ConnectionSpeedDetailObjectType(),
+			"public":  ConnectionSpeedDetailObjectType(),
 		},
 	}
 }
@@ -117,15 +82,6 @@ func ConnectionSpeedDetailObjectType() types.ObjectType {
 
 func ConnectionSpeedDataSourceSchema() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
-		"available": schema.ListAttribute{
-			ElementType: types.Float64Type,
-			Computed:    true,
-			Description: "Available connection speeds for cloud servers",
-		},
-		"current": schema.Float64Attribute{
-			Computed:    true,
-			Description: "Current connection speed for cloud servers",
-		},
 		"private": schema.SingleNestedAttribute{
 			Attributes: map[string]schema.Attribute{
 				"available": schema.ListAttribute{
@@ -161,21 +117,6 @@ func ConnectionSpeedDataSourceSchema() map[string]schema.Attribute {
 
 func ConnectionSpeedResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
-		"available": rschema.ListAttribute{
-			ElementType: types.Float64Type,
-			Computed:    true,
-			PlanModifiers: []planmodifier.List{
-				listplanmodifier.UseStateForUnknown(),
-			},
-			Description: "Available connection speeds for cloud servers",
-		},
-		"current": rschema.Float64Attribute{
-			Computed: true,
-			PlanModifiers: []planmodifier.Float64{
-				float64planmodifier.UseStateForUnknown(),
-			},
-			Description: "Current connection speed for cloud servers",
-		},
 		"private": rschema.SingleNestedAttribute{
 			Computed: true,
 			PlanModifiers: []planmodifier.Object{

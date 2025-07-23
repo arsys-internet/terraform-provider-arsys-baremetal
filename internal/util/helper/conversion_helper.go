@@ -28,3 +28,21 @@ func AssignStringDirect(target *string, source types.String) {
 		*target = source.ValueString()
 	}
 }
+
+func GetStringValue(attr interface{}) string {
+	if attr == nil {
+		return ""
+	}
+	str := attr.(types.String)
+	if str.IsNull() {
+		return ""
+	}
+	return str.ValueString()
+}
+
+func GetStringPtr(ptr *string) string {
+	if ptr == nil {
+		return ""
+	}
+	return *ptr
+}

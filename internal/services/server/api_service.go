@@ -65,6 +65,11 @@ func (s *ApiServerService) GetServer(id string) (*models.ServerDetailResponse, e
 	if err := json.NewDecoder(resp.Body).Decode(&server); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
+
+	if server.ServerType != "baremetal" {
+		return nil, fmt.Errorf("server not found")
+	}
+
 	return &server, nil
 }
 
@@ -90,7 +95,14 @@ func (s *ApiServerService) GetServers() ([]models.ServerListResponse, error) {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return servers, nil
+	var baremetalServers []models.ServerListResponse
+	for _, server := range servers {
+		if server.ServerType == "baremetal" {
+			baremetalServers = append(baremetalServers, server)
+		}
+	}
+
+	return baremetalServers, nil
 }
 
 func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*models.ServerBaseResponse, error) {

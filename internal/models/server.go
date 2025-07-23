@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -10,7 +9,6 @@ import (
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -18,22 +16,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/models/server"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"terraform-provider-arsys-baremetal/internal/util/helper"
 )
-
-//func (m *ServerResourceModel) ReadPath() (string, diag.Diagnostics) {
-//	var diags diag.Diagnostics
-//	path := "/servers/" + m.ID.ValueString()
-//	if len(path) == 0 || m.ID.IsNull() {
-//		diags.AddError("No read path defined for model", fmt.Sprintf("Type:%T, Model:%v", m, m))
-//		return path, diags
-//	}
-//	return path, diags
-//}
 
 type ServerBaseModel struct {
 	ID               types.String `tfsdk:"id"`
@@ -52,9 +39,8 @@ type ServerBaseModel struct {
 	MonitoringPolicy types.Object `tfsdk:"monitoring_policy"`
 	CloudPanelID     types.String `tfsdk:"cloudpanel_id"`
 	ServerType       types.String `tfsdk:"server_type"`
-	Hypervisor       types.String `tfsdk:"hypervisor"`
 	Hostname         types.String `tfsdk:"hostname"`
-	ConnectionSpeed  types.Object `tfsdk:"connection_speed"` // CORREGIDO: agregado
+	ConnectionSpeed  types.Object `tfsdk:"connection_speed"`
 	Redundancy       types.Object `tfsdk:"redundancy"`
 	RSAKey           types.Bool   `tfsdk:"rsa_key"`
 	Snapshot         types.Object `tfsdk:"snapshot"`
@@ -73,35 +59,22 @@ type ServerDetailModel struct {
 type ServerResourceModel struct {
 	ServerDetailModel
 
-	// Campos de configuración requeridos
-	ApplianceID            types.String  `tfsdk:"appliance_id"`
-	DatacenterID           types.String  `tfsdk:"datacenter_id"`
-	Password               types.String  `tfsdk:"password"`
-	PowerOn                types.Bool    `tfsdk:"power_on"`
-	FirewallPolicyID       types.String  `tfsdk:"firewall_policy_id"`
-	IPID                   types.String  `tfsdk:"ip_id"`
-	LoadBalancerID         types.String  `tfsdk:"load_balancer_id"`
-	MonitoringPolicyID     types.String  `tfsdk:"monitoring_policy_id"`
-	PrivateNetworkID       types.String  `tfsdk:"private_network_id"`
-	UserData               types.String  `tfsdk:"user_data"`
-	UserDataContentType    types.String  `tfsdk:"user_data_content_type"`
-	PublicConnectionSpeed  types.Float64 `tfsdk:"public_connection_speed"`
-	PrivateConnectionSpeed types.Float64 `tfsdk:"private_connection_speed"`
-	BondingAllowed         types.Bool    `tfsdk:"bonding_allowed"`
-	InstallBackupAgent     types.Bool    `tfsdk:"install_backup_agent"`
-	BackupAgentTenantData  types.String  `tfsdk:"backup_agent_tenant_data"`
-	BackupSize             types.String  `tfsdk:"backup_size"`
-	AvailabilityZoneID     types.String  `tfsdk:"availability_zone_id"`
-	PublicKey              types.List    `tfsdk:"public_key"`
-	SiteID                 types.String  `tfsdk:"site_id"`
-	SSHIDs                 types.List    `tfsdk:"ssh_ids"`
-	DisabledPassword       types.Bool    `tfsdk:"disabled_password"`
+	ApplianceID        types.String `tfsdk:"appliance_id"`
+	DatacenterID       types.String `tfsdk:"datacenter_id"`
+	Password           types.String `tfsdk:"password"`
+	PowerOn            types.Bool   `tfsdk:"power_on"`
+	FirewallPolicyID   types.String `tfsdk:"firewall_policy_id"`
+	IPID               types.String `tfsdk:"ip_id"`
+	LoadBalancerID     types.String `tfsdk:"load_balancer_id"`
+	MonitoringPolicyID types.String `tfsdk:"monitoring_policy_id"`
+	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
+	AvailabilityZoneID types.String `tfsdk:"availability_zone_id"`
 }
 
 type ServerBaseResponse struct {
 	ID               string                                 `json:"id"`
 	Name             string                                 `json:"name"`
-	Description      *string                                `json:"description,omitempty"`
+	Description      *string                                `json:"description"`
 	Datacenter       BaseDatacenterResponse                 `json:"datacenter"`
 	CreationDate     string                                 `json:"creation_date"`
 	FirstPassword    *string                                `json:"first_password"`
@@ -110,64 +83,50 @@ type ServerBaseResponse struct {
 	SSHPassword      bool                                   `json:"ssh_password"`
 	Image            IdentifierResponse                     `json:"image"`
 	Hardware         server.HardwareResponse                `json:"hardware"`
-	DVD              *IdentifierResponse                    `json:"dvd,omitempty"`
-	Alerts           *server.AlertResponse                  `json:"alerts,omitempty"`
-	MonitoringPolicy *IdentifierResponse                    `json:"monitoring_policy,omitempty"`
-	CloudPanelID     *string                                `json:"cloudpanel_id,omitempty"`
+	DVD              *IdentifierResponse                    `json:"dvd"`
+	Alerts           *server.AlertResponse                  `json:"alerts"`
+	MonitoringPolicy *IdentifierResponse                    `json:"monitoring_policy"`
+	CloudPanelID     *string                                `json:"cloudpanel_id"`
 	ServerType       string                                 `json:"server_type"`
-	Hypervisor       *string                                `json:"hypervisor,omitempty"`
 	Hostname         string                                 `json:"hostname"`
-	ConnectionSpeed  *server.ConnectionSpeedResponse        `json:"connection_speed,omitempty"`
-	Redundancy       *server.RedundancyResponse             `json:"redundancy,omitempty"`
+	ConnectionSpeed  *server.ConnectionSpeedResponse        `json:"connection_speed"`
+	Redundancy       *server.RedundancyResponse             `json:"redundancy"`
 	RSAKey           interface{}                            `json:"rsa_key"`
-	Snapshot         *server.SnapshotResponse               `json:"snapshot,omitempty"`
+	Snapshot         *server.SnapshotResponse               `json:"snapshot"`
 	PrivateNetworks  []server.ServersPrivateNetworkResponse `json:"private_networks"`
 }
 
 type ServerDetailResponse struct {
 	ServerBaseResponse
 	Status           server.StatusDetailResponse `json:"status"`
-	RecoveryMode     *bool                       `json:"recovery_mode,omitempty"`
-	RecoveryImageOS  *string                     `json:"recovery_image_os,omitempty"`
-	RecoveryUser     *string                     `json:"recovery_user,omitempty"`
-	RecoveryPassword *string                     `json:"recovery_password,omitempty"`
+	RecoveryMode     *bool                       `json:"recovery_mode"`
+	RecoveryImageOS  *string                     `json:"recovery_image_os"`
+	RecoveryUser     *string                     `json:"recovery_user"`
+	RecoveryPassword *string                     `json:"recovery_password"`
 }
 
 type ServerCreateRequest struct {
-	// REQUIRED fields - without pointer, without omitempty
+	// REQUIRED fields
 	Name         string                       `json:"name"`
 	ServerType   string                       `json:"server_type"`
 	ApplianceID  string                       `json:"appliance_id"`
 	DatacenterID string                       `json:"datacenter_id"`
 	Hardware     server.HardwareCreateRequest `json:"hardware"`
 
-	// Fields with known DEFAULTS - no pointer, no omitempty
+	// Fields with known DEFAULTS
 	SSHPassword        bool `json:"ssh_password"`
 	PowerOn            bool `json:"power_on"`
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
 	// OPTIONAL fields
-	Description            *string  `json:"description,omitempty"`
-	Password               *string  `json:"password,omitempty"`
-	FirewallPolicyID       *string  `json:"firewall_policy_id,omitempty"`
-	IPID                   *string  `json:"ip_id,omitempty"`
-	LoadBalancerID         *string  `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyID     *string  `json:"monitoring_policy_id,omitempty"`
-	PrivateNetworkID       *string  `json:"private_network_id,omitempty"`
-	UserData               *string  `json:"user_data,omitempty"`
-	UserDataContentType    *string  `json:"user_data_content_type,omitempty"`
-	PublicConnectionSpeed  *float64 `json:"public_connection_speed,omitempty"`
-	PrivateConnectionSpeed *float64 `json:"private_connection_speed,omitempty"`
-	BondingAllowed         *bool    `json:"bonding_allowed,omitempty"`
-	SiteID                 *string  `json:"site_id,omitempty"`
-	DisabledPassword       *bool    `json:"disabledPassword,omitempty"`
-	PublicKey              []string `json:"public_key,omitempty"`
-	SSHIDs                 []string `json:"sshIds,omitempty"`
-
-	BackupAgentTenantData *string `json:"backup_agent_tenant_data,omitempty"`
-	BackupSize            *string `json:"backup_size,omitempty"`
-	AvailabilityZoneID    *string `json:"availability_zone_id,omitempty"`
+	Description        *string `json:"description,omitempty"`
+	Password           *string `json:"password,omitempty"`
+	FirewallPolicyID   *string `json:"firewall_policy_id,omitempty"`
+	IPID               *string `json:"ip_id,omitempty"`
+	LoadBalancerID     *string `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyID *string `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneID *string `json:"availability_zone_id,omitempty"`
 }
 type ServerUpdateRequest struct {
 	Name        *string `json:"name,omitempty"`
@@ -223,12 +182,6 @@ func newServerBaseModelFromResponse(_ context.Context, sr *ServerBaseResponse) (
 		model.CloudPanelID = types.StringNull()
 	}
 
-	if sr.Hypervisor != nil {
-		model.Hypervisor = types.StringValue(*sr.Hypervisor)
-	} else {
-		model.Hypervisor = types.StringNull()
-	}
-
 	switch v := sr.RSAKey.(type) {
 	case bool:
 		model.RSAKey = types.BoolValue(v)
@@ -240,7 +193,6 @@ func newServerBaseModelFromResponse(_ context.Context, sr *ServerBaseResponse) (
 		model.RSAKey = types.BoolValue(false)
 	}
 
-	// Objetos embebidos obligatorios
 	datacenterObj, datacenterDiags := NewBaseDatacenterObject(sr.Datacenter)
 	diags.Append(datacenterDiags...)
 	if !datacenterDiags.HasError() {
@@ -271,7 +223,6 @@ func newServerBaseModelFromResponse(_ context.Context, sr *ServerBaseResponse) (
 		model.PrivateNetworks = pnList
 	}
 
-	// Objetos embebidos opcionales
 	if sr.DVD != nil {
 		dvdObj, dvdDiags := NewIdentifierObject(*sr.DVD)
 		diags.Append(dvdDiags...)
@@ -398,11 +349,9 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		ServerDetailModel: *baseModel,
 	}
 
-	// Siempre preservar los campos de configuración del plan
 	model.ApplianceID = plan.ApplianceID
 	model.DatacenterID = plan.DatacenterID
 
-	// Hardware - preservar del plan si todos los campos son conocidos
 	if !plan.Hardware.IsNull() && !plan.Hardware.IsUnknown() {
 		hardwareAttrs := plan.Hardware.Attributes()
 
@@ -429,7 +378,6 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		}
 	}
 
-	// Campos de configuración - preservar del plan o usar defaults
 	if !plan.Password.IsUnknown() {
 		model.Password = plan.Password
 	} else {
@@ -442,25 +390,12 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.PowerOn = types.BoolValue(true)
 	}
 
-	if !plan.BondingAllowed.IsUnknown() {
-		model.BondingAllowed = plan.BondingAllowed
-	} else {
-		model.BondingAllowed = types.BoolValue(false)
-	}
-
 	if !plan.InstallBackupAgent.IsUnknown() {
 		model.InstallBackupAgent = plan.InstallBackupAgent
 	} else {
 		model.InstallBackupAgent = types.BoolValue(false)
 	}
 
-	if !plan.DisabledPassword.IsUnknown() {
-		model.DisabledPassword = plan.DisabledPassword
-	} else {
-		model.DisabledPassword = types.BoolValue(false)
-	}
-
-	// Campos opcionales de configuración
 	if !plan.FirewallPolicyID.IsUnknown() {
 		model.FirewallPolicyID = plan.FirewallPolicyID
 	} else {
@@ -485,80 +420,18 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.MonitoringPolicyID = types.StringNull()
 	}
 
-	if !plan.PrivateNetworkID.IsUnknown() {
-		model.PrivateNetworkID = plan.PrivateNetworkID
-	} else {
-		model.PrivateNetworkID = types.StringNull()
-	}
-
-	if !plan.UserData.IsUnknown() {
-		model.UserData = plan.UserData
-	} else {
-		model.UserData = types.StringNull()
-	}
-
-	if !plan.UserDataContentType.IsUnknown() {
-		model.UserDataContentType = plan.UserDataContentType
-	} else {
-		model.UserDataContentType = types.StringNull()
-	}
-
-	if !plan.PublicConnectionSpeed.IsUnknown() {
-		model.PublicConnectionSpeed = plan.PublicConnectionSpeed
-	} else {
-		model.PublicConnectionSpeed = types.Float64Null()
-	}
-
-	if !plan.PrivateConnectionSpeed.IsUnknown() {
-		model.PrivateConnectionSpeed = plan.PrivateConnectionSpeed
-	} else {
-		model.PrivateConnectionSpeed = types.Float64Null()
-	}
-
-	if !plan.BackupAgentTenantData.IsUnknown() {
-		model.BackupAgentTenantData = plan.BackupAgentTenantData
-	} else {
-		model.BackupAgentTenantData = types.StringNull()
-	}
-
-	if !plan.BackupSize.IsUnknown() {
-		model.BackupSize = plan.BackupSize
-	} else {
-		model.BackupSize = types.StringNull()
-	}
-
 	if !plan.AvailabilityZoneID.IsUnknown() {
 		model.AvailabilityZoneID = plan.AvailabilityZoneID
 	} else {
 		model.AvailabilityZoneID = types.StringNull()
 	}
 
-	if !plan.SiteID.IsUnknown() {
-		model.SiteID = plan.SiteID
-	} else {
-		model.SiteID = types.StringNull()
-	}
-
-	// Arrays
-	if !plan.PublicKey.IsUnknown() {
-		model.PublicKey = plan.PublicKey
-	} else {
-		model.PublicKey = types.ListNull(types.StringType)
-	}
-
-	if !plan.SSHIDs.IsUnknown() {
-		model.SSHIDs = plan.SSHIDs
-	} else {
-		model.SSHIDs = types.ListNull(types.StringType)
-	}
-
 	return model, diags
 }
 
-func NewServerResourceModelFromRead(ctx context.Context, sr *ServerDetailResponse, currentState *ServerResourceModel) (*ServerResourceModel, diag.Diagnostics) {
+func NewServerResourceModelFromRead(_ context.Context, sr *ServerDetailResponse, currentState *ServerResourceModel) (*ServerResourceModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	tflog.Info(ctx, "🔍 NewServerResourceModelFromRead CALLED")
 	model := *currentState
 
 	model.Name = types.StringValue(sr.Name)
@@ -582,10 +455,6 @@ func NewServerResourceModelFromRead(ctx context.Context, sr *ServerDetailRespons
 
 	if sr.CloudPanelID != nil {
 		model.CloudPanelID = types.StringValue(*sr.CloudPanelID)
-	}
-
-	if sr.Hypervisor != nil {
-		model.Hypervisor = types.StringValue(*sr.Hypervisor)
 	}
 
 	if sr.Alerts != nil {
@@ -620,86 +489,10 @@ func NewServerResourceModelFromRead(ctx context.Context, sr *ServerDetailRespons
 		}
 	}
 
-	if !currentState.Hardware.IsNull() {
-		shouldUpdateHardware := false
-		hardwareAttrs := currentState.Hardware.Attributes()
+	shouldUpdateHardware := currentState.Hardware.IsNull() ||
+		server.NeedsHardwareUpdate(currentState.Hardware.Attributes(), sr.Hardware)
 
-		tflog.Info(ctx, "🔍 Starting hardware drift detection")
-
-		if fixedID, ok := hardwareAttrs["fixed_instance_size_id"]; ok {
-			currentFixed := fixedID.(types.String).ValueString()
-			apiFixed := ""
-			if sr.Hardware.FixedInstanceSizeID != nil {
-				apiFixed = *sr.Hardware.FixedInstanceSizeID
-			}
-			if currentFixed != apiFixed {
-				tflog.Warn(ctx, fmt.Sprintf("HARDWARE CHANGE DETECTED in fixed_instance_size_id: state='%s' vs api='%s'", currentFixed, apiFixed))
-				shouldUpdateHardware = true
-			}
-		}
-
-		if modelID, ok := hardwareAttrs["baremetal_model_id"]; ok {
-			currentModel := modelID.(types.String).ValueString()
-			apiModel := ""
-			if sr.Hardware.BaremetalModelID != nil {
-				apiModel = *sr.Hardware.BaremetalModelID
-			}
-			if currentModel != apiModel {
-				tflog.Warn(ctx, fmt.Sprintf("HARDWARE CHANGE DETECTED in baremetal_model_id: state='%s' vs api='%s'", currentModel, apiModel))
-				shouldUpdateHardware = true
-			}
-		}
-
-		if ram, ok := hardwareAttrs["ram"]; ok {
-			currentRAM := ram.(types.Int64).ValueInt64()
-			apiRAM := int64(sr.Hardware.RAM)
-			if currentRAM != apiRAM {
-				tflog.Warn(ctx, fmt.Sprintf("HARDWARE CHANGE DETECTED in ram: state='%d' vs api='%d'", currentRAM, apiRAM))
-				shouldUpdateHardware = true
-			}
-		}
-
-		if vcore, ok := hardwareAttrs["vcore"]; ok {
-			currentVCore := vcore.(types.Int64).ValueInt64()
-			apiVCore := int64(sr.Hardware.VCore)
-			tflog.Info(ctx, fmt.Sprintf("🔍 HARDWARE COMPARISON: state vcore=%d, api vcore=%d", currentVCore, apiVCore))
-			if currentVCore != apiVCore {
-				// ⚠️ CONOCEMOS que hay inconsistencia en API detail endpoint
-				tflog.Debug(ctx, fmt.Sprintf("API INCONSISTENCY in vcore: state='%d' vs api='%d' (preserving state value)", currentVCore, apiVCore))
-				// NO marcamos shouldUpdateHardware = true para este campo
-			}
-		}
-
-		if cores, ok := hardwareAttrs["cores_per_processor"]; ok {
-			currentCores := cores.(types.Int64).ValueInt64()
-			apiCores := int64(sr.Hardware.CoresPerProcessor)
-			if currentCores != apiCores {
-				tflog.Warn(ctx, fmt.Sprintf("HARDWARE CHANGE DETECTED in cores_per_processor: state='%d' vs api='%d'", currentCores, apiCores))
-				shouldUpdateHardware = true
-			}
-		}
-
-		if hdds, ok := hardwareAttrs["hdds"]; ok {
-			currentHDDs := hdds.(types.List)
-			if len(currentHDDs.Elements()) != len(sr.Hardware.HDDs) {
-				tflog.Warn(ctx, fmt.Sprintf("HARDWARE CHANGE DETECTED in hdds count: state='%d' vs api='%d'", len(currentHDDs.Elements()), len(sr.Hardware.HDDs)))
-				shouldUpdateHardware = true
-			}
-		}
-
-		if shouldUpdateHardware {
-			tflog.Info(ctx, "🔄 Updating hardware due to legitimate changes detected")
-			hardwareObj, hardwareDiags := server.NewHardwareObject(sr.Hardware)
-			diags.Append(hardwareDiags...)
-			if !hardwareDiags.HasError() {
-				model.Hardware = hardwareObj
-			}
-		} else {
-			tflog.Info(ctx, "✅ Preserving hardware state (no legitimate changes detected)")
-		}
-	} else {
-		// Primera vez - usar hardware de API
-		tflog.Info(ctx, "🆕 First time - using hardware from API")
+	if shouldUpdateHardware {
 		hardwareObj, hardwareDiags := server.NewHardwareObject(sr.Hardware)
 		diags.Append(hardwareDiags...)
 		if !hardwareDiags.HasError() {
@@ -707,7 +500,6 @@ func NewServerResourceModelFromRead(ctx context.Context, sr *ServerDetailRespons
 		}
 	}
 
-	tflog.Info(ctx, "🔍 NewServerResourceModelFromRead COMPLETED - hardware preserved from state")
 	return &model, diags
 }
 
@@ -740,33 +532,17 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 		ServerDetailModel: *detailModel,
 	}
 
-	// Campos de configuración requeridos - se asignarán en Create/Update
 	model.ApplianceID = types.StringNull()
 	model.DatacenterID = types.StringNull()
 
-	// Set default values para TODOS los campos que están en ServerResourceModel
 	model.Password = types.StringNull()
 	model.PowerOn = types.BoolValue(true)
 	model.FirewallPolicyID = types.StringNull()
 	model.IPID = types.StringNull()
 	model.LoadBalancerID = types.StringNull()
 	model.MonitoringPolicyID = types.StringNull()
-	model.PrivateNetworkID = types.StringNull()
-	model.UserData = types.StringNull()
-	model.UserDataContentType = types.StringNull()
-	model.PublicConnectionSpeed = types.Float64Null()
-	model.PrivateConnectionSpeed = types.Float64Null()
-	model.BondingAllowed = types.BoolValue(false)
 	model.InstallBackupAgent = types.BoolValue(false)
-	model.BackupAgentTenantData = types.StringNull()
-	model.BackupSize = types.StringNull()
 	model.AvailabilityZoneID = types.StringNull()
-	model.SiteID = types.StringNull()
-	model.DisabledPassword = types.BoolValue(false)
-
-	// Arrays
-	model.PublicKey = types.ListNull(types.StringType)
-	model.SSHIDs = types.ListNull(types.StringType)
 
 	return model, diags
 }
@@ -797,40 +573,7 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	helper.AssignStringPtr(&req.IPID, s.IPID)
 	helper.AssignStringPtr(&req.LoadBalancerID, s.LoadBalancerID)
 	helper.AssignStringPtr(&req.MonitoringPolicyID, s.MonitoringPolicyID)
-	helper.AssignStringPtr(&req.PrivateNetworkID, s.PrivateNetworkID)
-	helper.AssignStringPtr(&req.UserData, s.UserData)
-	helper.AssignStringPtr(&req.UserDataContentType, s.UserDataContentType)
-	helper.AssignStringPtr(&req.SiteID, s.SiteID)
-
-	helper.AssignFloatPtr(&req.PublicConnectionSpeed, s.PublicConnectionSpeed)
-	helper.AssignFloatPtr(&req.PrivateConnectionSpeed, s.PrivateConnectionSpeed)
-
-	helper.AssignBoolPtr(&req.BondingAllowed, s.BondingAllowed)
-	helper.AssignBoolPtr(&req.DisabledPassword, s.DisabledPassword)
-
-	helper.AssignStringDirect(req.BackupAgentTenantData, s.BackupAgentTenantData)
-	helper.AssignStringDirect(req.BackupSize, s.BackupSize)
-	helper.AssignStringDirect(req.AvailabilityZoneID, s.AvailabilityZoneID)
-
-	if !s.PublicKey.IsNull() && !s.PublicKey.IsUnknown() && len(s.PublicKey.Elements()) > 0 {
-		publicKeys := make([]string, 0, len(s.PublicKey.Elements()))
-		for _, key := range s.PublicKey.Elements() {
-			if strVal, ok := key.(types.String); ok {
-				publicKeys = append(publicKeys, strVal.ValueString())
-			}
-		}
-		req.PublicKey = publicKeys
-	}
-
-	if !s.SSHIDs.IsNull() && !s.SSHIDs.IsUnknown() && len(s.SSHIDs.Elements()) > 0 {
-		sshIds := make([]string, 0, len(s.SSHIDs.Elements()))
-		for _, id := range s.SSHIDs.Elements() {
-			if strVal, ok := id.(types.String); ok {
-				sshIds = append(sshIds, strVal.ValueString())
-			}
-		}
-		req.SSHIDs = sshIds
-	}
+	helper.AssignStringPtr(&req.AvailabilityZoneID, s.AvailabilityZoneID)
 
 	return req
 }
@@ -863,7 +606,6 @@ func serverBaseModelObjectType() types.ObjectType {
 			"monitoring_policy": IdentifierObjectType(),
 			"cloudpanel_id":     types.StringType,
 			"server_type":       types.StringType,
-			"hypervisor":        types.StringType,
 			"hostname":          types.StringType,
 			"connection_speed":  server.ConnectionSpeedObjectType(),
 			"redundancy":        server.RedundancyObjectType(),
@@ -952,10 +694,6 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"server_type": schema.StringAttribute{
 				Computed: true,
-			},
-			"hypervisor": schema.StringAttribute{
-				Computed:    true,
-				Description: "Server hypervisor type",
 			},
 			"hostname": schema.StringAttribute{
 				Computed: true,
@@ -1050,8 +788,8 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"first_password": rschema.StringAttribute{
-				Computed: true,
-				//Sensitive: true,
+				Computed:  true,
+				Sensitive: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -1128,13 +866,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"hypervisor": rschema.StringAttribute{
-				Computed:    true,
-				Description: "Server hypervisor type",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"hostname": rschema.StringAttribute{
 				Computed: true,
 				PlanModifiers: []planmodifier.String{
@@ -1178,10 +909,9 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					listplanmodifier.UseStateForUnknown(),
 				},
 			},
-			// ServerDetailModel
 			"status": rschema.SingleNestedAttribute{
 				Computed:   true,
-				Attributes: server.StatusResourceSchema(),
+				Attributes: server.StatusDetailResourceSchema(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -1214,8 +944,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-
-			// Fields from ServerResourceModel
 			"appliance_id": rschema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -1321,61 +1049,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					),
 				},
 			},
-			"private_network_id": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Private network identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid private_network_id",
-					),
-				},
-			},
-			"user_data": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "User data script",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"user_data_content_type": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "User data content type",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"public_connection_speed": rschema.Float64Attribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Public connection speed",
-				PlanModifiers: []planmodifier.Float64{
-					float64planmodifier.UseStateForUnknown(),
-				},
-			},
-			"private_connection_speed": rschema.Float64Attribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Private connection speed",
-				PlanModifiers: []planmodifier.Float64{
-					float64planmodifier.UseStateForUnknown(),
-				},
-			},
-			"bonding_allowed": rschema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(false),
-				Description: "Whether bonding is allowed",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"install_backup_agent": rschema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -1385,69 +1058,12 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"backup_agent_tenant_data": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Backup agent tenant data",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"backup_size": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Backup size",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"availability_zone_id": rschema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Availability zone identifier",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"public_key": rschema.ListAttribute{
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-				Description: "List of SSH Key IDs to be copied in the server",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"site_id": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "Site identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid site_id",
-					),
-				},
-			},
-			"ssh_ids": rschema.ListAttribute{
-				Optional:    true,
-				Computed:    true,
-				ElementType: types.StringType,
-				Description: "SSH key identifiers",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"disabled_password": rschema.BoolAttribute{
-				Optional:    true,
-				Computed:    true,
-				Default:     booldefault.StaticBool(false),
-				Description: "Whether to disable password authentication",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},

@@ -22,7 +22,7 @@ type StatusBaseModel struct {
 
 type StatusDetailResponse struct {
 	State   string `json:"state"`
-	Percent *int   `json:"percent,omitempty"`
+	Percent *int   `json:"percent"`
 }
 type StatusBaseResponse struct {
 	State string `json:"state"`
@@ -79,7 +79,7 @@ func StatusDetailDataSourceSchema() map[string]schema.Attribute {
 	}
 }
 
-func StatusResourceSchema() map[string]rschema.Attribute {
+func StatusDetailResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"state": rschema.StringAttribute{
 			Computed: true,
