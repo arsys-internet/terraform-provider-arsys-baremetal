@@ -10,4 +10,6 @@ const (
 	StateEnabled      = "ENABLED"
 	StatusCreating    = "CREATING"
 	StatusConfiguring = "CONFIGURING"
+	StatusAvailable   = "AVAILABLE"
+
 )

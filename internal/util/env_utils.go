@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -32,7 +31,6 @@ func LoadEnv() error {
 	return nil
 }
 
-// GetTimeoutFromEnv TODO: Refactor to use GetEnvTimeValues in all the use cases
 func GetTimeoutFromEnv(envVar string, unit time.Duration) time.Duration {
 	err := LoadEnv()
 
@@ -58,6 +56,7 @@ func GetEnvTimeValues(envVar string, unit time.Duration) (time.Duration, error) 
 
 	if err != nil {
 		log.Printf("Error loading .env file: %v", err)
+		return 0, fmt.Errorf("error loading environment variables: %v", err)
 	}
 
 	value := os.Getenv(envVar)
