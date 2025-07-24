@@ -99,7 +99,7 @@ type ServerBaseResponse struct {
 type ServerDetailResponse struct {
 	ServerBaseResponse
 	Status           server.StatusDetailResponse `json:"status"`
-	RecoveryMode     *bool                       `json:"recovery_mode"`
+	RecoveryMode     bool                        `json:"recovery_mode"`
 	RecoveryImageOS  *string                     `json:"recovery_image_os"`
 	RecoveryUser     *string                     `json:"recovery_user"`
 	RecoveryPassword *string                     `json:"recovery_password"`
@@ -305,11 +305,7 @@ func newServerDetailModelFromResponse(ctx context.Context, sr *ServerDetailRespo
 		model.Status = statusObj
 	}
 
-	if sr.RecoveryMode != nil {
-		model.RecoveryMode = types.BoolValue(*sr.RecoveryMode)
-	} else {
-		model.RecoveryMode = types.BoolNull()
-	}
+	model.RecoveryMode = types.BoolValue(sr.RecoveryMode)
 
 	if sr.RecoveryImageOS != nil {
 		model.RecoveryImageOS = types.StringValue(*sr.RecoveryImageOS)

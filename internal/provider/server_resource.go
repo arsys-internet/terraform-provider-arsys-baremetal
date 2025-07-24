@@ -11,7 +11,6 @@ import (
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/server"
 	"terraform-provider-arsys-baremetal/internal/util"
-	"time"
 )
 
 var (
@@ -124,17 +123,17 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating server",
-			fmt.Sprintf("Could not create server: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
 
-	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getServerTimeout()
+	timeouts := util.GetResourceTimeouts("SERVER")
 
 	waitOptions := util.NewWaitOptions(
-		defaultTimeout,
-		defaultRetryInterval,
-		defaultMinTimeout,
+		timeouts.Default,
+		timeouts.RetryInterval,
+		timeouts.MinTimeout,
 		[]string{util.StateDeploying},
 		[]string{util.StatePoweredOn, util.StatePoweredOff, util.StateActive},
 	)
@@ -156,7 +155,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final server state",
-			fmt.Sprintf("Could not get final server state: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
@@ -195,12 +194,10 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 		resp.Diagnostics.AddError(
 			"Error reading server",
-			fmt.Sprintf("Could not read server: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("Read - apiResponse: %+v", apiResponse))
 
 	if apiResponse == nil {
 		tflog.Info(ctx, fmt.Sprintf("Server with ID %s not found, removing from state", id))
@@ -257,7 +254,7 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating server",
-			fmt.Sprintf("Could not update server: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
@@ -290,17 +287,17 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 		resp.Diagnostics.AddError(
 			"Error deleting server",
-			fmt.Sprintf("Could not delete server: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
 
-	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getServerTimeout()
+	timeouts := util.GetResourceTimeouts("SERVER")
 
 	waitOptions := util.NewWaitOptions(
-		defaultTimeout,
-		defaultRetryInterval,
-		defaultMinTimeout,
+		timeouts.Default,
+		timeouts.RetryInterval,
+		timeouts.MinTimeout,
 		[]string{util.StateRemoving},
 		[]string{util.StateDeleted},
 	)
@@ -324,23 +321,4 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 func (r *ServerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func getServerTimeout() (time.Duration, time.Duration, time.Duration) {
-	timeout, err := util.GetEnvTimeValues("SERVER_DEFAULT_TIMEOUT", time.Minute)
-	if err != nil {
-		timeout = 40 * time.Minute
-	}
-
-	retryInterval, err := util.GetEnvTimeValues("SERVER_DEFAULT_RETRY_INTERVAL", time.Second)
-	if err != nil {
-		retryInterval = 30 * time.Second
-	}
-
-	minTimeout, err := util.GetEnvTimeValues("SERVER_DEFAULT_MIN_TIMEOUT", time.Second)
-	if err != nil {
-		minTimeout = 10 * time.Second
-	}
-
-	return timeout, retryInterval, minTimeout
 }

@@ -80,7 +80,7 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading server",
-			fmt.Sprintf("Could not read server with ID %s: %s", id, err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}

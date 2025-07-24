@@ -9,6 +9,7 @@ import (
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
+	"terraform-provider-arsys-baremetal/internal/util/helper"
 )
 
 var _ ApiServerServiceInterface = (*ApiServerService)(nil)
@@ -53,12 +54,10 @@ func (s *ApiServerService) GetServer(id string) (*models.ServerDetailResponse, e
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("server not found")
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := helper.HandleErrorResponse(resp, http.StatusOK, "get server")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var server models.ServerDetailResponse
@@ -86,8 +85,9 @@ func (s *ApiServerService) GetServers() ([]models.ServerListResponse, error) {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := helper.HandleErrorResponse(resp, http.StatusOK, "get servers")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var servers []models.ServerListResponse
@@ -118,9 +118,9 @@ func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*m
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error creating server: %s", string(body))
+	errorResponse := helper.HandleErrorResponse(resp, http.StatusAccepted, "create server")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var createdServer models.ServerBaseResponse
@@ -145,9 +145,9 @@ func (s *ApiServerService) UpdateServer(id string, request *models.ServerUpdateR
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error updating server: %s", string(body))
+	errorResponse := helper.HandleErrorResponse(resp, http.StatusOK, "update server")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var updatedServer models.ServerBaseResponse
@@ -172,13 +172,9 @@ func (s *ApiServerService) DeleteServer(id string) error {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("server with ID %s not found", id)
-	}
-
-	if resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error deleting server: %s", string(body))
+	errorResponse := helper.HandleErrorResponse(resp, http.StatusAccepted, "delete server")
+	if errorResponse != nil {
+		return errorResponse
 	}
 
 	return nil
