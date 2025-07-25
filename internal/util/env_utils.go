@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"time"
 )
 
+// TODO: Setear de manera dinamica las variables de entorno
 func LoadEnv() error {
 	envLocations := []string{
 		".env",
@@ -23,11 +25,8 @@ func LoadEnv() error {
 		if err == nil {
 			return nil
 		}
-		// Ignoramos el error y continuamos intentando con la siguiente ubicación
 	}
 
-	// No encontramos ningún archivo .env, pero no es un error
-	// Las variables podrían estar configuradas directamente en el entorno
 	return nil
 }
 

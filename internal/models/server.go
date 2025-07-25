@@ -807,6 +807,8 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"ssh_password": rschema.BoolAttribute{
 				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -885,6 +887,8 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"rsa_key": rschema.BoolAttribute{
 				Computed: true,
+				Optional: true,
+				Default:  booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},

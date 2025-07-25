@@ -9,7 +9,6 @@ import (
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
-	"terraform-provider-arsys-baremetal/internal/util/helper"
 )
 
 var _ ApiServerServiceInterface = (*ApiServerService)(nil)
@@ -55,7 +54,7 @@ func (s *ApiServerService) GetServer(id string) (*models.ServerDetailResponse, e
 		}
 	}(resp.Body)
 
-	errorResponse := helper.HandleErrorResponse(resp, http.StatusOK, "get server")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get server")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -85,7 +84,7 @@ func (s *ApiServerService) GetServers() ([]models.ServerListResponse, error) {
 		}
 	}(resp.Body)
 
-	errorResponse := helper.HandleErrorResponse(resp, http.StatusOK, "get servers")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get servers")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -118,7 +117,7 @@ func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*m
 		}
 	}(resp.Body)
 
-	errorResponse := helper.HandleErrorResponse(resp, http.StatusAccepted, "create server")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "create server")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -145,7 +144,7 @@ func (s *ApiServerService) UpdateServer(id string, request *models.ServerUpdateR
 		}
 	}(resp.Body)
 
-	errorResponse := helper.HandleErrorResponse(resp, http.StatusOK, "update server")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "update server")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -172,7 +171,7 @@ func (s *ApiServerService) DeleteServer(id string) error {
 		}
 	}(resp.Body)
 
-	errorResponse := helper.HandleErrorResponse(resp, http.StatusAccepted, "delete server")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "delete server")
 	if errorResponse != nil {
 		return errorResponse
 	}
