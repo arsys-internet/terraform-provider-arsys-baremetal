@@ -23,6 +23,8 @@ type ApiServerServiceInterface interface {
 	CreateServer(request *models.ServerCreateRequest) (*models.ServerBaseResponse, error)
 	UpdateServer(id string, request *models.ServerUpdateRequest) (*models.ServerBaseResponse, error)
 	DeleteServer(id string) error
+	GetBaremetalModel(id string) (*models.BaremetalModelResponse, error)
+	GetBaremetalModels() ([]models.BaremetalModelResponse, error)
 }
 
 func NewApiServerService(client *client.APIClient) *ApiServerService {
@@ -45,7 +47,7 @@ func (s *ApiServerService) GetServer(id string) (*models.ServerDetailResponse, e
 	resp, err := s.client.Get(fmt.Sprintf("/servers/%s", id))
 
 	if err != nil {
-		return nil, fmt.Errorf("error making request: %w", err)
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -75,7 +77,7 @@ func (s *ApiServerService) GetServers() ([]models.ServerListResponse, error) {
 	resp, err := s.client.Get("/servers")
 
 	if err != nil {
-		return nil, fmt.Errorf("error making request: %w", err)
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -177,6 +179,69 @@ func (s *ApiServerService) DeleteServer(id string) error {
 	}
 
 	return nil
+}
+
+func (s *ApiServerService) GetBaremetalModel(id string) (*models.BaremetalModelResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/servers/baremetal_models/%s", id))
+
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get baremetal model")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var baremetalModel models.BaremetalModelResponse
+	if err := json.NewDecoder(resp.Body).Decode(&baremetalModel); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	if baremetalModel.State != util.StateEnabled {
+		return nil, fmt.Errorf("baremetal model not found")
+	}
+
+	return &baremetalModel, nil
+}
+
+func (s *ApiServerService) GetBaremetalModels() ([]models.BaremetalModelResponse, error) {
+	resp, err := s.client.Get("/servers/baremetal_models")
+
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get baremetal models")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var baremetalModels []models.BaremetalModelResponse
+	if err := json.NewDecoder(resp.Body).Decode(&baremetalModels); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	var baremetalList []models.BaremetalModelResponse
+	for _, baremetalModel := range baremetalModels {
+		if baremetalModel.State == util.StateEnabled {
+			baremetalList = append(baremetalList, baremetalModel)
+		}
+	}
+
+	return baremetalList, nil
 }
 
 func (s *ApiServerService) GetResource(id string) (util.ResourceModel, error) {
