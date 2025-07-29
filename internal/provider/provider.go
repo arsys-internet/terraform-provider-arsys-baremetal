@@ -155,6 +155,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 	return []func() datasource.DataSource{
 		NewDatacenterDataSource,
 		NewDatacentersDataSource,
+		NewFirewallPolicyDataSource,
+		NewFirewallPoliciesDataSource,
 		NewPrivateNetworkDataSource,
 		NewPrivateNetworksDataSource,
 		NewPublicIpDataSource,
