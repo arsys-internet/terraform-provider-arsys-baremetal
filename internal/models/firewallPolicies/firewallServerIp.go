@@ -5,6 +5,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -84,14 +86,23 @@ func FirewallServerIPResourceSchema() map[string]rschema.Attribute {
 		"id": rschema.StringAttribute{
 			Computed:    true,
 			Description: "Server identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"ip": rschema.StringAttribute{
 			Computed:    true,
 			Description: "Server IP address",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 		"server_name": rschema.StringAttribute{
 			Computed:    true,
 			Description: "Server name",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
 		},
 	}
 }
