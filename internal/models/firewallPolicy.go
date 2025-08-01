@@ -214,6 +214,9 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxNameLength),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"description": rschema.StringAttribute{
 				Optional:    true,
@@ -221,6 +224,9 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Firewall policy description",
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"rules": rschema.ListNestedAttribute{
