@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"regexp"
 	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	"terraform-provider-arsys-baremetal/internal/util"
 )
@@ -160,6 +161,12 @@ func FirewallPolicyDataSourceSchema(_ context.Context) schema.Schema {
 			"id": schema.StringAttribute{
 				Required:    true,
 				Description: "Firewall policy identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+					),
+				},
 			},
 			"name": schema.StringAttribute{
 				Computed:    true,
@@ -239,6 +246,12 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Firewall policy identifier",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+					),
 				},
 			},
 			"state": rschema.StringAttribute{
