@@ -14,5 +14,4 @@ The provider supports authentication via environment variables (recommended) or 
 
 ### Environment Variables (Recommended)
 ```bash
-export ARSYS_BAREMETAL_HOST="https://api.arsys.es"
 export ARSYS_BAREMETAL_TOKEN="your-api-token-here"

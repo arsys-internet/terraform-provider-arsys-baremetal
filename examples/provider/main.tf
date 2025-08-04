@@ -7,9 +7,8 @@ terraform {
   }
 }
 
-# Set your API host and token
-# You can set the host and token directly in the provider block or use environment variables ARSYS_BAREMETAL_HOST and ARSYS_BAREMETAL_TOKEN.
+# Set your API token
+# You can set the token directly in the provider block or use environment variables ARSYS_BAREMETAL_TOKEN.
 provider "arsys-baremetal" {
-  #   host     = "https://api.ejemplo.com"
   # token = "token"
 }
