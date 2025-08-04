@@ -88,7 +88,7 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 		resp.Diagnostics.AddError(
 			"Error reading datacenter",
-			fmt.Sprintf("Could not read datacenter: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
