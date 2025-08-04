@@ -96,6 +96,9 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 		host = config.Host.ValueString()
 	} else {
 		host = os.Getenv("BAREMETAL_HOST")
+		if host == "" {
+			host = "https://api.cloudbuilder.es/v1"
+		}
 	}
 
 	if !config.Token.IsNull() {
