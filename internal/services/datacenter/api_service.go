@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
+	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 var _ ApiDatacenterServiceInterface = (*ApiDatacenterService)(nil)
@@ -48,12 +49,10 @@ func (s *ApiDatacenterService) GetDatacenter(id string) (*models.DatacenterRespo
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("datacenter not found")
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get datacenter")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var datacenter models.DatacenterResponse
@@ -76,8 +75,9 @@ func (s *ApiDatacenterService) GetDatacenters() ([]models.DatacentersResponse, e
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get datacenters")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var datacenters []models.DatacentersResponse
