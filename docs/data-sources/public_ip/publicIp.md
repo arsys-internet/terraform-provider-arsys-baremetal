@@ -37,8 +37,8 @@ data "arsys-baremetal_public_ip" "example" {
 
 ## Attributes Reference
 The following attributes are returned by the datasource:
-* `id` - Identifier of the private network
-* `ip` - The name of the private network
+* `id` - Identifier of the public IP
+* `ip` - The address of the public IP
 * `assigned_to` - Resource where the IP is assigned
   * `id` - Identifier of the resource
   * `name` - The name of the resource
