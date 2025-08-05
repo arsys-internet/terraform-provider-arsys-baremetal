@@ -53,12 +53,10 @@ func (s *ApiPublicIpService) GetPublicIp(id string) (*models.PublicIpResponse, e
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("public ip not found")
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get public ip")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var publicIp models.PublicIpResponse
@@ -81,8 +79,9 @@ func (s *ApiPublicIpService) GetPublicIps() ([]models.PublicIpResponse, error) {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get public ips")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var publicIps []models.PublicIpResponse
@@ -106,9 +105,9 @@ func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateReques
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error creating public ip: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusCreated, "create public ip")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var createdPublicIp models.PublicIpResponse
@@ -132,9 +131,9 @@ func (s *ApiPublicIpService) UpdatePublicIp(id string, request *models.PublicIpU
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error updating public ip: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "update public ip")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var updatedPublicIp models.PublicIpResponse
@@ -158,9 +157,9 @@ func (s *ApiPublicIpService) DeletePublicIp(id string) error {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error deleting public ip: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "delete public ip")
+	if errorResponse != nil {
+		return errorResponse
 	}
 
 	return nil

@@ -10,7 +10,6 @@ import (
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicIp"
 	"terraform-provider-arsys-baremetal/internal/util"
-	"time"
 )
 
 var (
@@ -83,7 +82,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 		resp.Diagnostics.AddError(
 			"Error reading public ip",
-			fmt.Sprintf("Could not read public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -200,12 +199,12 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getIpTimeout()
+	timeouts := util.GetResourceTimeouts("PUBLIC_IP")
 
 	waitOptions := util.NewWaitOptions(
-		defaultTimeout,
-		defaultRetryInterval,
-		defaultMinTimeout,
+		timeouts.Default,
+		timeouts.RetryInterval,
+		timeouts.MinTimeout,
 		[]string{util.StateRemoving},
 		[]string{util.StateDeleted},
 	)
@@ -227,12 +226,4 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 func (r *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func getIpTimeout() (time.Duration, time.Duration, time.Duration) {
-	var timeout = util.GetTimeoutFromEnv("IP_DEFAULT_TIMEOUT", time.Minute)
-	var retryInterval = util.GetTimeoutFromEnv("IP_DEFAULT_RETRY_INTERVAL", time.Second)
-	var minTimeout = util.GetTimeoutFromEnv("IP_DEFAULT_MIN_TIMEOUT", time.Second)
-
-	return timeout, retryInterval, minTimeout
 }
