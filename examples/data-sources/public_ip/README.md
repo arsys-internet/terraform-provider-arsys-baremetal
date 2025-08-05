@@ -1,4 +1,5 @@
 # Public IP
+
 This example demonstrates how to query public ip information using the Arsys Baremetal provider.
 
 ## What This Example Does
