@@ -27,7 +27,6 @@ data "arsys-baremetal_public_ips" "all" {}
 The following attributes are returned by the datasource:
 
 * `ips` - List of IPs
-  Algo
 
 ### Get By ID
 
@@ -46,12 +45,12 @@ data "arsys-baremetal_public_ip" "example" {
 
 The following attributes are returned by the datasource:
 
-* `id` - Identifier of the private network
-* `ip` - The name of the private network
+* `id` - Identifier of the public IP
+* `ip` - The address of the public IP
 * `assigned_to` - Resource where the IP is assigned
-    * `id` - Identifier of the resource
-    * `name` - The name of the resource
-    * `type` - The type of the resource ("SERVER", "LOAD_BALANCER")
+  * `id` - Identifier of the resource
+  * `name` - The name of the resource
+  * `type` - The type of the resource ("SERVER", "LOAD_BALANCER")
 * `subnet_id` - Subnet where the IP is located
 * `reverse_dns` - The reverse dns of the IP
 * `is_dhcp` - True if IP is assigned using DHCP
