@@ -107,26 +107,45 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		attrs := ruleObj.Attributes()
 
 		protocolAttr, protocolExists := attrs["protocol"]
-		if !protocolExists {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("rules").AtListIndex(i).AtName("protocol"),
-				"Missing required field",
-				fmt.Sprintf("'protocol' field is required for rule[%d]", i),
-			)
-			continue
-		}
+		if protocolExists {
+			if protocolVal, ok := protocolAttr.(types.String); ok && !protocolVal.IsNull() {
+				portFromAttr, portFromExists := attrs["port_from"]
+				if !portFromExists {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("rules").AtListIndex(i).AtName("port_from"),
+						"Missing required field",
+						fmt.Sprintf("'port_from' field is required in rule[%d]", i),
+					)
+					continue
+				}
 
-		protocolVal, ok := protocolAttr.(types.String)
-		if !ok || protocolVal.IsNull() || protocolVal.ValueString() == "" {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("rules").AtListIndex(i).AtName("protocol"),
-				"Invalid protocol value",
-				fmt.Sprintf("'protocol' field must be a non-empty string for rule[%d]", i),
-			)
-			continue
-		}
+				if portFromVal, ok := portFromAttr.(types.Int64); ok && portFromVal.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("rules").AtListIndex(i).AtName("port_from"),
+						"Missing required field",
+						fmt.Sprintf("'port_from' field is required in rule[%d]", i),
+					)
+				}
 
-		tflog.Info(ctx, fmt.Sprintf("Rule[%d] protocol: %s", i, protocolVal.ValueString()))
+				portToAttr, portToExists := attrs["port_to"]
+				if !portToExists {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("rules").AtListIndex(i).AtName("port_to"),
+						"Missing required field",
+						fmt.Sprintf("'port_to' field is required in rule[%d]", i),
+					)
+					continue
+				}
+
+				if portToVal, ok := portToAttr.(types.Int64); ok && portToVal.IsNull() {
+					resp.Diagnostics.AddAttributeError(
+						path.Root("rules").AtListIndex(i).AtName("port_to"),
+						"Missing required field",
+						fmt.Sprintf("'port_to' field is required in rule[%d]", i),
+					)
+				}
+			}
+		}
 	}
 
 	if resp.Diagnostics.HasError() {
