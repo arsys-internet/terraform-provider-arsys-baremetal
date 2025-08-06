@@ -7,7 +7,7 @@ description: |-
   Get information on a Arsys Baremetal public ip
 ---
 
-# arsys-baremetal\_ip
+# arsys-baremetal\_public\_ip
 
 The **Public IPs data source** can be used to search and return all existing public IPs.
 Also, can be used to search for and return an existing IP.
@@ -47,10 +47,11 @@ The following attributes are returned by the datasource:
 
 * `id` - Identifier of the public IP
 * `ip` - The address of the public IP
+* `type` - The type of the IP ("IPV4", "IPV6")
 * `assigned_to` - Resource where the IP is assigned
-  * `id` - Identifier of the resource
-  * `name` - The name of the resource
-  * `type` - The type of the resource ("SERVER", "LOAD_BALANCER")
+    * `id` - Identifier of the resource
+    * `name` - The name of the resource
+    * `type` - The type of the resource ("SERVER", "LOAD_BALANCER")
 * `subnet_id` - Subnet where the IP is located
 * `reverse_dns` - The reverse dns of the IP
 * `is_dhcp` - True if IP is assigned using DHCP

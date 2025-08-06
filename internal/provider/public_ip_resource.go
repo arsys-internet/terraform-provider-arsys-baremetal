@@ -117,7 +117,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating public ip",
-			fmt.Sprintf("Could not create public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -156,7 +156,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating public ip",
-			fmt.Sprintf("Could not update public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -194,7 +194,7 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 		resp.Diagnostics.AddError(
 			"Error deleting public ip",
-			fmt.Sprintf("Could not delete public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
