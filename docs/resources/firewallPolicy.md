@@ -16,7 +16,7 @@ Creates and manages a **Firewall Policies** on Arsys baremetal.
 # Create a Firewall Policy.
 
 ```hcl
-resource "cloudbuilder_firewall_policy" "example" {
+resource "arsys-baremetal_firewall_policy" "example" {
   name        = "Firewall Policy example"
   description = "Firewall Policy description"
   rules = [
@@ -46,7 +46,7 @@ The following arguments are supported:
 # Update a Firewall Policy.
 
 ```hcl
-resource "cloudbuilder_firewall_policy" "example_update" {
+resource "arsys-baremetal_firewall_policy" "example_update" {
   name        = "New Firewall Policy example"
   description = "New Firewall Policy description"
 }
@@ -67,11 +67,11 @@ Resource Firewall Policy can be imported using creating the resource the `resour
 Example:
 
 ```hcl
-resource "cloudbuilder_firewall_policy" "example_import" {}
+resource "arsys-baremetal_firewall_policy" "example_import" {}
 ```
 
 ```shell
-terraform import cloudbuilder_firewall_policy.example_import {firewall_policy id}
+terraform import arsys-baremetal_firewall_policy.example_import {firewall_policy id}
 ```
 
 # Destroy a Firewall Policy
@@ -79,5 +79,5 @@ terraform import cloudbuilder_firewall_policy.example_import {firewall_policy id
 To destroy a Firewall Policy, use the following command:
 
 ```shell
-terraform destroy -target=cloudbuilder_firewall_policy.example
+terraform destroy -target=arsys-baremetal_firewall_policy.example
 ```
