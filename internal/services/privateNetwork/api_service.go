@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
+	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 var _ ApiPrivateNetworkServiceInterface = (*ApiPrivateNetworkService)(nil)
@@ -51,12 +52,10 @@ func (s *ApiPrivateNetworkService) GetPrivateNetwork(id string) (*models.Private
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("private network not found")
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get private network")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var privateNetwork models.PrivateNetworkResponse
@@ -79,8 +78,9 @@ func (s *ApiPrivateNetworkService) GetPrivateNetworks() ([]models.PrivateNetwork
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get private networks")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var privateNetworks []models.PrivateNetworkResponse
@@ -104,9 +104,9 @@ func (s *ApiPrivateNetworkService) CreatePrivateNetwork(request *models.PrivateN
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error creating private network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusCreated, "create private network")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var createdPrivateNetwork models.PrivateNetworkResponse
@@ -131,9 +131,9 @@ func (s *ApiPrivateNetworkService) UpdatePrivateNetwork(id string, request *mode
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error updating private network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "update private network")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var updatedPrivateNetwork models.PrivateNetworkResponse
@@ -157,9 +157,9 @@ func (s *ApiPrivateNetworkService) DeletePrivateNetwork(id string) error {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error deleting private network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "delete private network")
+	if errorResponse != nil {
+		return errorResponse
 	}
 
 	return nil

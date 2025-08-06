@@ -3,6 +3,9 @@ package models
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -10,8 +13,6 @@ import (
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 type PrivateNetworkModel struct {
@@ -215,7 +216,6 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"cloudpanel_id": schema.StringAttribute{
 				Computed:    true,
-				Optional:    true,
 				Description: "CloudPanel identifier",
 			},
 			"name": schema.StringAttribute{

@@ -3,12 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/privateNetwork"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -95,7 +96,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating private network",
-			fmt.Sprintf("Could not create private network: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
@@ -136,7 +137,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 
 		resp.Diagnostics.AddError(
 			"Error reading private network",
-			fmt.Sprintf("Could not read private network: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
@@ -182,7 +183,7 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating private network",
-			fmt.Sprintf("Could not update private network: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
@@ -220,7 +221,7 @@ func (r *PrivateNetworkResource) Delete(ctx context.Context, req resource.Delete
 
 		resp.Diagnostics.AddError(
 			"Error deleting private network",
-			fmt.Sprintf("Could not delete private network: %s", err),
+			fmt.Sprintf("Error: %s", err),
 		)
 		return
 	}
