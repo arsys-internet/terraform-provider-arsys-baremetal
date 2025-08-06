@@ -1,15 +1,15 @@
 package provider
 
 import (
+	"fmt"
+	"testing"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
-	"time"
 )
 
 func TestAccServerApplianceDataSource(t *testing.T) {
@@ -24,12 +24,12 @@ func TestAccServerApplianceDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServerApplianceDataSourceConfig(),
+				Config: testAccServerApplianceDataSourceConfig("B964B3D9B337C62E7A3622546E4E60B0"),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server_appliance.test",
 						tfjsonpath.New("id"),
-						knownvalue.StringRegexp(regexp.MustCompile(util.HexID32Pattern)),
+						knownvalue.StringExact("B964B3D9B337C62E7A3622546E4E60B0"),
 					),
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server_appliance.test",
@@ -102,10 +102,10 @@ func TestAccServerApplianceDataSource(t *testing.T) {
 	})
 }
 
-func testAccServerApplianceDataSourceConfig() string {
-	return `
+func testAccServerApplianceDataSourceConfig(id string) string {
+	return fmt.Sprintf(`
 data "arsys-baremetal_server_appliance" "test" {
-  id = "B964B3D9B337C62E7A3622546E4E60B0"
+  id = "%s"
 }
-`
+`, id)
 }

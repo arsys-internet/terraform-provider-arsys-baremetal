@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
+	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 var _ ApiServerApplianceServiceInterface = (*ApiServerApplianceService)(nil)
@@ -48,12 +49,10 @@ func (s *ApiServerApplianceService) GetServerAppliance(id string) (*models.Serve
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("server appliance not found")
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get server appliance")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var serverAppliance models.ServerApplianceResponse
@@ -76,8 +75,9 @@ func (s *ApiServerApplianceService) GetServerAppliances() ([]models.ServerApplia
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get server appliances")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var serverAppliances []models.ServerApplianceResponse

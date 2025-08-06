@@ -2,13 +2,14 @@ package models
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type ServerAppliancesModel struct {
-	ID               types.String `tfsdk:"id"`
+	Id               types.String `tfsdk:"id"`
 	ServerAppliances types.List   `tfsdk:"server_appliances"`
 }
 
@@ -16,7 +17,7 @@ func NewServerAppliances(ctx context.Context, serverAppliancesResponse []ServerA
 	diags := diag.Diagnostics{}
 
 	model := &ServerAppliancesModel{}
-	model.ID = types.StringValue("server_appliances")
+	model.Id = types.StringValue("server_appliances")
 
 	serverApplianceModels, listDiags := NewServerApplianceFromList(ctx, serverAppliancesResponse)
 	diags.Append(listDiags...)
