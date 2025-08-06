@@ -4,7 +4,7 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Datacenter Data Sources"
 sidebar_current: "docs-datasource-datacenter"
 description: |-
-  Get information on a Arsys Baremetal Datacenter.
+  Get information on an Arsys Baremetal Datacenter.
 ---
 
 # arsys-baremetal\_datacenters
