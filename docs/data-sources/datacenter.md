@@ -1,23 +1,23 @@
-
 ---
 subcategory: "Infrastructure"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Datacenter Data Sources"
 sidebar_current: "docs-datasource-datacenter"
 description: |-
-Get information on a Arsys Baremetal Datacenter.
+  Get information on a Arsys Baremetal Datacenter.
 ---
 
 # arsys-baremetal\_datacenters
 
 The **Datacenter data source** can be used to search and return all existing datacenters.
 Also, can be used to search for and return an existing datacenter.
-You can provide a string for the id parameter which will be compared with created datacenter.
-If a single match is found, it will be returned. If it is not found an error will be returned.
+You can provide a string for the id parameter which will be compared with the created datacenter.
+If a single match is found, it will be returned. If it is not found, an error will be returned.
 
 ## Example Usage
 
 ### Get all Datacenters
+
 ```hcl
 data "arsys-baremetal_datacenters" "all" {}
 ```
