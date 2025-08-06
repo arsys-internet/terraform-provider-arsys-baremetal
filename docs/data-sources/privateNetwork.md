@@ -10,9 +10,9 @@ description: |-
 # arsys-baremetal\_private_network
 
 The **PrivateNetworks data source** can be used to search and return all existing private networks.
-Also, can be used to search for and return an existing private network.
+Also, it can be used to search for and return an existing private network.
 You can provide a string for the id parameter which will be compared with created private networks.
-If a single match is found, it will be returned. If it is not found an error will be returned.
+If a single match is found, it will be returned. If it is not found, an error will be returned.
 
 ## Example Usage
 
@@ -38,7 +38,7 @@ data "arsys-baremetal_private_network" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)ID of an existing private network that you want to search for.
+* `id` - (Required) ID of an existing private network that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 

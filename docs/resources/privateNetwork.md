@@ -23,7 +23,7 @@ resource "arsys-baremetal_private_network" "example" {
   subnet_mask = "255.255.255.0"
 }
 ```
-When updating a private network, datacenter_id is not needed only for the creation.
+When updating a private network, datacenter_id is only needed for the creation.
 
 ## Argument Reference
 
@@ -38,7 +38,7 @@ The following arguments are supported:
 ### Import
 
 Resource Private Network can be imported using creating the resource the `resource id`, e.g.
-**Note:** The resource must be declared before importing. No arguments are required!.
+**Note:** The resource must be declared before importing. No arguments are required!
 
 Example:
 ```hcl
