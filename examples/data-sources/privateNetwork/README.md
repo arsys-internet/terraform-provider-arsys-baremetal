@@ -1,4 +1,4 @@
-# Datacenter
+# Private Network
 
 This example demonstrates how to query private network information using the Arsys Baremetal provider.
 

@@ -16,6 +16,6 @@ resource "arsys-baremetal_private_network" "example_private_network" {
 }
 
 # Example to import an existing private network by its ID
-resource "arsys-baremetal_firewall_policy" "test_policy_import" {
+resource "arsys-baremetal_private_network" "test_private_network_import" {
 }
 // Execute terraform import command to import the existing private network
