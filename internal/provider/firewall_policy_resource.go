@@ -3,14 +3,15 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -49,7 +50,7 @@ func (r *FirewallPolicyResource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	serverService, ok := client.(*service.ApiFirewallPolicyService)
+	policyService, ok := client.(*service.ApiFirewallPolicyService)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -58,7 +59,7 @@ func (r *FirewallPolicyResource) Configure(_ context.Context, req resource.Confi
 		return
 	}
 
-	r.client = serverService
+	r.client = policyService
 }
 
 func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -161,13 +162,13 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Creating server: %s", createRequest.Name))
+	tflog.Info(ctx, fmt.Sprintf("Creating firewall policy: %s", createRequest.Name))
 
 	apiResponse, err := r.client.CreateFirewallPolicy(&createRequest)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating server",
+			"Error creating firewall policy",
 			fmt.Sprintf("Error: %s", err),
 		)
 		return
@@ -338,7 +339,7 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 		}
 
 		resp.Diagnostics.AddError(
-			"Error deleting server",
+			"Error deleting firewall policy",
 			fmt.Sprintf("Error: %s", err),
 		)
 		return

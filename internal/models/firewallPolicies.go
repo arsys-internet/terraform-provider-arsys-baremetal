@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -12,8 +13,6 @@ type FirewallPoliciesModel struct {
 	ID               types.String `tfsdk:"id"`
 	FirewallPolicies types.List   `tfsdk:"firewall_policies"`
 }
-
-type FirewallPoliciesResponse = FirewallPolicyResponse
 
 func NewFirewallPoliciesFromList(ctx context.Context, fpList []FirewallPolicyResponse) ([]FirewallPolicyModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}

@@ -12,6 +12,7 @@ description: |-
 Creates and manages a **Firewall Policies** on Arsys baremetal.
 
 ## Example Usage
+
 # Create a Firewall Policy.
 
 ```hcl
@@ -37,10 +38,10 @@ The following arguments are supported:
 * `name` - (Required) The name of the Firewall Policy.
 * `description` - (Optional) The description of the Firewall Policy.
 * `rules` - (Optional) A list of rules to be applied to the Firewall Policy. Each rule should be a map containing:
-  * `protocol` - (Required) The protocol of the rule (e.g., TCP, UDP).
-  * `port_from` - (Required) The starting port of the rule.
-  * `port_to` - (Required) The ending port of the rule (if applicable).
-  * `source` - (Optional) The source IP or CIDR of the rule.
+    * `protocol` - (Required) The protocol of the rule (e.g., TCP, UDP).
+    * `port_from` - (Required) The starting port of the rule.
+    * `port_to` - (Required) The ending port of the rule (if applicable).
+    * `source` - (Optional) The source IP or CIDR of the rule.
 
 # Update a Firewall Policy.
 
