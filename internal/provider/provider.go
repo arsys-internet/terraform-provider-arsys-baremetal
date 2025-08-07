@@ -143,6 +143,7 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 
 func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewFirewallPolicyResource,
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
 		NewPublicNetworkResource,
@@ -158,6 +159,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 	return []func() datasource.DataSource{
 		NewDatacenterDataSource,
 		NewDatacentersDataSource,
+		NewFirewallPolicyDataSource,
+		NewFirewallPoliciesDataSource,
 		NewPrivateNetworkDataSource,
 		NewPrivateNetworksDataSource,
 		NewPublicIpDataSource,

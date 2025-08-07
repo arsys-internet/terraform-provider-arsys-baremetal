@@ -176,6 +176,7 @@ func (m *PrivateNetworkResourceModel) ToCreateRequest() PrivateNetworkCreateRequ
 	}
 }
 
+// TODO: Add validation for fields, if I update just
 func (m *PrivateNetworkResourceModel) ToUpdateRequest() PrivateNetworkUpdateRequest {
 	return PrivateNetworkUpdateRequest{
 		Name:           m.Name.ValueString(),
@@ -214,6 +215,7 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 					),
 				},
 			},
+			//TODO: solo computed que viene desde la api
 			"cloudpanel_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "CloudPanel identifier",
@@ -252,6 +254,7 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 	}
 }
 
+// TODO: Add plan modifiers to use state for unknown values
 func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Private network resource",
