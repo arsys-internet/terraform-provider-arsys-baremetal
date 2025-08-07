@@ -4,15 +4,15 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Firewall Policy Data Sources"
 sidebar_current: "docs-datasource-firewallPolicy"
 description: |-
-  Get information on a Arsys Baremetal Firewall Policy
+  Get information about Firewall Policies in Arsys Baremetal
 ---
 
 # arsys-baremetal\_firewall_policies
 
 The **Firewall policies data source** can be used to search and return all existing firewall policies.
-Also, can be used to search for and return an existing firewall policy.
-You can provide a string for the id parameter which will be compared with created firewall policy.
-If a single match is found, it will be returned. If it is not found an error will be returned.
+Also, it can be used to search for and return an existing firewall policy.
+You can provide a string for the id parameter which will be compared with the created firewall policy.
+If a single match is found, it will be returned. If it is not found, an error will be returned.
 
 ## Example Usage
 

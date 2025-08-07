@@ -4,12 +4,12 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Firewall Policy Resources"
 sidebar_current: "docs-resource-firewall_policy"
 description: |-
-  Creates and manages Arsys Baremetal Firewall Policies.
+  Creates and manages Firewall Policies in Arsys Baremetal
 ---
 
 # arsys-baremetal\_firewall\_policy
 
-Creates and manages a **Firewall Policies** on Arsys baremetal.
+Creates and manages **Firewall Policies** in Arsys baremetal.
 
 ## Example Usage
 
