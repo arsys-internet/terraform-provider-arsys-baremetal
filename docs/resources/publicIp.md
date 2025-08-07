@@ -4,12 +4,12 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal : Public ip Data source"
 sidebar_current: "docs-datasource-public_ip"
 description: |-
-  Creates and manages Arsys Baremetal IPs.
+  Creates and manages Public IPs in Arsys Baremetal .
 ---
 
 # arsys-baremetal\_public\_ip
 
-Creates and manages a **Public IPs** on Arsys Baremetal.
+Creates and manages **Public IPs** in Arsys Baremetal.
 
 ## Example Usage
 

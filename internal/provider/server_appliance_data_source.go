@@ -3,11 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/serverAppliance"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ datasource.DataSource = &ServerApplianceDataSource{}
@@ -63,7 +64,7 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	if id == "" {
 		resp.Diagnostics.AddError(
@@ -85,7 +86,7 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 
 		resp.Diagnostics.AddError(
 			"Error reading the server appliance",
-			fmt.Sprintf("Could not read server appliance: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

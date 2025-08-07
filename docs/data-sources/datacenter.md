@@ -4,10 +4,10 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Datacenter Data Sources"
 sidebar_current: "docs-datasource-datacenter"
 description: |-
-  Get information on a Arsys Baremetal Datacenter.
+  Get information about Datacenters in Arsys Baremetal.
 ---
 
-# arsys-baremetal\_datacenters
+# arsys-baremetal\_datacenter
 
 The **Datacenter data source** can be used to search and return all existing datacenters.
 Also, can be used to search for and return an existing datacenter.

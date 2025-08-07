@@ -1,67 +1,27 @@
 package models
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"strconv"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
-type OSArchitecture struct {
-	Value int64
-}
-
-func (osa *OSArchitecture) UnmarshalJSON(data []byte) error {
-	reader := bytes.NewReader(data)
-	decoder := json.NewDecoder(reader)
-
-	var i int64
-	decoder = json.NewDecoder(bytes.NewReader(data))
-	if err := decoder.Decode(&i); err == nil {
-		osa.Value = i
-		return nil
-	}
-
-	var s string
-	decoder = json.NewDecoder(bytes.NewReader(data))
-	if err := decoder.Decode(&s); err == nil {
-		switch s {
-		case "x86", "32":
-			osa.Value = 32
-		case "x64", "64":
-			osa.Value = 64
-		case "arm64":
-			osa.Value = 64
-		default:
-			if parsed, parseErr := strconv.ParseInt(s, 10, 64); parseErr == nil {
-				osa.Value = parsed
-			} else {
-				return fmt.Errorf("os_architecture format not recognised: %s", s)
-			}
-		}
-		return nil
-	}
-
-	return fmt.Errorf("os_architecture format not recognised")
-}
-
 type ServerApplianceModel struct {
-	ID                      types.String `tfsdk:"id"`
+	Id                      types.String `tfsdk:"id"`
 	Name                    types.String `tfsdk:"name"`
 	AvailableDatacenters    types.List   `tfsdk:"available_datacenters"`
 	OsFamily                types.String `tfsdk:"os_family"`
 	Os                      types.String `tfsdk:"os"`
 	OsVersion               types.String `tfsdk:"os_version"`
-	OsArchitecture          types.Int64  `tfsdk:"os_architecture"`
+	OsArchitecture          types.String `tfsdk:"os_architecture"`
 	OsImageType             types.String `tfsdk:"os_image_type"`
 	Type                    types.String `tfsdk:"type"`
 	ServerTypeCompatibility types.List   `tfsdk:"server_type_compatibility"`
@@ -72,20 +32,20 @@ type ServerApplianceModel struct {
 }
 
 type ServerApplianceResponse struct {
-	Id                      string         `json:"id"`
-	Name                    string         `json:"name"`
-	AvailableDatacenters    []string       `json:"available_datacenters"`
-	OsFamily                string         `json:"os_family"`
-	Os                      string         `json:"os"`
-	OsVersion               string         `json:"os_version"`
-	OsArchitecture          OSArchitecture `json:"os_architecture"`
-	OsImageType             string         `json:"os_image_type"`
-	Type                    string         `json:"type"`
-	ServerTypeCompatibility []string       `json:"server_type_compatibility"`
-	MinHddSize              int            `json:"min_hdd_size"`
-	Licenses                []string       `json:"licenses"`
-	Version                 string         `json:"version"`
-	Categories              []string       `json:"categories"`
+	Id                      string   `json:"id"`
+	Name                    string   `json:"name"`
+	AvailableDatacenters    []string `json:"available_datacenters"`
+	OsFamily                string   `json:"os_family"`
+	Os                      string   `json:"os"`
+	OsVersion               string   `json:"os_version"`
+	OsArchitecture          string   `json:"os_architecture"`
+	OsImageType             string   `json:"os_image_type"`
+	Type                    string   `json:"type"`
+	ServerTypeCompatibility []string `json:"server_type_compatibility"`
+	MinHddSize              int      `json:"min_hdd_size"`
+	Licenses                []string `json:"licenses"`
+	Version                 string   `json:"version"`
+	Categories              []string `json:"categories"`
 }
 
 func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*ServerApplianceModel, diag.Diagnostics) {
@@ -98,12 +58,12 @@ func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*Server
 
 	model := &ServerApplianceModel{}
 
-	model.ID = types.StringValue(sa.Id)
+	model.Id = types.StringValue(sa.Id)
 	model.Name = types.StringValue(sa.Name)
 	model.OsFamily = types.StringValue(sa.OsFamily)
 	model.Os = types.StringValue(sa.Os)
 	model.OsVersion = types.StringValue(sa.OsVersion)
-	model.OsArchitecture = types.Int64Value(sa.OsArchitecture.Value)
+	model.OsArchitecture = types.StringValue(sa.OsArchitecture)
 	model.Type = types.StringValue(sa.Type)
 	model.MinHddSize = types.Int64Value(int64(sa.MinHddSize))
 	model.Version = types.StringValue(sa.Version)
@@ -161,7 +121,7 @@ func serverApplianceObjectType() types.ObjectType {
 			"os_family":                 types.StringType,
 			"os":                        types.StringType,
 			"os_version":                types.StringType,
-			"os_architecture":           types.Int64Type,
+			"os_architecture":           types.StringType,
 			"os_image_type":             types.StringType,
 			"type":                      types.StringType,
 			"server_type_compatibility": types.ListType{ElemType: types.StringType},
@@ -257,9 +217,9 @@ func ServerApplianceDataSourceSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "Operating system version",
 			},
-			"os_architecture": schema.Int64Attribute{
+			"os_architecture": schema.StringAttribute{
 				Computed:    true,
-				Description: "OS architecture (32 or 64 bit)",
+				Description: "OS architecture (x86, x64, or null)",
 			},
 			"os_image_type": schema.StringAttribute{
 				Computed:    true,

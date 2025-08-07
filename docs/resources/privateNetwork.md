@@ -4,25 +4,27 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Private Network Resource"
 sidebar_current: "docs-resource-privateNetwork"
 description: |-
-  Creates and manages Arsys Baremetal private network.
+  Creates and manages Private Networks in Arsys Baremetal .
 ---
 
 # arsys-baremetal\_private_network
 
-Creates and manages a **Private Network** on Arsys Baremetal.
+Creates and manages **Private Networks** in Arsys Baremetal.
 
 ## Example Usage
 
 ### Create or update a private network.
+
 ```hcl
 resource "arsys-baremetal_private_network" "example" {
-  name = "Private Network example"
-  datacenter_id = "99DEF28511HBC2A973HC0C620DH5B732"
-  description = "private network description"
+  name            = "Private Network example"
+  datacenter_id   = "99DEF28511HBC2A973HC0C620DH5B732"
+  description     = "private network description"
   network_address = "192.168.1.0"
-  subnet_mask = "255.255.255.0"
+  subnet_mask     = "255.255.255.0"
 }
 ```
+
 When updating a private network, datacenter_id is only needed for the creation.
 
 ## Argument Reference
@@ -41,6 +43,7 @@ Resource Private Network can be imported using creating the resource the `resour
 **Note:** The resource must be declared before importing. No arguments are required!
 
 Example:
+
 ```hcl
 resource "arsys-baremetal_private_network" "example_import" {}
 ```
@@ -50,7 +53,9 @@ terraform import arsys-baremetal_private_network.example_import {privateNetwork 
 ```
 
 ### Destroy
+
 To destroy a private network, use the following command:
+
 ```shell
 terraform destroy -target=arsys-baremetal_private_network.example
 ```
