@@ -46,18 +46,28 @@ data "arsys-baremetal_public_network" "example" {
 
 The following attributes are returned by the datasource:
 
-* `id` - Identifier of the private network
-* `name` - The name of the private network
-* `description` - The description of the private network
-* `network_address` - The network address of the private network
-* `subnet_mask` - The subnet mask of the private network
-* `state` - The state of the private network
-* `datacenter` - The data center where the private network is located
-    * `id` - Identifier of the Data Center
-    * `country_code` - The country code of the Data Center
-    * `location` - The regional location where the Data Center will be created
-* `creation_date` - The creation date of the private network
-* `servers` - The servers that are connected to the private network
+* `id` - Identifier of the public network
+* `public_name` - The name of the public network
+* `description` - The description of the public network
+* `datacenter_id` - The data center ID where the public network is located
+* `start_date` - Date when the public network was created
+* `same_vlan` - Indicates if the public network shares the same VLAN with other networks
+* `type` - The type of the public network
+* `state` - The state of the public network
+* `servers` - The servers that are connected to the public network
     * `id` - Identifier of the server
     * `name` - The name of the server
-* `cloudpanel_id` - The CloudPanel ID of the private network
+    * `mac` - The MAC address of the server
+    * `tagged` - Indicates if the server is tagged
+* `ips` - List of IPs Id in the public network
+* `availability_zones` - The availability zones of the public network
+    * `id` - Identifier of the availability zone
+    * `vlan_id` - Identifier of the VLAN
+* `last_logs` - The last logs of the public network
+    * `id` - Identifier of the log
+    * `uuid` - The UUID of the log
+    * `date` - The creation date of the operation
+    * `action` - The action of the operation
+    * `time` - The time it took for the operation
+    * `result` - The result of the operation
+    * `type` - The type of the operation

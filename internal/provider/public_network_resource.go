@@ -69,7 +69,7 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Reading public network with ID: %s", id))
 
@@ -149,7 +149,7 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 
 	waitResult, diags := util.WaitForResourceState(
 		ctx,
-		apiResponse.ID,
+		apiResponse.Id,
 		r.client,
 		waitOptions,
 	)
@@ -167,7 +167,7 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		}
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created public network with ID: %s", finalModel.ID.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created public network with ID: %s", finalModel.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
@@ -186,7 +186,7 @@ func (r *PublicNetworkResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	id := state.ID.ValueString()
+	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating public network with ID: %s", id))
 
 	updateRequest := plan.ToUpdateRequest()
@@ -220,7 +220,7 @@ func (r *PublicNetworkResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Deleting public network with ID: %s", id))
 
@@ -250,7 +250,7 @@ func (r *PublicNetworkResource) Delete(ctx context.Context, req resource.DeleteR
 
 	_, diags := util.WaitForResourceState(
 		ctx,
-		data.ID.ValueString(),
+		data.Id.ValueString(),
 		r.client,
 		waitOptions,
 	)
