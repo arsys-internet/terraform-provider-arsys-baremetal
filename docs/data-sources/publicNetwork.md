@@ -1,44 +1,44 @@
 ---
 subcategory: "Network"
 layout: "arsys-baremetal"
-page_title: "Arsys Baremetal: Private Network Data Sources"
-sidebar_current: "docs-datasource-private_network"
+page_title: "Arsys Baremetal: Public Network Data Sources"
+sidebar_current: "docs-datasource-public_network"
 description: |-
-  Get information about Private Networks in Arsys Baremetal.
+  Get information about Public Networks in Arsys Baremetal.
 ---
 
-# arsys-baremetal\_private_network
+# arsys-baremetal\_public_network
 
-The **Private Networks data source** can be used to search and return all existing private networks.
-Also, it can be used to search for and return an existing private network.
-You can provide a string for the id parameter which will be compared with created private networks.
+The **Public Networks data source** can be used to search and return all existing public networks.
+Also, it can be used to search for and return an existing public network.
+You can provide a string for the id parameter which will be compared with created public networks.
 If a single match is found, it will be returned. If it is not found, an error will be returned.
 
 ## Example Usage
 
-### Get all Private Networks
+### Get all Public Networks
 
 ```hcl
-data "arsys-baremetal_private_networks" "all" {}
+data "arsys-baremetal_public_networks" "all" {}
 ```
 
 ## Attributes Reference
 
 The following attributes are returned by the datasource:
 
-* `private_networks` - List of private networks
+* `public_networks` - List of public networks
 
 ### Get By ID
 
 ```hcl
-data "arsys-baremetal_private_network" "example" {
-  id = private_network_id
+data "arsys-baremetal_public_network" "example" {
+  id = public_network_id
 }
 ```
 
 ## Argument Reference
 
-* `id` - (Required) ID of an existing private network that you want to search for.
+* `id` - (Required) ID of an existing public network that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 

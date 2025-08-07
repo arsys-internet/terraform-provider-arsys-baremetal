@@ -3,14 +3,14 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicNetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
-	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -83,7 +83,7 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 
 		resp.Diagnostics.AddError(
 			"Error reading public network",
-			fmt.Sprintf("Could not read public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -126,7 +126,7 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating public network",
-			fmt.Sprintf("Could not create public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -137,12 +137,12 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getPublicNetworkTimeout()
+	timeouts := util.GetResourceTimeouts("PUBLIC_NETWORK")
 
 	waitOptions := util.NewWaitOptions(
-		defaultTimeout,
-		defaultRetryInterval,
-		defaultMinTimeout,
+		timeouts.Default,
+		timeouts.RetryInterval,
+		timeouts.MinTimeout,
 		[]string{util.StateDeploying},
 		[]string{util.StatePoweredOn, util.StatePoweredOff},
 	)
@@ -195,7 +195,7 @@ func (r *PublicNetworkResource) Update(ctx context.Context, req resource.UpdateR
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating public network",
-			fmt.Sprintf("Could not update public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -233,17 +233,17 @@ func (r *PublicNetworkResource) Delete(ctx context.Context, req resource.DeleteR
 
 		resp.Diagnostics.AddError(
 			"Error deleting public network",
-			fmt.Sprintf("Could not delete public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
-	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getPublicNetworkTimeout()
+	timeouts := util.GetResourceTimeouts("PUBLIC_NETWORK")
 
 	waitOptions := util.NewWaitOptions(
-		defaultTimeout,
-		defaultRetryInterval,
-		defaultMinTimeout,
+		timeouts.Default,
+		timeouts.RetryInterval,
+		timeouts.MinTimeout,
 		[]string{util.StateRemoving},
 		[]string{util.StateDeleted},
 	)
@@ -265,12 +265,4 @@ func (r *PublicNetworkResource) Delete(ctx context.Context, req resource.DeleteR
 
 func (r *PublicNetworkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func getPublicNetworkTimeout() (time.Duration, time.Duration, time.Duration) {
-	var timeout = util.GetTimeoutFromEnv("PUBLIC_NETWORK_DEFAULT_TIMEOUT", time.Minute)
-	var retryInterval = util.GetTimeoutFromEnv("PUBLIC_NETWORK_DEFAULT_RETRY_INTERVAL", time.Second)
-	var minTimeout = util.GetTimeoutFromEnv("PUBLIC_NETWORK_DEFAULT_MIN_TIMEOUT", time.Second)
-
-	return timeout, retryInterval, minTimeout
 }

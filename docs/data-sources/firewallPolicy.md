@@ -2,7 +2,7 @@
 subcategory: "Network"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Firewall Policy Data Sources"
-sidebar_current: "docs-datasource-firewallPolicy"
+sidebar_current: "docs-datasource-firewall_policy"
 description: |-
   Get information about Firewall Policies in Arsys Baremetal
 ---
