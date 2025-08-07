@@ -4,7 +4,7 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Private Network Data Sources"
 sidebar_current: "docs-datasource-privateNetwork"
 description: |-
-  Get information on an Arsys Baremetal Private Network.
+  Get information about Private Networks in Arsys Baremetal.
 ---
 
 # arsys-baremetal\_private_network

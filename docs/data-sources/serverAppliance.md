@@ -4,7 +4,7 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal : Server appliance Data source"
 sidebar_current: "docs-datasource-server_appliance"
 description: |-
-  Get information on an Arsys Baremetal Server Appliance.
+  Get information about Server Appliances in Arsys Baremetal .
 ---
 
 # arsys-baremetal\_server\_appliance
