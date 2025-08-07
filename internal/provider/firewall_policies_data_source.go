@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ datasource.DataSource = &FirewallPoliciesDataSource{}

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	"terraform-provider-arsys-baremetal/internal/util"
 )
 
@@ -19,14 +18,11 @@ type ApiFirewallPolicyService struct {
 }
 
 type ApiFirewallPolicyServiceInterface interface {
-	GetFirewallPolicy(id string) (*models.FirewallPoliciesResponse, error)
-	GetFirewallPolicies() ([]models.FirewallPoliciesResponse, error)
+	GetFirewallPolicy(id string) (*models.FirewallPolicyResponse, error)
+	GetFirewallPolicies() ([]models.FirewallPolicyResponse, error)
 	CreateFirewallPolicy(request *models.FirewallPolicyCreateRequest) (*models.FirewallPolicyResponse, error)
 	UpdateFirewallPolicy(id string, request *models.FirewallPolicyUpdateRequest) (*models.FirewallPolicyResponse, error)
 	DeleteFirewallPolicy(id string) error
-	GetFirewallPolicyServerIPs(id string) ([]firewallPolicies.FirewallServerIPResponse, error)
-	AssignServerIPsToFirewallPolicy(id string, request *models.FirewallPolicyServerRequest) (*models.FirewallPolicyResponse, error)
-	UnassignServerIPFromFirewallPolicy(firewallId string, serverIp string) (*models.FirewallPolicyResponse, error)
 }
 
 func NewAApiFirewallPolicyService(client *client.APIClient) *ApiFirewallPolicyService {
@@ -63,7 +59,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicy(id string) (*models.Firewal
 		return nil, errorResponse
 	}
 
-	var firewallPolicy models.FirewallPoliciesResponse
+	var firewallPolicy models.FirewallPolicyResponse
 	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicy); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
@@ -71,7 +67,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicy(id string) (*models.Firewal
 	return &firewallPolicy, nil
 }
 
-func (s *ApiFirewallPolicyService) GetFirewallPolicies() ([]models.FirewallPoliciesResponse, error) {
+func (s *ApiFirewallPolicyService) GetFirewallPolicies() ([]models.FirewallPolicyResponse, error) {
 	resp, err := s.client.Get("/firewall_policies")
 
 	if err != nil {
@@ -89,12 +85,12 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicies() ([]models.FirewallPolic
 		return nil, errorResponse
 	}
 
-	var responses []models.FirewallPoliciesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&responses); err != nil {
+	var firewallPolicies []models.FirewallPolicyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicies); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return responses, nil
+	return firewallPolicies, nil
 }
 
 func (s *ApiFirewallPolicyService) CreateFirewallPolicy(request *models.FirewallPolicyCreateRequest) (*models.FirewallPolicyResponse, error) {
