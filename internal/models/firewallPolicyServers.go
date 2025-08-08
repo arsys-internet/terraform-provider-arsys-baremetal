@@ -3,13 +3,14 @@ package models
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 type FirewallPolicyServerIpsModel struct {
@@ -39,13 +40,13 @@ func FirewallPolicyServerIPsSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID e.g. (",
+						"must be a valid ID",
 					),
 				},
 			},
 			"server_ips": schema.ListNestedAttribute{
 				Computed:    true,
-				Description: "Servers assigned to firewall policy",
+				Description: "ServerIPs assigned to firewall policy",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: firewallPolicies.FirewallServerIPDataSourceSchema(),
 				},

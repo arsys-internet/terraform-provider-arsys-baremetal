@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
+	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	"terraform-provider-arsys-baremetal/internal/util"
 )
 
@@ -23,6 +24,9 @@ type ApiFirewallPolicyServiceInterface interface {
 	CreateFirewallPolicy(request *models.FirewallPolicyCreateRequest) (*models.FirewallPolicyResponse, error)
 	UpdateFirewallPolicy(id string, request *models.FirewallPolicyUpdateRequest) (*models.FirewallPolicyResponse, error)
 	DeleteFirewallPolicy(id string) error
+	GetFirewallPolicyServerIP(firewallId string, serverIp string) (*firewallPolicies.FirewallServerIPResponse, error)
+	GetFirewallPolicyServerIPs(id string) ([]firewallPolicies.FirewallServerIPResponse, error)
+	AssignServerIPsToFirewallPolicy(id string, request *models.FirewallPolicyServerAssignRequest) (*models.FirewallPolicyResponse, error)
 }
 
 func NewAApiFirewallPolicyService(client *client.APIClient) *ApiFirewallPolicyService {
@@ -85,12 +89,12 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicies() ([]models.FirewallPolic
 		return nil, errorResponse
 	}
 
-	var firewallPolicies []models.FirewallPolicyResponse
-	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicies); err != nil {
+	var responses []models.FirewallPolicyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&responses); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return firewallPolicies, nil
+	return responses, nil
 }
 
 func (s *ApiFirewallPolicyService) CreateFirewallPolicy(request *models.FirewallPolicyCreateRequest) (*models.FirewallPolicyResponse, error) {
@@ -238,7 +242,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIP(firewallId string, 
 	return &response, nil
 }
 
-func (s *ApiFirewallPolicyService) AssignServerIPsToFirewallPolicy(id string, request *models.FirewallPolicyServerRequest) (*models.FirewallPolicyResponse, error) {
+func (s *ApiFirewallPolicyService) AssignServerIPsToFirewallPolicy(id string, request *models.FirewallPolicyServerAssignRequest) (*models.FirewallPolicyResponse, error) {
 	resp, err := s.client.Post(fmt.Sprintf("/firewall_policies/%s/server_ips", id), request)
 	if err != nil {
 		return nil, err
@@ -252,33 +256,6 @@ func (s *ApiFirewallPolicyService) AssignServerIPsToFirewallPolicy(id string, re
 	}(resp.Body)
 
 	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "Assigns server IPs to a firewall policy")
-	if errorResponse != nil {
-		return nil, errorResponse
-	}
-
-	var response models.FirewallPolicyResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		fmt.Printf("JSON Decode Error: %v\n", err)
-		return nil, err
-	}
-
-	return &response, nil
-}
-
-func (s *ApiFirewallPolicyService) UnassignServerIPFromFirewallPolicy(firewallId string, serverIp string) (*models.FirewallPolicyResponse, error) {
-	resp, err := s.client.Delete(fmt.Sprintf("/firewall_policies/%s/%s", firewallId, serverIp))
-	if err != nil {
-		return nil, err
-	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(resp.Body)
-
-	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "unassign firewall policy ips from firewall policy")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
