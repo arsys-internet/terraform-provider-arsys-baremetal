@@ -16,6 +16,8 @@ resource "arsys-baremetal_public_network" "test_public_network_import" {
 }
 // Execute terraform import command to import the existing public network
 
+
+
 // Example to associate servers to public network
 resource "arsys-baremetal_public_network_server" "example_public_network_server" {
   id      = var.public_network_id
