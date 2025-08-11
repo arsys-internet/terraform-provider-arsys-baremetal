@@ -50,7 +50,7 @@ func testAccCheckPublicIpsListNotEmpty() resource.TestCheckFunc {
 
 		count, err := strconv.Atoi(countStr)
 		if err != nil {
-			return fmt.Errorf("invalid public_ips count '%s': %v", countStr, err.Error())
+			return fmt.Errorf("invalid public_ips count '%s': %v", countStr, err)
 		}
 
 		if count == 0 {
