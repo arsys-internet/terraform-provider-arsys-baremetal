@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/privateNetwork"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ datasource.DataSource = &PrivateNetworksDataSource{}
@@ -61,7 +62,7 @@ func (d *PrivateNetworksDataSource) Read(ctx context.Context, _ datasource.ReadR
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading private networks",
-			fmt.Sprintf("Could not read private networks: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
