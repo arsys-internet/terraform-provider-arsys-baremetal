@@ -71,8 +71,6 @@ mkdir -p %APPDATA%\terraform.d\plugins\registry.terraform.io\local\arsys-baremet
 copy %GOPATH%\bin\terraform-provider-arsys-baremetal.exe %APPDATA%\terraform.d\plugins\registry.terraform.io\local\arsys-baremetal\{provider-version}\windows_amd64\terraform-provider-arsys-baremetal_v{provider-version}.exe
 ```
 
-
-
 ## Configuration
 
 Configuring the provider to use it locally.
