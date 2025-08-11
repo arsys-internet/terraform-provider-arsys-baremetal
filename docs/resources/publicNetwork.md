@@ -17,7 +17,7 @@ Creates and manages **Public Networks** in Arsys Baremetal.
 
 ```hcl
 resource "arsys-baremetal_public_network" "example" {
-  name          = "Public Network example"
+  public_name   = "Public Network example"
   datacenter_id = "99DEF28511HBC2A973HC0C620DH5B732"
   description   = "public network description"
 }
@@ -29,7 +29,7 @@ When updating a public network, datacenter_id is only needed for the creation.
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the public network.
+* `public_name` - (Required) The name of the public network.
 * `datacenter_id` - (Required) The ID of the data center where the public network will be created.
 * `description` - (Optional) The description of the public network.
 

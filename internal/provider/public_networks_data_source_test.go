@@ -50,7 +50,7 @@ func testAccCheckPublicNetworksListNotEmpty() resource.TestCheckFunc {
 
 		count, err := strconv.Atoi(countStr)
 		if err != nil {
-			return fmt.Errorf("invalid public_networks count '%s': %v", countStr, err)
+			return fmt.Errorf("invalid public_networks count '%s': %v", countStr, err.Error())
 		}
 
 		if count == 0 {

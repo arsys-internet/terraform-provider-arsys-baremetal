@@ -88,7 +88,7 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 
 		resp.Diagnostics.AddError(
 			"Error reading the private network",
-			fmt.Sprintf("Could not read private network: %s", err),
+			fmt.Sprintf("Could not read private network: %s", err.Error()),
 		)
 		return
 	}
