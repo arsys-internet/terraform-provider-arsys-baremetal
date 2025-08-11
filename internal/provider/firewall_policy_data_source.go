@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -80,7 +81,7 @@ func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.Read
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

@@ -2,15 +2,16 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"testing"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
-	"time"
 )
 
 func TestAccFirewallPolicyResource(t *testing.T) {
