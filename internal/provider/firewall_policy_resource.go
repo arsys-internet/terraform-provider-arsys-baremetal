@@ -169,7 +169,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -201,7 +201,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -240,7 +240,7 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -300,7 +300,7 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -340,7 +340,7 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 
 		resp.Diagnostics.AddError(
 			"Error deleting firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

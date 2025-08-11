@@ -2,12 +2,13 @@ package models
 
 import (
 	"context"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 type PublicNetworkServerRequest struct {

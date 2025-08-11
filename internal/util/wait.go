@@ -3,13 +3,13 @@ package util
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-// Configuración por defecto para rate limiting
 const (
 	DefaultRateLimitMultiplier = 3
 	RateLimitErrorSubstring    = "429"
@@ -46,19 +46,6 @@ func NewWaitOptions(timeout, retryInterval, minTimeout time.Duration, pendingSta
 	}
 }
 
-func NewWaitOptionsWithDefaults(opts WaitOptions) WaitOptions {
-	if opts.RateLimitMultiplier <= 0 {
-		opts.RateLimitMultiplier = DefaultRateLimitMultiplier
-	}
-	if opts.RetryInterval == 0 {
-		opts.RetryInterval = 5 * time.Second
-	}
-	if opts.MinTimeout == 0 {
-		opts.MinTimeout = 1 * time.Second
-	}
-	return opts
-}
-
 type WaitResult struct {
 	Resource   ResourceModel
 	FinalState string
@@ -79,7 +66,6 @@ func WaitForResourceState(ctx context.Context, resourceID string, service Resour
 
 	isDeleting := isDeletionOperation(options.PendingStates, options.TargetStates)
 
-	// Verificación inicial del recurso
 	resource, err := service.GetResource(resourceID)
 	if err != nil && (!isDeleting || !options.IgnoreNotFoundErrors) {
 		diags.AddError(
@@ -89,7 +75,6 @@ func WaitForResourceState(ctx context.Context, resourceID string, service Resour
 		return nil, diags
 	}
 
-	// Caso especial: recurso no encontrado durante eliminación
 	if resource == nil && isDeleting {
 		tflog.Info(ctx, "Resource not found during deletion - considering as deleted")
 		return &WaitResult{
@@ -292,10 +277,9 @@ func evaluateState(ctx context.Context, resourceID string, resource ResourceMode
 		"state":       currentState,
 	})
 
-	return nil, true, diags // Continuar polling
+	return nil, true, diags
 }
 
-// Funciones utilitarias
 func isDeletionOperation(pendingStates, targetStates []string) bool {
 	return (contains(pendingStates, StateRemoving) || contains(pendingStates, StateRemoving)) &&
 		contains(targetStates, StateDeleted)
