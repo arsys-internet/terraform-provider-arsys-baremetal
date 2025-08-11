@@ -71,9 +71,13 @@ mkdir -p %APPDATA%\terraform.d\plugins\registry.terraform.io\local\arsys-baremet
 copy %GOPATH%\bin\terraform-provider-arsys-baremetal.exe %APPDATA%\terraform.d\plugins\registry.terraform.io\local\arsys-baremetal\{provider-version}\windows_amd64\terraform-provider-arsys-baremetal_v{provider-version}.exe
 ```
 
-#### Use the local provider
 
-Generate .terraformrc file:
+
+## Configuration
+
+Configuring the provider to use it locally.
+
+Generate .terraformrc file in $HOME directory:
 
 ```shell
 cat > ~/.terraformrc << 'EOF'
@@ -86,7 +90,8 @@ direct {}
 EOF
 ```
 
-Add the machine ip to your user in your Baremetal panel.
+**IMPORTANT!**
+You need to add the machine ip to your user to allow access via api in your Baremetal panel
 
 Export the API token:
 
@@ -94,9 +99,6 @@ Export the API token:
 export BAREMETAL_API_TOKEN="{your-api-token}"
 ```
 
-## Configuration
-
-Configuring the provider to use it locally.
 Add the provider block to your Terraform configuration file.
 
 ```hcl
