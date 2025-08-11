@@ -9,7 +9,7 @@ import (
 )
 
 type PublicNetworksModel struct {
-	ID             types.String `tfsdk:"id"`
+	Id             types.String `tfsdk:"id"`
 	PublicNetworks types.List   `tfsdk:"public_networks"`
 }
 
@@ -17,7 +17,7 @@ func NewPublicNetworks(ctx context.Context, publicNetworksResponse []PublicNetwo
 	diags := diag.Diagnostics{}
 
 	model := &PublicNetworksModel{}
-	model.ID = types.StringValue("public_networks")
+	model.Id = types.StringValue("public_networks")
 
 	publicNetworkModels, listDiags := NewPublicNetworkFromList(ctx, publicNetworksResponse)
 	diags.Append(listDiags...)

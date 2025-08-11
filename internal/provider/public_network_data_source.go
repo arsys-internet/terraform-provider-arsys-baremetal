@@ -63,7 +63,7 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	if id == "" {
 		resp.Diagnostics.AddError(
@@ -85,7 +85,7 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 
 		resp.Diagnostics.AddError(
 			"Error reading the public network",
-			fmt.Sprintf("Could not read public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

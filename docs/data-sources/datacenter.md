@@ -2,7 +2,7 @@
 subcategory: "Infrastructure"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Datacenter Data Sources"
-sidebar_current: "docs-datasource-datacenter"
+sidebar_current: "docs-datasource_datacenter"
 description: |-
   Get information about Datacenters in Arsys Baremetal.
 ---

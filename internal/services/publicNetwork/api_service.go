@@ -55,12 +55,10 @@ func (s *ApiPublicNetworkService) GetPublicNetwork(id string) (*models.PublicNet
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("public network not found")
-	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get public network")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var publicIp models.PublicNetworkResponse
@@ -83,8 +81,9 @@ func (s *ApiPublicNetworkService) GetPublicNetworks() ([]models.PublicNetworkRes
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %d", resp.StatusCode)
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get public networks")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var publicIps []models.PublicNetworkResponse
@@ -108,9 +107,9 @@ func (s *ApiPublicNetworkService) CreatePublicNetwork(request *models.PublicNetw
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error creating public network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "create public network")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var createdPublicNetwork models.PublicNetworkCreateResponse
@@ -134,9 +133,9 @@ func (s *ApiPublicNetworkService) UpdatePublicNetwork(id string, request *models
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("error updating public network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "update public network")
+	if errorResponse != nil {
+		return nil, errorResponse
 	}
 
 	var updatedPublicNetwork models.PublicNetworkCreateResponse
@@ -160,9 +159,9 @@ func (s *ApiPublicNetworkService) DeletePublicNetwork(id string) error {
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error deleting public network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "delete public network")
+	if errorResponse != nil {
+		return errorResponse
 	}
 
 	return nil
@@ -181,9 +180,9 @@ func (s *ApiPublicNetworkService) AssignServersToPublicNetwork(id string, reques
 		}
 	}(resp.Body)
 
-	if resp.StatusCode != http.StatusAccepted {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("error assigning servers to public network: %s", string(body))
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "assign server to public network")
+	if errorResponse != nil {
+		return errorResponse
 	}
 
 	return nil
