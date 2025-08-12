@@ -281,8 +281,7 @@ func evaluateState(ctx context.Context, resourceID string, resource ResourceMode
 }
 
 func isDeletionOperation(pendingStates, targetStates []string) bool {
-	return (contains(pendingStates, StateRemoving) || contains(pendingStates, StateRemoving)) &&
-		contains(targetStates, StateDeleted)
+	return contains(pendingStates, StateRemoving) && contains(targetStates, StateDeleted)
 }
 
 func isRateLimitingError(err error) bool {

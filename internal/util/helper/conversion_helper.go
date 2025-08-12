@@ -17,7 +17,9 @@ func AssignFloatPtr(target **float64, source types.Float64) {
 }
 
 func AssignBoolPtr(target **bool, source types.Bool) {
-	if !source.IsNull() && source.ValueBool() {
+	if source.IsNull() {
+		*target = nil
+	} else {
 		value := source.ValueBool()
 		*target = &value
 	}
@@ -33,8 +35,8 @@ func GetStringValue(attr interface{}) string {
 	if attr == nil {
 		return ""
 	}
-	str := attr.(types.String)
-	if str.IsNull() {
+	str, ok := attr.(types.String)
+	if !ok || str.IsNull() {
 		return ""
 	}
 	return str.ValueString()

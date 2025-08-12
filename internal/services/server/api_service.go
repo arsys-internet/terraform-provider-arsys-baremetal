@@ -9,6 +9,8 @@ import (
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ ApiServerServiceInterface = (*ApiServerService)(nil)
@@ -126,8 +128,10 @@ func (s *ApiServerService) CreateServer(request *models.ServerCreateRequest) (*m
 
 	var createdServer models.ServerBaseResponse
 	if err := json.NewDecoder(resp.Body).Decode(&createdServer); err != nil {
-		fmt.Printf("JSON Decode Error: %v\n", err)
-		return nil, err
+		tflog.Error(context.Background(), "JSON Decode Error", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
 	return &createdServer, nil
@@ -153,8 +157,10 @@ func (s *ApiServerService) UpdateServer(id string, request *models.ServerUpdateR
 
 	var updatedServer models.ServerBaseResponse
 	if err := json.NewDecoder(resp.Body).Decode(&updatedServer); err != nil {
-		fmt.Printf("JSON Decode Error: %v\n", err)
-		return nil, err
+		tflog.Error(context.Background(), "JSON Decode Error", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
 	return &updatedServer, nil

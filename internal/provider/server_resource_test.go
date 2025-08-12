@@ -1,15 +1,16 @@
 package provider
 
 import (
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"testing"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
-	"time"
 )
 
 func TestAccServerResource(t *testing.T) {
@@ -140,7 +141,6 @@ func testAccServerResourceUpdatedConfig() string {
 resource "arsys-baremetal_server" "test" {
   name           = "test-baremetal-updated"
   description    = "Updated description for baremetal server"
-}
   appliance_id   = "6EE23B88AB3CBA9944334C06E9075061"
   datacenter_id  = "81DEF28500FBC2A973FC0C620DF5B721"
   power_on                = false
