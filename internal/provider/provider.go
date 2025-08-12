@@ -2,6 +2,11 @@ package provider
 
 import (
 	"context"
+	"log"
+	"os"
+	"terraform-provider-arsys-baremetal/internal/client"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -11,10 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"log"
-	"os"
-	"terraform-provider-arsys-baremetal/internal/client"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 // Ensure BaremetalProvider satisfies various provider interfaces.
@@ -96,6 +97,9 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 		host = config.Host.ValueString()
 	} else {
 		host = os.Getenv("BAREMETAL_HOST")
+		if host == "" {
+			host = "https://api.cloudbuilder.es/v1"
+		}
 	}
 
 	if !config.Token.IsNull() {
@@ -140,6 +144,7 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 
 func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewFirewallPolicyResource,
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
 		NewPublicNetworkResource,
@@ -158,6 +163,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewBaremetalModelsDataSource,
 		NewDatacenterDataSource,
 		NewDatacentersDataSource,
+		NewFirewallPolicyDataSource,
+		NewFirewallPoliciesDataSource,
 		NewPrivateNetworkDataSource,
 		NewPrivateNetworksDataSource,
 		NewPublicIpDataSource,

@@ -3,6 +3,9 @@ package models
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -10,8 +13,6 @@ import (
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 type PrivateNetworkModel struct {
@@ -175,6 +176,7 @@ func (m *PrivateNetworkResourceModel) ToCreateRequest() PrivateNetworkCreateRequ
 	}
 }
 
+// TODO: Add validation for fields, if I update just
 func (m *PrivateNetworkResourceModel) ToUpdateRequest() PrivateNetworkUpdateRequest {
 	return PrivateNetworkUpdateRequest{
 		Name:           m.Name.ValueString(),
@@ -213,9 +215,9 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 					),
 				},
 			},
+			//TODO: solo computed que viene desde la api
 			"cloudpanel_id": schema.StringAttribute{
 				Computed:    true,
-				Optional:    true,
 				Description: "CloudPanel identifier",
 			},
 			"name": schema.StringAttribute{
@@ -252,6 +254,7 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 	}
 }
 
+// TODO: Add plan modifiers to use state for unknown values
 func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Private network resource",

@@ -11,5 +11,4 @@ const (
 	StatusCreating    = "CREATING"
 	StatusConfiguring = "CONFIGURING"
 	StatusAvailable   = "AVAILABLE"
-
 )

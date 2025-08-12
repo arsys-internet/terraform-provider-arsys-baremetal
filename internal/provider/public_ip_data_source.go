@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicIp"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 var _ datasource.DataSource = &PublicIpDataSource{}
@@ -84,7 +85,7 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 		resp.Diagnostics.AddError(
 			"Error reading the public IP",
-			fmt.Sprintf("Could not read public IP: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

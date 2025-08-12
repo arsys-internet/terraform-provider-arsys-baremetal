@@ -3,14 +3,14 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicIp"
 	"terraform-provider-arsys-baremetal/internal/util"
-	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -83,7 +83,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 		resp.Diagnostics.AddError(
 			"Error reading public ip",
-			fmt.Sprintf("Could not read public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -118,7 +118,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating public ip",
-			fmt.Sprintf("Could not create public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -157,7 +157,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating public ip",
-			fmt.Sprintf("Could not update public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -195,17 +195,17 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 		resp.Diagnostics.AddError(
 			"Error deleting public ip",
-			fmt.Sprintf("Could not delete public ip: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
-	defaultTimeout, defaultRetryInterval, defaultMinTimeout := getIpTimeout()
+	timeouts := util.GetResourceTimeouts("PUBLIC_IP")
 
 	waitOptions := util.NewWaitOptions(
-		defaultTimeout,
-		defaultRetryInterval,
-		defaultMinTimeout,
+		timeouts.Default,
+		timeouts.RetryInterval,
+		timeouts.MinTimeout,
 		[]string{util.StateRemoving},
 		[]string{util.StateDeleted},
 	)
@@ -227,12 +227,4 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 func (r *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
-}
-
-func getIpTimeout() (time.Duration, time.Duration, time.Duration) {
-	var timeout = util.GetTimeoutFromEnv("IP_DEFAULT_TIMEOUT", time.Minute)
-	var retryInterval = util.GetTimeoutFromEnv("IP_DEFAULT_RETRY_INTERVAL", time.Second)
-	var minTimeout = util.GetTimeoutFromEnv("IP_DEFAULT_MIN_TIMEOUT", time.Second)
-
-	return timeout, retryInterval, minTimeout
 }

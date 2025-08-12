@@ -3,10 +3,11 @@ package util
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const (
@@ -276,7 +277,7 @@ func evaluateState(ctx context.Context, resourceID string, resource ResourceMode
 		"state":       currentState,
 	})
 
-	return nil, true, diags // Continuar polling
+	return nil, true, diags
 }
 
 func isDeletionOperation(pendingStates, targetStates []string) bool {

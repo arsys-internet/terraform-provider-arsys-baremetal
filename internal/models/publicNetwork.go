@@ -3,6 +3,9 @@ package models
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -10,12 +13,10 @@ import (
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 type PublicNetworkModel struct {
-	ID                types.String `tfsdk:"id"`
+	Id                types.String `tfsdk:"id"`
 	PublicName        types.String `tfsdk:"public_name"`
 	Description       types.String `tfsdk:"description"`
 	DatacenterId      types.String `tfsdk:"datacenter_id"`
@@ -30,7 +31,7 @@ type PublicNetworkModel struct {
 }
 
 type PublicNetworkResponse struct {
-	ID                string                        `json:"id"`
+	Id                string                        `json:"id"`
 	PublicName        string                        `json:"public_name"`
 	Description       *string                       `json:"description"`
 	DatacenterId      string                        `json:"datacenter_id"`
@@ -45,19 +46,19 @@ type PublicNetworkResponse struct {
 }
 
 type PublicNetworkServerResponse struct {
-	ID     string `json:"id"`
+	Id     string `json:"id"`
 	VlanId int    `json:"vlan_id"`
 	Mac    string `json:"mac"`
 	Tagged bool   `json:"tagged"`
 }
 
 type AvailabilityZoneResponse struct {
-	ID     string `json:"id"`
+	Id     string `json:"id"`
 	VlanId int    `json:"vlan_id"`
 }
 
 type PublicNetworkLogResponse struct {
-	ID     string `json:"id"`
+	Id     string `json:"id"`
 	UUID   string `json:"uuid"`
 	Date   string `json:"date"`
 	Action string `json:"action"`
@@ -112,7 +113,7 @@ func NewPublicNetworkServerObject(pn PublicNetworkServerResponse) (types.Object,
 	return types.ObjectValue(
 		publicNetworkServerAttributeTypes(),
 		map[string]attr.Value{
-			"id":      types.StringValue(pn.ID),
+			"id":      types.StringValue(pn.Id),
 			"vlan_id": types.Int64Value(int64(pn.VlanId)),
 			"mac":     types.StringValue(pn.Mac),
 			"tagged":  types.BoolValue(pn.Tagged),
@@ -124,7 +125,7 @@ func NewAvailabilityZoneObject(az AvailabilityZoneResponse) (types.Object, diag.
 	return types.ObjectValue(
 		availabilityZoneAttributeTypes(),
 		map[string]attr.Value{
-			"id":      types.StringValue(az.ID),
+			"id":      types.StringValue(az.Id),
 			"vlan_id": types.Int64Value(int64(az.VlanId)),
 		},
 	)
@@ -178,7 +179,7 @@ func NewPublicNetworkModel(ctx context.Context, pn *PublicNetworkResponse) (*Pub
 
 	model := &PublicNetworkModel{}
 
-	model.ID = types.StringValue(pn.ID)
+	model.Id = types.StringValue(pn.Id)
 	model.PublicName = types.StringValue(pn.PublicName)
 	model.DatacenterId = types.StringValue(pn.DatacenterId)
 	model.StartDate = types.Int64Value(pn.StartDate)
@@ -236,7 +237,7 @@ func NewPublicNetworkModel(ctx context.Context, pn *PublicNetworkResponse) (*Pub
 					"type":   types.StringType,
 				},
 				map[string]attr.Value{
-					"id":     types.StringValue(logEntry.ID),
+					"id":     types.StringValue(logEntry.Id),
 					"uuid":   types.StringValue(logEntry.UUID),
 					"date":   types.StringValue(logEntry.Date),
 					"action": types.StringValue(logEntry.Action),

@@ -2,12 +2,13 @@ package util
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 // TODO: Setear de manera dinamica las variables de entorno
