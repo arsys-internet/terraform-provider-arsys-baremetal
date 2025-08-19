@@ -87,7 +87,7 @@ type FirewallRuleCreateRequest struct {
 	Protocol    string  `json:"protocol"`
 	PortFrom    int     `json:"port_from"`
 	PortTo      int     `json:"port_to"`
-	Source      string  `json:"source,omitempty"`
+	Source      *string `json:"source,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Action      *string `json:"action,omitempty"`
 }
@@ -126,11 +126,12 @@ func ConvertRulesToCreateRequest(rules types.List) ([]FirewallRuleCreateRequest,
 			rule.PortTo = int(portToVal.ValueInt64())
 		}
 
-		if sourceVal, ok := attrs["source"].(types.String); ok && !sourceVal.IsNull() {
-			rule.Source = sourceVal.ValueString()
+		if sourceVal, ok := attrs["source"].(types.String); ok && !sourceVal.IsNull() && sourceVal.ValueString() != "" {
+			source := sourceVal.ValueString()
+			rule.Source = &source
 		}
 
-		if descVal, ok := attrs["description"].(types.String); ok && !descVal.IsNull() && descVal.ValueString() != "" {
+		if descVal, ok := attrs["description"].(types.String); ok && !descVal.IsNull() {
 			desc := descVal.ValueString()
 			rule.Description = &desc
 		}

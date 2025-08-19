@@ -122,7 +122,7 @@ func (r *FirewallPolicyRuleResource) Create(ctx context.Context, req resource.Cr
 	if fwErr != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", fwErr),
 		)
 		return
 	}

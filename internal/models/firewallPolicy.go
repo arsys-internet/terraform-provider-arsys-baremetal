@@ -109,13 +109,13 @@ func FirewallPolicyObjectType() types.ObjectType {
 
 type FirewallPolicyCreateRequest struct {
 	Name        string                                       `json:"name"`
-	Description string                                       `json:"description,omitempty"`
+	Description *string                                      `json:"description,omitempty"`
 	Rules       []firewallPolicies.FirewallRuleCreateRequest `json:"rules"`
 }
 
 type FirewallPolicyUpdateRequest struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
 }
 
 func (f *FirewallPolicyModel) GetState() string {
@@ -128,8 +128,12 @@ func (f *FirewallPolicyModel) GetState() string {
 
 func (f *FirewallPolicyModel) ToCreateRequest() (FirewallPolicyCreateRequest, error) {
 	request := FirewallPolicyCreateRequest{
-		Name:        f.Name.ValueString(),
-		Description: f.Description.ValueString(),
+		Name: f.Name.ValueString(),
+	}
+
+	if !f.Description.IsNull() {
+		desc := f.Description.ValueString()
+		request.Description = &desc
 	}
 
 	rules, err := firewallPolicies.ConvertRulesToCreateRequest(f.Rules)
@@ -149,7 +153,8 @@ func (f *FirewallPolicyModel) ToUpdateRequest() FirewallPolicyUpdateRequest {
 	}
 
 	if !f.Description.IsNull() {
-		request.Description = f.Description.ValueString()
+		desc := f.Description.ValueString()
+		request.Description = &desc
 	}
 
 	return request
