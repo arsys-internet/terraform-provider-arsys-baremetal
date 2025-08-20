@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,12 +13,12 @@ import (
 )
 
 type IdentifierModel struct {
-	ID   types.String `tfsdk:"id"`
+	Id   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 }
 
 type IdentifierResponse struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -36,7 +37,7 @@ func IdentifierObjectType() types.ObjectType {
 
 func NewIdentifierObject(identifier IdentifierResponse) (types.Object, diag.Diagnostics) {
 	model := IdentifierModel{
-		ID:   types.StringValue(identifier.ID),
+		Id:   types.StringValue(identifier.Id),
 		Name: types.StringValue(identifier.Name),
 	}
 
@@ -53,7 +54,7 @@ func NewIdentifierList(responses []IdentifierResponse) (types.List, diag.Diagnos
 	var models []IdentifierModel
 	for _, response := range responses {
 		model := IdentifierModel{
-			ID:   types.StringValue(response.ID),
+			Id:   types.StringValue(response.Id),
 			Name: types.StringValue(response.Name),
 		}
 		models = append(models, model)

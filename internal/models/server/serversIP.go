@@ -14,7 +14,7 @@ import (
 )
 
 type ServersIPResponse struct {
-	ID             string                 `json:"id"`
+	Id             string                 `json:"id"`
 	IP             string                 `json:"ip"`
 	Type           string                 `json:"type"`
 	ReverseDNS     interface{}            `json:"reverse_dns"`
@@ -24,7 +24,7 @@ type ServersIPResponse struct {
 }
 
 type IdentifierIPResponse struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -33,7 +33,7 @@ func NewServersIPList(ips []ServersIPResponse) (types.List, diag.Diagnostics) {
 
 	for _, ip := range ips {
 		fpAttrs := map[string]attr.Value{
-			"id":   types.StringValue(ip.FirewallPolicy.ID),
+			"id":   types.StringValue(ip.FirewallPolicy.Id),
 			"name": types.StringValue(ip.FirewallPolicy.Name),
 		}
 		fpObj, _ := types.ObjectValue(IdentifierIPObjectType().AttrTypes, fpAttrs)
@@ -41,7 +41,7 @@ func NewServersIPList(ips []ServersIPResponse) (types.List, diag.Diagnostics) {
 		var lbElements []attr.Value
 		for _, lb := range ip.LoadBalancers {
 			lbAttrs := map[string]attr.Value{
-				"id":   types.StringValue(lb.ID),
+				"id":   types.StringValue(lb.Id),
 				"name": types.StringValue(lb.Name),
 			}
 			lbObj, _ := types.ObjectValue(IdentifierIPObjectType().AttrTypes, lbAttrs)
@@ -57,7 +57,7 @@ func NewServersIPList(ips []ServersIPResponse) (types.List, diag.Diagnostics) {
 		}
 
 		ipAttrs := map[string]attr.Value{
-			"id":              types.StringValue(ip.ID),
+			"id":              types.StringValue(ip.Id),
 			"ip":              types.StringValue(ip.IP),
 			"type":            types.StringValue(ip.Type),
 			"reverse_dns":     reverseDNS,
@@ -124,7 +124,7 @@ func ServersIPDataSourceSchema() map[string]schema.Attribute {
 			Attributes: map[string]schema.Attribute{
 				"id": schema.StringAttribute{
 					Computed:    true,
-					Description: "Firewall policy ID",
+					Description: "Firewall policy Id",
 				},
 				"name": schema.StringAttribute{
 					Computed:    true,
@@ -139,7 +139,7 @@ func ServersIPDataSourceSchema() map[string]schema.Attribute {
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						Computed:    true,
-						Description: "Load balancer ID",
+						Description: "Load balancer Id",
 					},
 					"name": schema.StringAttribute{
 						Computed:    true,
@@ -200,7 +200,7 @@ func ServersIPResourceSchema() map[string]rschema.Attribute {
 					PlanModifiers: []planmodifier.String{
 						stringplanmodifier.UseStateForUnknown(),
 					},
-					Description: "Firewall policy ID",
+					Description: "Firewall policy Id",
 				},
 				"name": rschema.StringAttribute{
 					Computed: true,
@@ -224,7 +224,7 @@ func ServersIPResourceSchema() map[string]rschema.Attribute {
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
-						Description: "Load balancer ID",
+						Description: "Load balancer Id",
 					},
 					"name": rschema.StringAttribute{
 						Computed: true,

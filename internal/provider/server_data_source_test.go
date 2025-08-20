@@ -2,15 +2,16 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"testing"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
-	"time"
 )
 
 func TestAccServerDataSource(t *testing.T) {
@@ -37,8 +38,6 @@ func TestAccServerDataSource(t *testing.T) {
 			{
 				Config: testAccServerDataSourceConfig(),
 				ConfigStateChecks: []statecheck.StateCheck{
-					// Verify that the data source retrieves the server details correctly
-					//with the expected values only for essential attributes
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server.test",
 						tfjsonpath.New("id"),

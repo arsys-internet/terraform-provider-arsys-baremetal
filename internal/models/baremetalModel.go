@@ -2,11 +2,12 @@ package models
 
 import (
 	"context"
+	"terraform-provider-arsys-baremetal/internal/models/server"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-arsys-baremetal/internal/models/server"
 )
 
 type BaremetalModelResponse struct {

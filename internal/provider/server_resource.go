@@ -3,14 +3,15 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/server"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -77,7 +78,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	if data.ApplianceID.IsNull() || data.ApplianceID.ValueString() == "" {
+	if data.ApplianceId.IsNull() || data.ApplianceId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("appliance_id"),
 			"Missing required field",
@@ -85,11 +86,11 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	if data.DatacenterID.IsNull() || data.DatacenterID.ValueString() == "" {
+	if data.DatacenterId.IsNull() || data.DatacenterId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
-			"Either 'datacenter_id' field is required when creating a server",
+			"'datacenter_id' field is required when creating a server",
 		)
 	}
 
@@ -102,7 +103,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	hardwareAttrs := data.Hardware.Attributes()
-	if baremetalModelID, ok := hardwareAttrs["baremetal_model_id"].(types.String); !ok || baremetalModelID.IsNull() || baremetalModelID.ValueString() == "" {
+	if baremetalModelId, ok := hardwareAttrs["baremetal_model_id"].(types.String); !ok || baremetalModelId.IsNull() || baremetalModelId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("hardware").AtName("baremetal_model_id"),
 			"Missing required field",
@@ -116,14 +117,12 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	createRequest := data.ToCreateRequest()
 
-	tflog.Info(ctx, fmt.Sprintf("Creating server: %s", createRequest.Name))
-
 	apiResponse, err := r.client.CreateServer(&createRequest)
 
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating server",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -140,7 +139,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	_, diags := util.WaitForResourceState(
 		ctx,
-		apiResponse.ID,
+		apiResponse.Id,
 		r.client,
 		waitOptions,
 	)
@@ -151,11 +150,11 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	finalServer, err := r.client.GetServer(apiResponse.ID)
+	finalServer, err := r.client.GetServer(apiResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final server state",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -167,7 +166,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created server with ID: %s", finalModel.ID.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created server with Id: %s", finalModel.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
@@ -180,27 +179,27 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading server with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading server with Id: %s", id))
 
 	apiResponse, err := r.client.GetServer(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Server with ID %s not found, removing from state", id))
+			tflog.Info(ctx, fmt.Sprintf("Server with Id %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
 		}
 
 		resp.Diagnostics.AddError(
 			"Error reading server",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Server with ID %s not found, removing from state", id))
+		tflog.Info(ctx, fmt.Sprintf("Server with Id %s not found, removing from state", id))
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -228,8 +227,8 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	id := state.ID.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Updating server with ID: %s", id))
+	id := state.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Updating server with Id: %s", id))
 
 	hasChanges := false
 	if !plan.Name.Equal(state.Name) {
@@ -254,7 +253,7 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating server",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -262,7 +261,7 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 	finalModel, diags := models.NewServerResourceModelFromUpdate(ctx, updatedServer, &state)
 	resp.Diagnostics.Append(diags...)
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully updated server with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Successfully updated server with Id: %s", id))
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
@@ -274,9 +273,9 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Deleting server with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleting server with Id: %s", id))
 
 	err := r.client.DeleteServer(id)
 	if err != nil {
@@ -287,7 +286,7 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 		resp.Diagnostics.AddError(
 			"Error deleting server",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -316,7 +315,7 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Deleted server with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleted server with Id: %s", id))
 }
 
 func (r *ServerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

@@ -3,13 +3,14 @@ package models
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type BaremetalModels struct {
-	ID              types.String `tfsdk:"id"`
+	Id              types.String `tfsdk:"id"`
 	BaremetalModels types.List   `tfsdk:"baremetal_models"`
 }
 
@@ -45,7 +46,7 @@ func NewBaremetalModels(ctx context.Context, datacentersResponse []BaremetalMode
 	diags := diag.Diagnostics{}
 
 	model := &BaremetalModels{}
-	model.ID = types.StringValue("baremetal_models")
+	model.Id = types.StringValue("baremetal_models")
 
 	baremetalModels, listDiags := NewBaremetalModelFromList(ctx, datacentersResponse)
 	diags.Append(listDiags...)

@@ -2,11 +2,12 @@ package models
 
 import (
 	"context"
+	"terraform-provider-arsys-baremetal/internal/models/server"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-arsys-baremetal/internal/models/server"
 )
 
 type ServerListModel struct {
@@ -15,7 +16,7 @@ type ServerListModel struct {
 }
 
 type ServersModel struct {
-	ID      types.String `tfsdk:"id"`
+	Id      types.String `tfsdk:"id"`
 	Servers types.List   `tfsdk:"servers"`
 }
 
@@ -40,7 +41,7 @@ func NewServers(ctx context.Context, serversResponse []ServerListResponse) (*Ser
 	diags := diag.Diagnostics{}
 
 	model := &ServersModel{}
-	model.ID = types.StringValue("servers")
+	model.Id = types.StringValue("servers")
 
 	serverModels, listDiags := NewServerFromList(ctx, serversResponse)
 	diags.Append(listDiags...)

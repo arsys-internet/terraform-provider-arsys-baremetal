@@ -3,11 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/server"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ datasource.DataSource = &BaremetalModelDataSource{}
@@ -73,22 +74,20 @@ func (d *BaremetalModelDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Reading baremetal model with ID: %s", id))
-
 	apiResponse, err := d.client.GetBaremetalModel(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Baremetal Model Not Found",
-				fmt.Sprintf("Error: %s", err),
+				fmt.Sprintf("Error: %s", err.Error()),
 			)
-			tflog.Info(ctx, fmt.Sprintf("Error: %s", err))
+			tflog.Info(ctx, fmt.Sprintf("Error: %s", err.Error()))
 			return
 		}
 
 		resp.Diagnostics.AddError(
 			"Error reading baremetal model",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

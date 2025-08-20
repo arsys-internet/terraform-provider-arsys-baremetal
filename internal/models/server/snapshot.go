@@ -11,7 +11,7 @@ import (
 )
 
 type SnapshotResponse struct {
-	ID           string `json:"id"`
+	Id           string `json:"id"`
 	CreationDate string `json:"creation_date"`
 	DeletionDate string `json:"deletion_date"`
 }
@@ -24,7 +24,7 @@ func NewSnapshotObject(snapshot *SnapshotResponse) (types.Object, diag.Diagnosti
 	}
 
 	attrs := map[string]attr.Value{
-		"id":            types.StringValue(snapshot.ID),
+		"id":            types.StringValue(snapshot.Id),
 		"creation_date": types.StringValue(snapshot.CreationDate),
 		"deletion_date": types.StringValue(snapshot.DeletionDate),
 	}

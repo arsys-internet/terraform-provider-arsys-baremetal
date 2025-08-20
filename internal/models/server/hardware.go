@@ -1,6 +1,8 @@
 package server
 
 import (
+	"terraform-provider-arsys-baremetal/internal/util/helper"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -11,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-arsys-baremetal/internal/util/helper"
 )
 
 type HardwareResponse struct {
@@ -24,7 +25,7 @@ type HardwareResponse struct {
 }
 
 type HDDResponse struct {
-	ID            string `json:"id"`
+	Id            string `json:"id"`
 	Size          int    `json:"size"`
 	IsMain        bool   `json:"is_main"`
 	DiskType      string `json:"disk_type"`
@@ -131,7 +132,7 @@ func HardwareObjectType() types.ObjectType {
 
 func NewHDDObject(hdd HDDResponse) (types.Object, diag.Diagnostics) {
 	attrs := map[string]attr.Value{
-		"id":              types.StringValue(hdd.ID),
+		"id":              types.StringValue(hdd.Id),
 		"size":            types.Int64Value(int64(hdd.Size)),
 		"is_main":         types.BoolValue(hdd.IsMain),
 		"disk_type":       types.StringValue(hdd.DiskType),

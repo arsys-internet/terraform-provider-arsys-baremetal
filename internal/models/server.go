@@ -2,6 +2,11 @@ package models
 
 import (
 	"context"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/models/server"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"terraform-provider-arsys-baremetal/internal/util/helper"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -16,14 +21,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/server"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"terraform-provider-arsys-baremetal/internal/util/helper"
 )
 
 type ServerBaseModel struct {
-	ID               types.String `tfsdk:"id"`
+	Id               types.String `tfsdk:"id"`
 	Name             types.String `tfsdk:"name"`
 	Description      types.String `tfsdk:"description"`
 	Datacenter       types.Object `tfsdk:"datacenter"`
@@ -37,7 +38,7 @@ type ServerBaseModel struct {
 	DVD              types.Object `tfsdk:"dvd"`
 	Alerts           types.Object `tfsdk:"alerts"`
 	MonitoringPolicy types.Object `tfsdk:"monitoring_policy"`
-	CloudPanelID     types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId     types.String `tfsdk:"cloudpanel_id"`
 	ServerType       types.String `tfsdk:"server_type"`
 	Hostname         types.String `tfsdk:"hostname"`
 	ConnectionSpeed  types.Object `tfsdk:"connection_speed"`
@@ -59,20 +60,20 @@ type ServerDetailModel struct {
 type ServerResourceModel struct {
 	ServerDetailModel
 
-	ApplianceID        types.String `tfsdk:"appliance_id"`
-	DatacenterID       types.String `tfsdk:"datacenter_id"`
+	ApplianceId        types.String `tfsdk:"appliance_id"`
+	DatacenterId       types.String `tfsdk:"datacenter_id"`
 	Password           types.String `tfsdk:"password"`
 	PowerOn            types.Bool   `tfsdk:"power_on"`
-	FirewallPolicyID   types.String `tfsdk:"firewall_policy_id"`
+	FirewallPolicyId   types.String `tfsdk:"firewall_policy_id"`
 	IPID               types.String `tfsdk:"ip_id"`
-	LoadBalancerID     types.String `tfsdk:"load_balancer_id"`
-	MonitoringPolicyID types.String `tfsdk:"monitoring_policy_id"`
+	LoadBalancerId     types.String `tfsdk:"load_balancer_id"`
+	MonitoringPolicyId types.String `tfsdk:"monitoring_policy_id"`
 	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
-	AvailabilityZoneID types.String `tfsdk:"availability_zone_id"`
+	AvailabilityZoneId types.String `tfsdk:"availability_zone_id"`
 }
 
 type ServerBaseResponse struct {
-	ID               string                                 `json:"id"`
+	Id               string                                 `json:"id"`
 	Name             string                                 `json:"name"`
 	Description      *string                                `json:"description"`
 	Datacenter       BaseDatacenterResponse                 `json:"datacenter"`
@@ -86,7 +87,7 @@ type ServerBaseResponse struct {
 	DVD              *IdentifierResponse                    `json:"dvd"`
 	Alerts           *server.AlertResponse                  `json:"alerts"`
 	MonitoringPolicy *IdentifierResponse                    `json:"monitoring_policy"`
-	CloudPanelID     *string                                `json:"cloudpanel_id"`
+	CloudPanelId     *string                                `json:"cloudpanel_id"`
 	ServerType       string                                 `json:"server_type"`
 	Hostname         string                                 `json:"hostname"`
 	ConnectionSpeed  *server.ConnectionSpeedResponse        `json:"connection_speed"`
@@ -106,28 +107,26 @@ type ServerDetailResponse struct {
 }
 
 type ServerCreateRequest struct {
-	// REQUIRED fields
 	Name         string                       `json:"name"`
 	ServerType   string                       `json:"server_type"`
-	ApplianceID  string                       `json:"appliance_id"`
-	DatacenterID string                       `json:"datacenter_id"`
+	ApplianceId  string                       `json:"appliance_id"`
+	DatacenterId string                       `json:"datacenter_id"`
 	Hardware     server.HardwareCreateRequest `json:"hardware"`
 
-	// Fields with known DEFAULTS
 	SSHPassword        bool `json:"ssh_password"`
 	PowerOn            bool `json:"power_on"`
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
-	// OPTIONAL fields
 	Description        *string `json:"description,omitempty"`
 	Password           *string `json:"password,omitempty"`
-	FirewallPolicyID   *string `json:"firewall_policy_id,omitempty"`
-	IPID               *string `json:"ip_id,omitempty"`
-	LoadBalancerID     *string `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyID *string `json:"monitoring_policy_id,omitempty"`
-	AvailabilityZoneID *string `json:"availability_zone_id,omitempty"`
+	FirewallPolicyId   *string `json:"firewall_policy_id,omitempty"`
+	IPId               *string `json:"ip_id,omitempty"`
+	LoadBalancerId     *string `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyId *string `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneId *string `json:"availability_zone_id,omitempty"`
 }
+
 type ServerUpdateRequest struct {
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
@@ -156,7 +155,7 @@ func newServerBaseModelFromResponse(_ context.Context, sr *ServerBaseResponse) (
 
 	model := &ServerBaseModel{}
 
-	model.ID = types.StringValue(sr.ID)
+	model.Id = types.StringValue(sr.Id)
 	model.Name = types.StringValue(sr.Name)
 	model.CreationDate = types.StringValue(sr.CreationDate)
 	model.Managed = types.BoolValue(sr.Managed)
@@ -176,10 +175,10 @@ func newServerBaseModelFromResponse(_ context.Context, sr *ServerBaseResponse) (
 		model.FirstPassword = types.StringNull()
 	}
 
-	if sr.CloudPanelID != nil {
-		model.CloudPanelID = types.StringValue(*sr.CloudPanelID)
+	if sr.CloudPanelId != nil {
+		model.CloudPanelId = types.StringValue(*sr.CloudPanelId)
 	} else {
-		model.CloudPanelID = types.StringNull()
+		model.CloudPanelId = types.StringNull()
 	}
 
 	switch v := sr.RSAKey.(type) {
@@ -345,8 +344,8 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		ServerDetailModel: *baseModel,
 	}
 
-	model.ApplianceID = plan.ApplianceID
-	model.DatacenterID = plan.DatacenterID
+	model.ApplianceId = plan.ApplianceId
+	model.DatacenterId = plan.DatacenterId
 
 	if !plan.Hardware.IsNull() && !plan.Hardware.IsUnknown() {
 		hardwareAttrs := plan.Hardware.Attributes()
@@ -392,10 +391,10 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.InstallBackupAgent = types.BoolValue(false)
 	}
 
-	if !plan.FirewallPolicyID.IsUnknown() {
-		model.FirewallPolicyID = plan.FirewallPolicyID
+	if !plan.FirewallPolicyId.IsUnknown() {
+		model.FirewallPolicyId = plan.FirewallPolicyId
 	} else {
-		model.FirewallPolicyID = types.StringNull()
+		model.FirewallPolicyId = types.StringNull()
 	}
 
 	if !plan.IPID.IsUnknown() {
@@ -404,22 +403,22 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.IPID = types.StringNull()
 	}
 
-	if !plan.LoadBalancerID.IsUnknown() {
-		model.LoadBalancerID = plan.LoadBalancerID
+	if !plan.LoadBalancerId.IsUnknown() {
+		model.LoadBalancerId = plan.LoadBalancerId
 	} else {
-		model.LoadBalancerID = types.StringNull()
+		model.LoadBalancerId = types.StringNull()
 	}
 
-	if !plan.MonitoringPolicyID.IsUnknown() {
-		model.MonitoringPolicyID = plan.MonitoringPolicyID
+	if !plan.MonitoringPolicyId.IsUnknown() {
+		model.MonitoringPolicyId = plan.MonitoringPolicyId
 	} else {
-		model.MonitoringPolicyID = types.StringNull()
+		model.MonitoringPolicyId = types.StringNull()
 	}
 
-	if !plan.AvailabilityZoneID.IsUnknown() {
-		model.AvailabilityZoneID = plan.AvailabilityZoneID
+	if !plan.AvailabilityZoneId.IsUnknown() {
+		model.AvailabilityZoneId = plan.AvailabilityZoneId
 	} else {
-		model.AvailabilityZoneID = types.StringNull()
+		model.AvailabilityZoneId = types.StringNull()
 	}
 
 	return model, diags
@@ -449,8 +448,8 @@ func NewServerResourceModelFromRead(_ context.Context, sr *ServerDetailResponse,
 
 	model.Hostname = types.StringValue(sr.Hostname)
 
-	if sr.CloudPanelID != nil {
-		model.CloudPanelID = types.StringValue(*sr.CloudPanelID)
+	if sr.CloudPanelId != nil {
+		model.CloudPanelId = types.StringValue(*sr.CloudPanelId)
 	}
 
 	if sr.Alerts != nil {
@@ -528,17 +527,17 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 		ServerDetailModel: *detailModel,
 	}
 
-	model.ApplianceID = types.StringNull()
-	model.DatacenterID = types.StringNull()
+	model.ApplianceId = types.StringNull()
+	model.DatacenterId = types.StringNull()
 
 	model.Password = types.StringNull()
 	model.PowerOn = types.BoolValue(true)
-	model.FirewallPolicyID = types.StringNull()
+	model.FirewallPolicyId = types.StringNull()
 	model.IPID = types.StringNull()
-	model.LoadBalancerID = types.StringNull()
-	model.MonitoringPolicyID = types.StringNull()
+	model.LoadBalancerId = types.StringNull()
+	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolValue(false)
-	model.AvailabilityZoneID = types.StringNull()
+	model.AvailabilityZoneId = types.StringNull()
 
 	return model, diags
 }
@@ -547,8 +546,8 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	req := ServerCreateRequest{
 		Name:         s.Name.ValueString(),
 		ServerType:   "baremetal",
-		ApplianceID:  s.ApplianceID.ValueString(),
-		DatacenterID: s.DatacenterID.ValueString(),
+		ApplianceId:  s.ApplianceId.ValueString(),
+		DatacenterId: s.DatacenterId.ValueString(),
 		Hardware:     server.HardwareCreateRequestFromModel(s.Hardware),
 	}
 
@@ -562,14 +561,13 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 		req.PowerOn = true
 	}
 
-	// Optional fields with pointers
 	helper.AssignStringPtr(&req.Description, s.Description)
 	helper.AssignStringPtr(&req.Password, s.Password)
-	helper.AssignStringPtr(&req.FirewallPolicyID, s.FirewallPolicyID)
-	helper.AssignStringPtr(&req.IPID, s.IPID)
-	helper.AssignStringPtr(&req.LoadBalancerID, s.LoadBalancerID)
-	helper.AssignStringPtr(&req.MonitoringPolicyID, s.MonitoringPolicyID)
-	helper.AssignStringPtr(&req.AvailabilityZoneID, s.AvailabilityZoneID)
+	helper.AssignStringPtr(&req.FirewallPolicyId, s.FirewallPolicyId)
+	helper.AssignStringPtr(&req.IPId, s.IPID)
+	helper.AssignStringPtr(&req.LoadBalancerId, s.LoadBalancerId)
+	helper.AssignStringPtr(&req.MonitoringPolicyId, s.MonitoringPolicyId)
+	helper.AssignStringPtr(&req.AvailabilityZoneId, s.AvailabilityZoneId)
 
 	return req
 }
@@ -664,8 +662,9 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 				Description: "Whether SSH password authentication is enabled",
 			},
 			"image": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseIdentifierAttributes(),
+				Computed:    true,
+				Description: "Server image",
+				Attributes:  BaseIdentifierAttributes(),
 			},
 			"hardware": schema.SingleNestedAttribute{
 				Computed:    true,
@@ -673,8 +672,9 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 				Attributes:  server.HardwareDataSourceSchema(),
 			},
 			"dvd": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseIdentifierAttributes(),
+				Computed:    true,
+				Description: "DVD image",
+				Attributes:  BaseIdentifierAttributes(),
 			},
 			"alerts": schema.SingleNestedAttribute{
 				Computed:    true,
@@ -682,17 +682,21 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 				Attributes:  server.AlertsDataSourceSchema(),
 			},
 			"monitoring_policy": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseIdentifierAttributes(),
+				Computed:    true,
+				Description: "Monitoring policy",
+				Attributes:  BaseIdentifierAttributes(),
 			},
 			"cloudpanel_id": schema.StringAttribute{
-				Computed: true,
+				Description: "CloudPanel ID",
+				Computed:    true,
 			},
 			"server_type": schema.StringAttribute{
-				Computed: true,
+				Description: "Server type",
+				Computed:    true,
 			},
 			"hostname": schema.StringAttribute{
-				Computed: true,
+				Description: "Hostname",
+				Computed:    true,
 			},
 			"connection_speed": schema.SingleNestedAttribute{
 				Computed:    true,
@@ -700,18 +704,22 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 				Attributes:  server.ConnectionSpeedDataSourceSchema(),
 			},
 			"redundancy": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: server.RedundancyDataSourceSchema(),
+				Computed:    true,
+				Description: "Redundancy configuration",
+				Attributes:  server.RedundancyDataSourceSchema(),
 			},
 			"rsa_key": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Whether RSA key authentication is enabled",
 			},
 			"snapshot": schema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: server.SnapshotDataSourceSchema(),
+				Computed:    true,
+				Description: "Snapshot configuration",
+				Attributes:  server.SnapshotDataSourceSchema(),
 			},
 			"private_networks": schema.ListNestedAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Private networks configuration",
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: server.ServersPrivateNetworksDataSourceSchema(),
 				},
@@ -771,33 +779,38 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"datacenter": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseDatacenterResourceAttributes(),
+				Computed:    true,
+				Description: "Server datacenter",
+				Attributes:  BaseDatacenterResourceAttributes(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"creation_date": rschema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Creation timestamp",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"first_password": rschema.StringAttribute{
-				Computed:  true,
-				Sensitive: true,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "First password generated",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"managed": rschema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Whether server is managed",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"ips": rschema.ListNestedAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Server IP addresses",
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: server.ServersIPResourceSchema(),
 				},
@@ -815,8 +828,9 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Whether SSH password authentication is enabled",
 			},
 			"image": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseIdentifierResourceAttributes(),
+				Computed:    true,
+				Description: "Server image",
+				Attributes:  BaseIdentifierResourceAttributes(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -831,8 +845,9 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"dvd": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseIdentifierResourceAttributes(),
+				Computed:    true,
+				Description: "DVD image",
+				Attributes:  BaseIdentifierResourceAttributes(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -846,26 +861,30 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"monitoring_policy": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: BaseIdentifierResourceAttributes(),
+				Computed:    true,
+				Description: "Monitoring policy",
+				Attributes:  BaseIdentifierResourceAttributes(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"cloudpanel_id": rschema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "CloudPanel ID",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"server_type": rschema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Server type",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"hostname": rschema.StringAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Hostname",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -879,29 +898,33 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"redundancy": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: server.RedundancyResourceSchema(),
+				Computed:    true,
+				Description: "Redundancy configuration",
+				Attributes:  server.RedundancyResourceSchema(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"rsa_key": rschema.BoolAttribute{
-				Computed: true,
-				Optional: true,
-				Default:  booldefault.StaticBool(false),
+				Computed:    true,
+				Optional:    true,
+				Description: "Whether RSA key authentication is enabled",
+				Default:     booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"snapshot": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: server.SnapshotResourceSchema(),
+				Computed:    true,
+				Description: "Snapshot configuration",
+				Attributes:  server.SnapshotResourceSchema(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"private_networks": rschema.ListNestedAttribute{
-				Computed: true,
+				Computed:    true,
+				Description: "Private networks configuration",
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: server.ServersPrivateNetworksResourceSchema(),
 				},
@@ -910,8 +933,9 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"status": rschema.SingleNestedAttribute{
-				Computed:   true,
-				Attributes: server.StatusDetailResourceSchema(),
+				Computed:    true,
+				Description: "Server status",
+				Attributes:  server.StatusDetailResourceSchema(),
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -987,7 +1011,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			"power_on": rschema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(true),
 				Description: "Whether to power on the server after creation",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),

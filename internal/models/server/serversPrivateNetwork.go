@@ -11,21 +11,21 @@ import (
 )
 
 type ServersPrivateNetworkResponse struct {
-	ID       string  `json:"id"`
+	Id       string  `json:"id"`
 	Name     string  `json:"name"`
 	ServerIP string  `json:"server_ip"`
-	VlanID   *string `json:"vlan_id"`
+	VlanId   *string `json:"vlan_id"`
 }
 
 func NewServersPrivateNetworkObject(pn ServersPrivateNetworkResponse) (types.Object, diag.Diagnostics) {
 	attrs := map[string]attr.Value{
-		"id":        types.StringValue(pn.ID),
+		"id":        types.StringValue(pn.Id),
 		"name":      types.StringValue(pn.Name),
 		"server_ip": types.StringValue(pn.ServerIP),
 	}
 
-	if pn.VlanID != nil {
-		attrs["vlan_id"] = types.StringValue(*pn.VlanID)
+	if pn.VlanId != nil {
+		attrs["vlan_id"] = types.StringValue(*pn.VlanId)
 	} else {
 		attrs["vlan_id"] = types.StringNull()
 	}

@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -90,16 +89,5 @@ func BaseDatacenterNestedAttribute() schema.SingleNestedAttribute {
 		Computed:    true,
 		Description: "Datacenter information",
 		Attributes:  baseDatacenterAttributes(),
-	}
-}
-
-func BaseDatacenterResourceNestedAttribute() rschema.SingleNestedAttribute {
-	return rschema.SingleNestedAttribute{
-		Computed: true,
-		PlanModifiers: []planmodifier.Object{
-			objectplanmodifier.UseStateForUnknown(),
-		},
-		Description: "Datacenter information",
-		Attributes:  BaseDatacenterResourceAttributes(),
 	}
 }

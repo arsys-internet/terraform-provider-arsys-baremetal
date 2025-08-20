@@ -1,14 +1,15 @@
 package provider
 
 import (
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
 )
 
 func TestAccBaremetalModelsDataSource(t *testing.T) {

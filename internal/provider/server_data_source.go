@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/server"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
@@ -64,7 +65,7 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	if id == "" {
 		resp.Diagnostics.AddError(
@@ -74,13 +75,13 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Reading server data source with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading server data source with Id: %s", id))
 
 	apiResponse, err := d.client.GetServer(id)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading server",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -88,7 +89,7 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Server not found",
-			fmt.Sprintf("Server with ID %s not found", id),
+			fmt.Sprintf("Server with Id %s not found", id),
 		)
 		return
 	}
