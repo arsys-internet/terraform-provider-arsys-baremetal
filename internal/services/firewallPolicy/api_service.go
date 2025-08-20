@@ -27,6 +27,11 @@ type ApiFirewallPolicyServiceInterface interface {
 	GetFirewallPolicyServerIP(firewallId string, serverIp string) (*firewallPolicies.FirewallServerIPResponse, error)
 	GetFirewallPolicyServerIPs(id string) ([]firewallPolicies.FirewallServerIPResponse, error)
 	AssignServerIPsToFirewallPolicy(id string, request *models.FirewallPolicyServerAssignRequest) (*models.FirewallPolicyResponse, error)
+	GetFirewallPolicyRules(id string) (*[]firewallPolicies.FirewallRuleResponse, error)
+	GetFirewallPolicyRule(firewallPolicyId, ruleId string) (*firewallPolicies.FirewallRuleResponse, error)
+	CreateFirewallPolicyRule(id string, request *models.FirewallPolicyAddRulesRequest) (*models.FirewallPolicyResponse, error)
+	DeleteFirewallPolicyRule(firewallPolicyId, ruleId string) (*models.FirewallPolicyResponse, error)
+	GetResource(id string) (util.ResourceModel, error)
 }
 
 func NewAApiFirewallPolicyService(client *client.APIClient) *ApiFirewallPolicyService {
@@ -115,13 +120,13 @@ func (s *ApiFirewallPolicyService) CreateFirewallPolicy(request *models.Firewall
 		return nil, errorResponse
 	}
 
-	var createdServer models.FirewallPolicyResponse
-	if err := json.NewDecoder(resp.Body).Decode(&createdServer); err != nil {
+	var firewallPolicy models.FirewallPolicyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicy); err != nil {
 		fmt.Printf("JSON Decode Error: %v\n", err)
 		return nil, err
 	}
 
-	return &createdServer, nil
+	return &firewallPolicy, nil
 }
 
 func (s *ApiFirewallPolicyService) UpdateFirewallPolicy(id string, request *models.FirewallPolicyUpdateRequest) (*models.FirewallPolicyResponse, error) {
@@ -142,13 +147,13 @@ func (s *ApiFirewallPolicyService) UpdateFirewallPolicy(id string, request *mode
 		return nil, errorResponse
 	}
 
-	var updatedServer models.FirewallPolicyResponse
-	if err := json.NewDecoder(resp.Body).Decode(&updatedServer); err != nil {
+	var firewallPolicy models.FirewallPolicyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicy); err != nil {
 		fmt.Printf("JSON Decode Error: %v\n", err)
 		return nil, err
 	}
 
-	return &updatedServer, nil
+	return &firewallPolicy, nil
 }
 
 func (s *ApiFirewallPolicyService) DeleteFirewallPolicy(id string) error {
@@ -267,4 +272,110 @@ func (s *ApiFirewallPolicyService) AssignServerIPsToFirewallPolicy(id string, re
 	}
 
 	return &response, nil
+}
+
+func (s *ApiFirewallPolicyService) GetFirewallPolicyRules(id string) (*[]firewallPolicies.FirewallRuleResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/firewall_policies/%s/rules", id))
+
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get firewall policy rules")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var firewallPolicyRules []firewallPolicies.FirewallRuleResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicyRules); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	return &firewallPolicyRules, nil
+}
+
+func (s *ApiFirewallPolicyService) GetFirewallPolicyRule(firewallPolicyId, ruleId string) (*firewallPolicies.FirewallRuleResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/firewall_policies/%s/rules/%s", firewallPolicyId, ruleId))
+
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get firewall policy rule")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var firewallPolicyRule firewallPolicies.FirewallRuleResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicyRule); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	return &firewallPolicyRule, nil
+}
+
+func (s *ApiFirewallPolicyService) CreateFirewallPolicyRule(id string, request *models.FirewallPolicyAddRulesRequest) (*models.FirewallPolicyResponse, error) {
+	resp, err := s.client.Post(fmt.Sprintf("/firewall_policies/%s/rules", id), request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "create firewall policy rules")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var firewallPolicy models.FirewallPolicyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicy); err != nil {
+		fmt.Printf("JSON Decode Error: %v\n", err)
+		return nil, err
+	}
+
+	return &firewallPolicy, nil
+}
+
+func (s *ApiFirewallPolicyService) DeleteFirewallPolicyRule(firewallPolicyId, ruleId string) (*models.FirewallPolicyResponse, error) {
+	resp, err := s.client.Delete(fmt.Sprintf("/firewall_policies/%s/rules/%s", firewallPolicyId, ruleId))
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "delete firewall policy rule")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var firewallPolicy models.FirewallPolicyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicy); err != nil {
+		fmt.Printf("JSON Decode Error: %v\n", err)
+		return nil, err
+	}
+
+	return &firewallPolicy, nil
 }

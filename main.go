@@ -5,8 +5,9 @@ import (
 	"flag"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"terraform-provider-arsys-baremetal/internal/provider"
+
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
 var (

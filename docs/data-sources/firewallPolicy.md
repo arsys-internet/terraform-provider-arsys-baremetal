@@ -2,7 +2,7 @@
 subcategory: "Network"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Firewall Policy Data Sources"
-sidebar_current: "docs-datasource-firewallPolicy"
+sidebar_current: "docs-datasource-firewall_policy"
 description: |-
   Get information about Firewall Policies in Arsys Baremetal
 ---
@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `firewall_policies` - List of firewall policies
 
-### Get By ID
+### Get By Id
 
 ```hcl
 data "arsys-baremetal_firewall_policy" "example" {
@@ -38,7 +38,7 @@ data "arsys-baremetal_firewall_policy" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)ID of an existing firewall policy that you want to search for.
+* `id` - (Required)Id of an existing firewall policy that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 

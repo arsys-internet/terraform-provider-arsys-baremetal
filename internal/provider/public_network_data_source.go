@@ -3,10 +3,11 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicNetwork"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 var _ datasource.DataSource = &PublicNetworkDataSource{}
@@ -62,7 +63,7 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	if id == "" {
 		resp.Diagnostics.AddError(
@@ -84,7 +85,7 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 
 		resp.Diagnostics.AddError(
 			"Error reading the public network",
-			fmt.Sprintf("Could not read public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

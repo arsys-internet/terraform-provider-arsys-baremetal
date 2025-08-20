@@ -2,12 +2,12 @@
 subcategory: "Network"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Private Network Resource"
-sidebar_current: "docs-resource-privateNetwork"
+sidebar_current: "docs-resource-private_network"
 description: |-
   Creates and manages Private Networks in Arsys Baremetal.
 ---
 
-# arsys-baremetal\_private_network
+# arsys-baremetal\_private\_network
 
 Creates and manages **Private Networks** in Arsys Baremetal.
 

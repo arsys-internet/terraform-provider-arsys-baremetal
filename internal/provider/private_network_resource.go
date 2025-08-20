@@ -96,7 +96,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating private network",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -137,7 +137,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 
 		resp.Diagnostics.AddError(
 			"Error reading private network",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -183,7 +183,7 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating private network",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -221,7 +221,7 @@ func (r *PrivateNetworkResource) Delete(ctx context.Context, req resource.Delete
 
 		resp.Diagnostics.AddError(
 			"Error deleting private network",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

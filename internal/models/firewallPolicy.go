@@ -21,7 +21,7 @@ import (
 )
 
 type FirewallPolicyResponse struct {
-	ID           string                                      `json:"id"`
+	Id           string                                      `json:"id"`
 	Name         string                                      `json:"name"`
 	Description  *string                                     `json:"description"`
 	State        string                                      `json:"state"`
@@ -33,7 +33,7 @@ type FirewallPolicyResponse struct {
 }
 
 type FirewallPolicyModel struct {
-	ID           types.String `tfsdk:"id"`
+	Id           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	Description  types.String `tfsdk:"description"`
 	State        types.String `tfsdk:"state"`
@@ -61,7 +61,7 @@ func NewFirewallPolicyModel(_ context.Context, fp FirewallPolicyResponse) (*Fire
 	}
 
 	model := &FirewallPolicyModel{
-		ID:           types.StringValue(fp.ID),
+		Id:           types.StringValue(fp.Id),
 		Name:         types.StringValue(fp.Name),
 		Description:  description,
 		State:        types.StringValue(fp.State),
@@ -109,30 +109,34 @@ func FirewallPolicyObjectType() types.ObjectType {
 
 type FirewallPolicyCreateRequest struct {
 	Name        string                                       `json:"name"`
-	Description string                                       `json:"description,omitempty"`
+	Description *string                                      `json:"description,omitempty"`
 	Rules       []firewallPolicies.FirewallRuleCreateRequest `json:"rules"`
 }
 
 type FirewallPolicyUpdateRequest struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
 }
 
-func (m *FirewallPolicyModel) GetState() string {
-	if m == nil {
+func (f *FirewallPolicyModel) GetState() string {
+	if f == nil {
 		return ""
 	}
 
-	return m.State.ValueString()
+	return f.State.ValueString()
 }
 
-func (m *FirewallPolicyModel) ToCreateRequest() (FirewallPolicyCreateRequest, error) {
+func (f *FirewallPolicyModel) ToCreateRequest() (FirewallPolicyCreateRequest, error) {
 	request := FirewallPolicyCreateRequest{
-		Name:        m.Name.ValueString(),
-		Description: m.Description.ValueString(),
+		Name: f.Name.ValueString(),
 	}
 
-	rules, err := firewallPolicies.ConvertRulesToCreateRequest(m.Rules)
+	if !f.Description.IsNull() {
+		desc := f.Description.ValueString()
+		request.Description = &desc
+	}
+
+	rules, err := firewallPolicies.ConvertRulesToCreateRequest(f.Rules)
 	if err != nil {
 		return request, fmt.Errorf("failed to convert rules: %w", err)
 	}
@@ -141,15 +145,16 @@ func (m *FirewallPolicyModel) ToCreateRequest() (FirewallPolicyCreateRequest, er
 	return request, nil
 }
 
-func (m *FirewallPolicyModel) ToUpdateRequest() FirewallPolicyUpdateRequest {
+func (f *FirewallPolicyModel) ToUpdateRequest() FirewallPolicyUpdateRequest {
 	request := FirewallPolicyUpdateRequest{}
 
-	if !m.Name.IsNull() && m.Name.ValueString() != "" {
-		request.Name = m.Name.ValueString()
+	if !f.Name.IsNull() && f.Name.ValueString() != "" {
+		request.Name = f.Name.ValueString()
 	}
 
-	if !m.Description.IsNull() {
-		request.Description = m.Description.ValueString()
+	if !f.Description.IsNull() {
+		desc := f.Description.ValueString()
+		request.Description = &desc
 	}
 
 	return request
@@ -165,7 +170,7 @@ func FirewallPolicyDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 					),
 				},
 			},
@@ -200,10 +205,12 @@ func FirewallPolicyDataSourceSchema(_ context.Context) schema.Schema {
 					Attributes: firewallPolicies.FirewallRuleDataSourceSchema(),
 				},
 			},
-			"server_ips": schema.SetAttribute{
-				ElementType: types.StringType,
-				Optional:    true,
-				Description: "List of server IP IDs to assign to the firewall policy",
+			"server_ips": schema.ListNestedAttribute{
+				Computed:    true,
+				Description: "Servers assigned to firewall policy",
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: firewallPolicies.FirewallServerIPDataSourceSchema(),
+				},
 			},
 		},
 	}
@@ -255,7 +262,7 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 					),
 				},
 			},

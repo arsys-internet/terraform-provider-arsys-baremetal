@@ -2,11 +2,6 @@ package provider
 
 import (
 	"context"
-	"log"
-	"os"
-	"terraform-provider-arsys-baremetal/internal/client"
-	"terraform-provider-arsys-baremetal/internal/util"
-
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -146,6 +141,8 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 	return []func() resource.Resource{
 		NewFirewallPolicyResource,
 		NewFirewallPolicyServerIPsAssignResource,
+		NewFirewallPolicyRuleResource,
+		NewFirewallPolicyRemoveRuleResource,
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
 		NewPublicNetworkResource,
@@ -165,6 +162,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewFirewallPoliciesDataSource,
 		NewFirewallPolicyServerIPDataSource,
 		NewFirewallPolicyServerIPsDataSource,
+		NewFirewallPolicyRuleDataSource,
+		NewFirewallPolicyRulesDataSource,
 		NewPrivateNetworkDataSource,
 		NewPrivateNetworksDataSource,
 		NewPublicIpDataSource,

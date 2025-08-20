@@ -2,15 +2,16 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
+	"testing"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 	"github.com/hashicorp/terraform-plugin-testing/tfversion"
-	"regexp"
-	"terraform-provider-arsys-baremetal/internal/util"
-	"testing"
-	"time"
 )
 
 func TestAccFirewallPolicyResource(t *testing.T) {
@@ -95,12 +96,15 @@ resource "arsys-baremetal_firewall_policy" "test" {
       port_from = 22
       port_to   = 22
       source    = "192.168.1.0/24"
+      action    = "ALLOW"
     },
     {
-      protocol  = "TCP"
-      port_from = 80
-      port_to   = 80
-      source    = "0.0.0.0"
+	  protocol  = "TCP"
+	  port_from = 80
+	  port_to   = 80
+	  source    = "0.0.0.0"
+	  description = "access"
+      action      = "ALLOW"
     }
   ]
 }

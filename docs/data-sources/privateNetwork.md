@@ -2,14 +2,14 @@
 subcategory: "Network"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Private Network Data Sources"
-sidebar_current: "docs-datasource-privateNetwork"
+sidebar_current: "docs-datasource-private_network"
 description: |-
   Get information about Private Networks in Arsys Baremetal.
 ---
 
 # arsys-baremetal\_private_network
 
-The **PrivateNetworks data source** can be used to search and return all existing private networks.
+The **Private Networks data source** can be used to search and return all existing private networks.
 Also, it can be used to search for and return an existing private network.
 You can provide a string for the id parameter which will be compared with created private networks.
 If a single match is found, it will be returned. If it is not found, an error will be returned.
