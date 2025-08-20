@@ -87,7 +87,7 @@ func (d *FirewallPolicyRuleDataSource) Read(ctx context.Context, req datasource.
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy rule",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

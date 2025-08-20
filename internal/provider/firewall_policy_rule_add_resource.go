@@ -80,7 +80,7 @@ func (r *FirewallPolicyRuleResource) Create(ctx context.Context, req resource.Cr
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error converting model to request",
-			fmt.Sprintf("Could not convert rules to request: %s", err),
+			fmt.Sprintf("Could not convert rules to request: %s", err.Error()),
 		)
 		return
 	}
@@ -122,7 +122,7 @@ func (r *FirewallPolicyRuleResource) Create(ctx context.Context, req resource.Cr
 	if fwErr != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
-			fmt.Sprintf("Error: %s", fwErr),
+			fmt.Sprintf("Error: %s", fwErr.Error()),
 		)
 		return
 	}
@@ -146,26 +146,26 @@ func (r *FirewallPolicyRuleResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	firewallPolicyID := data.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy assignment: %s", firewallPolicyID))
+	firewallPolicyId := data.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy assignment: %s", firewallPolicyId))
 
-	apiResponse, err := r.client.GetFirewallPolicy(firewallPolicyID)
+	apiResponse, err := r.client.GetFirewallPolicy(firewallPolicyId)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyID))
+			tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
 			resp.State.RemoveResource(ctx)
 			return
 		}
 
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyID))
+		tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
 		resp.State.RemoveResource(ctx)
 		return
 	}

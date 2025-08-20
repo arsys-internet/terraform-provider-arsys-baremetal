@@ -76,7 +76,7 @@ func (r *FirewallPolicyRemoveRuleResource) Create(ctx context.Context, req resou
 		} else {
 			resp.Diagnostics.AddError(
 				"Error removing rule from firewall policy",
-				fmt.Sprintf("Error: %s", err),
+				fmt.Sprintf("Error: %s", err.Error()),
 			)
 			return
 		}
@@ -102,14 +102,14 @@ func (r *FirewallPolicyRemoveRuleResource) Create(ctx context.Context, req resou
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
 	if finalPolicy == nil {
 		resp.Diagnostics.AddError(
-			"Unexpected API response",
+			"Unexpected Firewall Policy State",
 			"API returned no firewall policy data after rule removal",
 		)
 		return
