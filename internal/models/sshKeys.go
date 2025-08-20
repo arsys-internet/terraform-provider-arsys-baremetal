@@ -29,7 +29,7 @@ func sshKeyObjectType() types.ObjectType {
 }
 
 func sshKeyNestedAttributeObject() schema.NestedAttributeObject {
-	existingSchema := sshKeyDataSourceSchema(context.Background())
+	existingSchema := SshKeyDataSourceSchema(context.Background())
 
 	attributes := make(map[string]schema.Attribute)
 	for name, attribute := range existingSchema.Attributes {
@@ -52,7 +52,7 @@ func NewSshKeys(ctx context.Context, sshKeysResponse []SshKeyResponse) (*SshKeys
 	diags := diag.Diagnostics{}
 
 	model := &SshKeysModel{}
-	model.ID = types.StringValue("ssh_keys")
+	model.Id = types.StringValue("ssh_keys")
 
 	sshKeyModels, listDiags := NewSshKeyFromList(ctx, sshKeysResponse)
 	diags.Append(listDiags...)
