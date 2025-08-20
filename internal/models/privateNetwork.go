@@ -97,7 +97,7 @@ func NewPrivateNetworkResourceModel(ctx context.Context, pn *PrivateNetworkRespo
 
 	resourceModel := &PrivateNetworkResourceModel{
 		PrivateNetworkModel: *baseModel,
-		DatacenterID:        types.StringValue(pn.Datacenter.ID),
+		DatacenterID:        types.StringValue(pn.Datacenter.Id),
 	}
 
 	return resourceModel, diags

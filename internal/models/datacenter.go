@@ -15,14 +15,14 @@ import (
 )
 
 type DatacenterModel struct {
-	ID          types.String `tfsdk:"id"`
+	Id          types.String `tfsdk:"id"`
 	CountryCode types.String `tfsdk:"country_code"`
 	Location    types.String `tfsdk:"location"`
 	Default     types.Int64  `tfsdk:"default"`
 }
 
 type DatacenterResponse struct {
-	ID          string `json:"id"`
+	Id          string `json:"id"`
 	CountryCode string `json:"country_code"`
 	Location    string `json:"location"`
 	Default     int64  `json:"default"`
@@ -49,7 +49,7 @@ func NewDatacenter(_ context.Context, dc *DatacenterResponse) (*DatacenterModel,
 	}
 
 	model := &DatacenterModel{}
-	model.ID = types.StringValue(dc.ID)
+	model.Id = types.StringValue(dc.Id)
 	model.CountryCode = types.StringValue(dc.CountryCode)
 	model.Location = types.StringValue(dc.Location)
 	model.Default = types.Int64Value(dc.Default)
@@ -106,7 +106,7 @@ func DatacenterDataSourceSchema(_ context.Context) schema.Schema {
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(util.HexID32Pattern),
-				"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+				"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 			),
 		},
 	}

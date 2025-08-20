@@ -4,11 +4,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type BaseDatacenterResponse struct {
-	ID          string `json:"id"`
+	Id          string `json:"id"`
 	CountryCode string `json:"country_code"`
 	Location    string `json:"location"`
 }
@@ -31,7 +34,7 @@ func NewBaseDatacenterObject(datacenter BaseDatacenterResponse) (types.Object, d
 	return types.ObjectValue(
 		baseDatacenterAttributeTypes(),
 		map[string]attr.Value{
-			"id":           types.StringValue(datacenter.ID),
+			"id":           types.StringValue(datacenter.Id),
 			"country_code": types.StringValue(datacenter.CountryCode),
 			"location":     types.StringValue(datacenter.Location),
 		},
@@ -51,6 +54,32 @@ func baseDatacenterAttributes() map[string]schema.Attribute {
 		"location": schema.StringAttribute{
 			Computed:    true,
 			Description: "Datacenter location",
+		},
+	}
+}
+
+func BaseDatacenterResourceAttributes() map[string]rschema.Attribute {
+	return map[string]rschema.Attribute{
+		"id": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Datacenter Id",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"country_code": rschema.StringAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+			Description: "Country code",
+		},
+		"location": rschema.StringAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+			Description: "Location",
 		},
 	}
 }

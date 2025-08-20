@@ -10,7 +10,7 @@ import (
 )
 
 type PublicIpsModel struct {
-	ID        types.String `tfsdk:"id"`
+	Id        types.String `tfsdk:"id"`
 	PublicIps types.List   `tfsdk:"public_ips"`
 }
 
@@ -55,7 +55,7 @@ func NewPublicIps(ctx context.Context, publicIpsResponse []PublicIpResponse) (*P
 	diags := diag.Diagnostics{}
 
 	model := &PublicIpsModel{}
-	model.ID = types.StringValue("public_ips")
+	model.Id = types.StringValue("public_ips")
 
 	publicIpModels, listDiags := NewPublicIpFromList(ctx, publicIpsResponse)
 	diags.Append(listDiags...)
