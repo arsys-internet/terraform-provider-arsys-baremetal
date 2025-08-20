@@ -620,7 +620,7 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 					),
 				},
 			},
@@ -687,7 +687,7 @@ func ServerDataSourceSchema(_ context.Context) schema.Schema {
 				Attributes:  BaseIdentifierAttributes(),
 			},
 			"cloudpanel_id": schema.StringAttribute{
-				Description: "CloudPanel ID",
+				Description: "CloudPanel Id",
 				Computed:    true,
 			},
 			"server_type": schema.StringAttribute{
@@ -870,7 +870,7 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			},
 			"cloudpanel_id": rschema.StringAttribute{
 				Computed:    true,
-				Description: "CloudPanel ID",
+				Description: "CloudPanel Id",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

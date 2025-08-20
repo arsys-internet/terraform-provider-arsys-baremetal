@@ -64,15 +64,7 @@ func (d *BaremetalModelDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	id := data.ID.ValueString()
-
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Baremetal Model Id",
-			"Baremetal model ID cannot be empty",
-		)
-		return
-	}
+	id := data.Id.ValueString()
 
 	apiResponse, err := d.client.GetBaremetalModel(id)
 	if err != nil {

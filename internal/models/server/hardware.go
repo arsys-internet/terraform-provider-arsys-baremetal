@@ -19,7 +19,7 @@ type HardwareResponse struct {
 	RAM                 int           `json:"ram"`
 	HDDs                []HDDResponse `json:"hdds"`
 	FixedInstanceSizeID *string       `json:"fixed_instance_size_id"`
-	BaremetalModelID    string        `json:"baremetal_model_id"`
+	BaremetalModelId    string        `json:"baremetal_model_id"`
 	VCore               int           `json:"vcore"`
 	CoresPerProcessor   int           `json:"cores_per_processor"`
 }
@@ -73,7 +73,7 @@ func NewHardwareObject(hardware HardwareResponse) (types.Object, diag.Diagnostic
 			"ram":                    types.Int64Value(int64(hardware.RAM)),
 			"hdds":                   hddsList,
 			"fixed_instance_size_id": fixedInstanceSizeID,
-			"baremetal_model_id":     types.StringValue(hardware.BaremetalModelID),
+			"baremetal_model_id":     types.StringValue(hardware.BaremetalModelId),
 			"vcore":                  types.Int64Value(int64(hardware.VCore)),
 			"cores_per_processor":    types.Int64Value(int64(hardware.CoresPerProcessor)),
 		})
@@ -90,7 +90,7 @@ func NeedsHardwareUpdate(hardwareAttrs map[string]attr.Value, apiHardware Hardwa
 	}
 
 	if modelID, exists := hardwareAttrs["baremetal_model_id"]; exists {
-		if helper.GetStringValue(modelID) != apiHardware.BaremetalModelID {
+		if helper.GetStringValue(modelID) != apiHardware.BaremetalModelId {
 			return true
 		}
 	}

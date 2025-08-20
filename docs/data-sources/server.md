@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute Engine"
+subcategory: "Infrastructure"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Server Data Sources"
 sidebar_current: "docs-datasource-server"

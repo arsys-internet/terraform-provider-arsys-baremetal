@@ -11,7 +11,7 @@ import (
 )
 
 type BaremetalModelResponse struct {
-	ID           string                           `json:"id"`
+	Id           string                           `json:"id"`
 	Name         string                           `json:"name"`
 	Hardware     server.BaremetalHardwareResponse `json:"hardware"`
 	StateId      int                              `json:"state_id"`
@@ -20,7 +20,7 @@ type BaremetalModelResponse struct {
 }
 
 type BaremetalModel struct {
-	ID           types.String `tfsdk:"id"`
+	Id           types.String `tfsdk:"id"`
 	Name         types.String `tfsdk:"name"`
 	Hardware     types.Object `tfsdk:"hardware"`
 	StateId      types.Int64  `tfsdk:"state_id"`
@@ -32,7 +32,7 @@ func NewBaremetalModel(_ context.Context, bmResponse BaremetalModelResponse) (Ba
 	diags := diag.Diagnostics{}
 
 	model := BaremetalModel{
-		ID:      types.StringValue(bmResponse.ID),
+		Id:      types.StringValue(bmResponse.Id),
 		Name:    types.StringValue(bmResponse.Name),
 		StateId: types.Int64Value(int64(bmResponse.StateId)),
 		State:   types.StringValue(bmResponse.State),

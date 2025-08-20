@@ -9,7 +9,7 @@ import (
 )
 
 type DatacentersListModel struct {
-	ID          types.String `tfsdk:"id"`
+	Id          types.String `tfsdk:"id"`
 	Datacenters types.List   `tfsdk:"datacenters"`
 }
 
@@ -36,7 +36,7 @@ func NewDatacenters(ctx context.Context, datacentersResponse []DatacentersRespon
 	diags := diag.Diagnostics{}
 
 	model := &DatacentersListModel{}
-	model.ID = types.StringValue("datacenters")
+	model.Id = types.StringValue("datacenters")
 
 	datacenterModels, listDiags := NewDatacenterFromList(ctx, datacentersResponse)
 	diags.Append(listDiags...)

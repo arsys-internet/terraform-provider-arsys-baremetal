@@ -1,5 +1,5 @@
 ---
-subcategory: "Compute Engine"
+subcategory: "Infrastructure"
 layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: Server"
 sidebar_current: "docs-resource-server"
@@ -54,9 +54,8 @@ resource "arsys-baremetal_server" "complete_server" {
 
 ### Update Server
 
-
 ```hcl
-resource "arsys-baremetal_server" "example" {
+resource "arsys-baremetal_server" "complete_server" {
   name        = "baremetal-server-updated"
   description = "Updated server description"
 }

@@ -69,7 +69,7 @@ func BaseIdentifierAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed:    true,
-			Description: "Resource ID",
+			Description: "Resource Id",
 		},
 		"name": schema.StringAttribute{
 			Computed:    true,

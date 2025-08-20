@@ -11,7 +11,7 @@ import (
 )
 
 type BaseDatacenterResponse struct {
-	ID          string `json:"id"`
+	Id          string `json:"id"`
 	CountryCode string `json:"country_code"`
 	Location    string `json:"location"`
 }
@@ -34,7 +34,7 @@ func NewBaseDatacenterObject(datacenter BaseDatacenterResponse) (types.Object, d
 	return types.ObjectValue(
 		baseDatacenterAttributeTypes(),
 		map[string]attr.Value{
-			"id":           types.StringValue(datacenter.ID),
+			"id":           types.StringValue(datacenter.Id),
 			"country_code": types.StringValue(datacenter.CountryCode),
 			"location":     types.StringValue(datacenter.Location),
 		},
@@ -62,7 +62,7 @@ func BaseDatacenterResourceAttributes() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"id": rschema.StringAttribute{
 			Computed:    true,
-			Description: "Datacenter ID",
+			Description: "Datacenter Id",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},

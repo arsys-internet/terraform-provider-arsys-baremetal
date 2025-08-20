@@ -63,12 +63,12 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	if id == "" {
 		resp.Diagnostics.AddError(
 			"Invalid public IP Id",
-			"Public IP ID cannot be empty",
+			"Public IP Id cannot be empty",
 		)
 		return
 	}
