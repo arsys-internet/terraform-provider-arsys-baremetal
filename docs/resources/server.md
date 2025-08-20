@@ -1,7 +1,7 @@
 ---
 subcategory: "Compute Engine"
 layout: "arsys-baremetal"
-page_title: "Arsys Baremetal: server"
+page_title: "Arsys Baremetal: Server"
 sidebar_current: "docs-resource-server"
 description: |-
   Creates and manages Servers in Arsys Baremetal.
