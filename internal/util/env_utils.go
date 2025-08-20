@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// TODO: Setear de manera dinamica las variables de entorno
+// TODO: Set environment variables dynamically
 func LoadEnv() error {
 	envLocations := []string{
 		".env",
