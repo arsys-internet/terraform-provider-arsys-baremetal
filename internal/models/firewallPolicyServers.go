@@ -36,11 +36,11 @@ func FirewallPolicyServerIPsSchema(_ context.Context) schema.Schema {
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Required:    true,
-				Description: "ID of the firewall policy",
+				Description: "Id of the firewall policy",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID",
+						"must be a valid Id",
 					),
 				},
 			},

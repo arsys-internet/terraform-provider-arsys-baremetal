@@ -16,3 +16,8 @@ output "firewall_policy_rules" {
 output "firewall_policy_rule" {
   value = data.arsys-baremetal_firewall_policy_rule.example
 }
+
+// Output for all server IPs assigned to a firewall policy
+output "firewall_policy_server_ips" {
+  value = data.arsys-baremetal_firewall_policy_server_ips.all
+}

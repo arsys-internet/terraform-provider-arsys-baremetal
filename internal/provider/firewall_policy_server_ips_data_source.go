@@ -3,9 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 var (

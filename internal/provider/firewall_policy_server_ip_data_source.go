@@ -68,27 +68,11 @@ func (d *FirewallPolicyServerIPDataSource) Read(ctx context.Context, req datasou
 	firewallPolicyId := data.FirewallPolicyId.ValueString()
 	serverIpId := data.ServerIpId.ValueString()
 
-	if firewallPolicyId == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Firewall Policy Id",
-			"Firewall Policy Id cannot be empty",
-		)
-		return
-	}
-
-	if serverIpId == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Server IP Id",
-			"Server IP Id cannot be empty",
-		)
-		return
-	}
-
 	apiResponse, err := d.client.GetFirewallPolicyServerIP(firewallPolicyId, serverIpId)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy server IP",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -96,7 +80,7 @@ func (d *FirewallPolicyServerIPDataSource) Read(ctx context.Context, req datasou
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Firewall policy not found",
-			fmt.Sprintf("Firewall policy with ID %s not found", firewallPolicyId),
+			fmt.Sprintf("Firewall policy with Id %s not found", firewallPolicyId),
 		)
 		return
 	}

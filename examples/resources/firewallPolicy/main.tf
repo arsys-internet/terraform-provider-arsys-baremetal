@@ -46,3 +46,9 @@ resource "arsys-baremetal_firewall_policy_rule_remove" "remove" {
   id = var.firewall_policy_id
   rule_id = var.rule_id
 }
+
+// Example that assigns server IPs to a firewall policy
+resource "arsys-baremetal_firewall_policy_server_ips" "example" {
+  id = var.firewall_policy_id
+  server_ips = ["08D42710D6071AE597C46EF3C6EB2272"] //Additional server IP Ids can be added inside the list
+}

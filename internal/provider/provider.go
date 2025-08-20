@@ -2,6 +2,11 @@ package provider
 
 import (
 	"context"
+	"log"
+	"os"
+	"terraform-provider-arsys-baremetal/internal/client"
+	"terraform-provider-arsys-baremetal/internal/util"
+
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"

@@ -33,7 +33,7 @@ type FirewallPolicyServerModel struct {
 	Default         types.Int64  `tfsdk:"default"`
 	Rules           types.List   `tfsdk:"rules"`
 	ServerIPsDetail types.List   `tfsdk:"server_ips_detail"`
-	CloudPanelID    types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId    types.String `tfsdk:"cloudpanel_id"`
 }
 
 func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) (*FirewallPolicyServerModel, diag.Diagnostics) {
@@ -44,7 +44,7 @@ func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) 
 
 	serverIPIds := make([]string, len(fp.ServerIPs))
 	for i, serverIP := range fp.ServerIPs {
-		serverIPIds[i] = serverIP.ID
+		serverIPIds[i] = serverIP.Id
 	}
 	serverIPsSet, _ := types.SetValueFrom(context.Background(), types.StringType, serverIPIds)
 
@@ -59,7 +59,7 @@ func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) 
 	}
 
 	model := &FirewallPolicyServerModel{
-		Id:              types.StringValue(fp.ID),
+		Id:              types.StringValue(fp.Id),
 		Name:            types.StringValue(fp.Name),
 		Description:     description,
 		State:           types.StringValue(fp.State),
@@ -68,7 +68,7 @@ func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) 
 		Rules:           rulesList,
 		ServerIPs:       serverIPsSet,
 		ServerIPsDetail: serverIPsList,
-		CloudPanelID:    types.StringValue(fp.CloudPanelID),
+		CloudPanelId:    types.StringValue(fp.CloudPanelID),
 	}
 
 	return model, diags
@@ -97,7 +97,7 @@ type FirewallPolicyServerIpModel struct {
 func NewFirewallPolicyServerIpDataSourceModel(_ context.Context, firewallPolicyId string, response firewallPolicies.FirewallServerIPResponse) *FirewallPolicyServerIpModel {
 	return &FirewallPolicyServerIpModel{
 		FirewallPolicyId: types.StringValue(firewallPolicyId),
-		ServerIpId:       types.StringValue(response.ID),
+		ServerIpId:       types.StringValue(response.Id),
 		IP:               types.StringValue(response.IP),
 		ServerName:       types.StringValue(response.ServerName),
 	}
@@ -157,7 +157,7 @@ func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 					),
 				},
 			},
@@ -167,7 +167,7 @@ func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.RequiresReplace(),
 				},
-				Description: "List of server IP IDs to assign to the firewall policy",
+				Description: "List of server IP Ids to assign to the firewall policy",
 			},
 			"name": rschema.StringAttribute{
 				Computed:    true,

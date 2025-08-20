@@ -75,19 +75,16 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Assigning server IPs to firewall policy: %s", firewallPolicyID))
-	tflog.Debug(ctx, fmt.Sprintf("Server IPs to assign: %v", assignRequest))
-
 	apiResponse, assignErr := r.client.AssignServerIPsToFirewallPolicy(firewallPolicyID, assignRequest)
 	if assignErr != nil {
 		resp.Diagnostics.AddError(
 			"Error assigning server IPs to firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", assignErr.Error()),
 		)
 		return
 	}
 
-	timeouts := util.GetResourceTimeouts("FIREWALL_POLICY_SERVER_IPS")
+	timeouts := util.GetResourceTimeouts("FIREWALL_POLICY_OPERATIONS")
 	waitOptions := util.NewWaitOptions(
 		timeouts.Default,
 		timeouts.RetryInterval,
@@ -96,7 +93,7 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 		[]string{util.StateActive},
 	)
 
-	id := apiResponse.ID
+	id := apiResponse.Id
 
 	_, diags := util.WaitForResourceState(
 		ctx,
@@ -139,13 +136,13 @@ func (r *FirewallPolicyServerIPsAssignResource) Read(ctx context.Context, req re
 		return
 	}
 
-	firewallPolicyID := data.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy assignment: %s", firewallPolicyID))
+	firewallPolicyId := data.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy assignment: %s", firewallPolicyId))
 
-	apiResponse, err := r.client.GetFirewallPolicy(firewallPolicyID)
+	apiResponse, err := r.client.GetFirewallPolicy(firewallPolicyId)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyID))
+			tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -158,7 +155,7 @@ func (r *FirewallPolicyServerIPsAssignResource) Read(ctx context.Context, req re
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyID))
+		tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
 		resp.State.RemoveResource(ctx)
 		return
 	}
