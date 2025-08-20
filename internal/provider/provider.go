@@ -170,6 +170,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewPublicNetworksDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
+		NewSshKeyDataSource,
+		NewSshKeysDataSource,
 	}
 }
 
