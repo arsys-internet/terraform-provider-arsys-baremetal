@@ -7,7 +7,7 @@ description: |-
   Get information about Firewall Policy Server Ips of a Firewall Policy in Arsys Baremetal
 ---
 
-# arsys-baremetal\_firewall_policy_server_ips
+# arsys-baremetal\_firewall\_policy\_server\_ips
 
 The **Firewall policy server ips data source** can be used to search and return all existing server ips from a specific
 firewall policy.
