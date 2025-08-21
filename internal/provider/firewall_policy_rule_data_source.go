@@ -64,7 +64,7 @@ func (d *FirewallPolicyRuleDataSource) Read(ctx context.Context, req datasource.
 		return
 	}
 
-	firewallPolicyId := data.FirewallPolicyID.ValueString()
+	firewallPolicyId := data.FirewallPolicyId.ValueString()
 	firewallPolicyRuleId := data.Id.ValueString()
 
 	if firewallPolicyId == "" {
