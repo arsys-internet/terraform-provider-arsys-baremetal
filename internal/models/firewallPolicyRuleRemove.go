@@ -27,7 +27,7 @@ type FirewallPolicyRuleRemoveResourceModel struct {
 	Default      types.Int64  `tfsdk:"default"`
 	Rules        types.List   `tfsdk:"rules"`
 	ServerIPs    types.List   `tfsdk:"server_ips"`
-	CloudPanelID types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId types.String `tfsdk:"cloudpanel_id"`
 }
 
 func NewFirewallPolicyRuleRemoveResourceModel(_ context.Context, ruleId string, fp FirewallPolicyResponse) (*FirewallPolicyRuleRemoveResourceModel, diag.Diagnostics) {
@@ -56,7 +56,7 @@ func NewFirewallPolicyRuleRemoveResourceModel(_ context.Context, ruleId string, 
 		Default:      types.Int64Value(int64(fp.Default)),
 		Rules:        rulesList,
 		ServerIPs:    serverIPsList,
-		CloudPanelID: types.StringValue(fp.CloudPanelID),
+		CloudPanelId: types.StringValue(fp.CloudPanelID),
 	}
 
 	return model, diags

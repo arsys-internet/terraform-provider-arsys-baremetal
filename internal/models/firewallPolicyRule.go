@@ -13,7 +13,7 @@ import (
 )
 
 type FirewallPolicyRuleModel struct {
-	FirewallPolicyID types.String `tfsdk:"firewall_policy_id"`
+	FirewallPolicyId types.String `tfsdk:"firewall_policy_id"`
 	Id               types.String `tfsdk:"id"`
 	Protocol         types.String `tfsdk:"protocol"`
 	PortFrom         types.Int64  `tfsdk:"port_from"`
@@ -33,7 +33,7 @@ func NewFirewallPolicyRuleModel(_ context.Context, firewallPolicyId string, rule
 
 	model := &FirewallPolicyRuleModel{
 		Id:               types.StringValue(rule.Id),
-		FirewallPolicyID: types.StringValue(firewallPolicyId),
+		FirewallPolicyId: types.StringValue(firewallPolicyId),
 		Protocol:         types.StringValue(rule.Protocol),
 		PortFrom:         types.Int64Value(int64(rule.PortFrom)),
 		PortTo:           types.Int64Value(int64(rule.PortTo)),

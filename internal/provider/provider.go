@@ -152,6 +152,7 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewPublicIpResource,
 		NewPublicNetworkResource,
 		NewPublicNetworkServerResource,
+		NewServerResource,
 	}
 }
 
@@ -161,6 +162,8 @@ func (p *BaremetalProvider) EphemeralResources(_ context.Context) []func() ephem
 
 func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewBaremetalModelDataSource,
+		NewBaremetalModelsDataSource,
 		NewDatacenterDataSource,
 		NewDatacentersDataSource,
 		NewFirewallPolicyDataSource,
@@ -175,6 +178,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewPublicIpsDataSource,
 		NewPublicNetworkDataSource,
 		NewPublicNetworksDataSource,
+		NewServerDataSource,
+		NewServersDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
 	}

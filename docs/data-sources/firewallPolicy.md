@@ -7,7 +7,7 @@ description: |-
   Get information about Firewall Policies in Arsys Baremetal
 ---
 
-# arsys-baremetal\_firewall_policies
+# arsys-baremetal\_firewall\_policies
 
 The **Firewall policies data source** can be used to search and return all existing firewall policies.
 Also, it can be used to search for and return an existing firewall policy.

@@ -16,7 +16,7 @@ import (
 )
 
 type PublicIpModel struct {
-	ID           types.String `tfsdk:"id"`
+	Id           types.String `tfsdk:"id"`
 	IP           types.String `tfsdk:"ip"`
 	Type         types.String `tfsdk:"type"`
 	AssignedTo   types.Object `tfsdk:"assigned_to"`
@@ -34,7 +34,7 @@ type PublicIpResourceModel struct {
 }
 
 type PublicIpResponse struct {
-	ID           string                 `json:"id"`
+	Id           string                 `json:"id"`
 	IP           string                 `json:"ip"`
 	Type         string                 `json:"type"`
 	AssignedTo   *AssignedToResponse    `json:"assigned_to"`
@@ -47,7 +47,7 @@ type PublicIpResponse struct {
 }
 
 type AssignedToResponse struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
@@ -70,7 +70,7 @@ func NewAssignedToObject(assignedTo AssignedToResponse) (types.Object, diag.Diag
 	return types.ObjectValue(
 		assignedToAttributeTypes(),
 		map[string]attr.Value{
-			"id":   types.StringValue(assignedTo.ID),
+			"id":   types.StringValue(assignedTo.Id),
 			"name": types.StringValue(assignedTo.Name),
 			"type": types.StringValue(assignedTo.Type),
 		},
@@ -87,7 +87,7 @@ func newPublicIpFromResponse(_ context.Context, ip *PublicIpResponse) (*PublicIp
 
 	model := &PublicIpModel{}
 
-	model.ID = types.StringValue(ip.ID)
+	model.Id = types.StringValue(ip.Id)
 	model.IP = types.StringValue(ip.IP)
 	model.Type = types.StringValue(ip.Type)
 	model.IsDHCP = types.BoolValue(ip.IsDHCP)
@@ -137,7 +137,7 @@ func NewPublicIpResourceModel(ctx context.Context, ip *PublicIpResponse) (*Publi
 
 	resourceModel := &PublicIpResourceModel{
 		PublicIpModel: *baseModel,
-		DatacenterId:  types.StringValue(ip.Datacenter.ID),
+		DatacenterId:  types.StringValue(ip.Datacenter.Id),
 	}
 
 	return resourceModel, diags
@@ -173,11 +173,11 @@ func assignedToAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed:    true,
-			Description: "ID of the resource to which the IP is assigned",
+			Description: "Id of the resource to which the IP is assigned",
 			Validators: []validator.String{
 				stringvalidator.RegexMatches(
 					regexp.MustCompile(util.HexID32Pattern),
-					"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+					"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 				),
 			},
 		},
@@ -213,7 +213,7 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
 					),
 				},
 			},
@@ -237,7 +237,7 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 			"assigned_to": AssignedToNestedAttribute(),
 			"subnet_id": schema.StringAttribute{
 				Computed:    true,
-				Description: "ID of the subnet to which the IP belongs",
+				Description: "Id of the subnet to which the IP belongs",
 			},
 			"reverse_dns": schema.StringAttribute{
 				Computed:    true,
@@ -324,7 +324,7 @@ func PublicIpResourceSchema(_ context.Context) rschema.Schema {
 			"assigned_to": AssignedToNestedAttribute(),
 			"subnet_id": rschema.StringAttribute{
 				Computed:    true,
-				Description: "ID of the subnet to which the IP belongs",
+				Description: "Id of the subnet to which the IP belongs",
 			},
 			"is_dhcp": rschema.BoolAttribute{
 				Computed:    true,
