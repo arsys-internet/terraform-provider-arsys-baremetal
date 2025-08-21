@@ -74,12 +74,12 @@ func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) 
 	return model, diags
 }
 
-func (m *FirewallPolicyServerModel) ToAssignRequest(ctx context.Context) (*FirewallPolicyServerAssignRequest, diag.Diagnostic) {
+func (m *FirewallPolicyServerModel) ToAssignRequest(ctx context.Context) (*FirewallPolicyServerAssignRequest, diag.Diagnostics) {
 	var serverIPs []string
 
 	diags := m.ServerIPs.ElementsAs(ctx, &serverIPs, false)
 	if diags.HasError() {
-		return nil, diags.Errors()[0]
+		return nil, diags
 	}
 
 	return &FirewallPolicyServerAssignRequest{

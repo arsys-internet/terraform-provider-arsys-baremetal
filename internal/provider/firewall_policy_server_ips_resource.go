@@ -66,12 +66,9 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 
 	firewallPolicyID := data.Id.ValueString()
 
-	assignRequest, err := data.ToAssignRequest(ctx)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error converting model to request",
-			fmt.Sprintf("Could not convert server IPs to request: %s", err),
-		)
+	assignRequest, diags := data.ToAssignRequest(ctx)
+	if diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -95,14 +92,14 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 
 	id := apiResponse.Id
 
-	_, diags := util.WaitForResourceState(
+	_, waitDiags := util.WaitForResourceState(
 		ctx,
 		id,
 		r.client,
 		waitOptions,
 	)
 
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(waitDiags...)
 	if resp.Diagnostics.HasError() {
 		tflog.Error(ctx, "Wait for firewall policy state failed")
 		return
@@ -112,7 +109,7 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 	if fwErr != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
-			fmt.Sprintf("Could not get final firewall policy state: %s", err),
+			fmt.Sprintf("Could not get final firewall policy state: %s", fwErr.Error()),
 		)
 		return
 	}
@@ -149,7 +146,7 @@ func (r *FirewallPolicyServerIPsAssignResource) Read(ctx context.Context, req re
 
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy",
-			fmt.Sprintf("Error: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
