@@ -23,3 +23,26 @@ resource "arsys-baremetal_firewall_policy" "test_policy" {
 resource "arsys-baremetal_firewall_policy" "test_policy_import" {
 }
 // Execute terraform import command to import the existing firewall policy
+
+
+// Example that adds a rule to an existing firewall policy
+resource "arsys-baremetal_firewall_policy_rule_add" "allow_udp" {
+  id = var.firewall_policy_id
+  rules = [
+    {
+      protocol  = "UDP"
+      port_from = 85
+      port_to   = 85
+      source    = "8.8.8.8"
+      action    = "ALLOW"
+      description = "Allow DNS queries from Public DNS"
+    }
+    // Additional rules can be added here
+  ]
+}
+
+// Example that removes a rule from an existing firewall policy
+resource "arsys-baremetal_firewall_policy_rule_remove" "remove" {
+  id = var.firewall_policy_id
+  rule_id = var.rule_id
+}

@@ -7,31 +7,30 @@ import (
 	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var (
-	_ datasource.DataSource              = &FirewallPolicyDataSource{}
-	_ datasource.DataSourceWithConfigure = &FirewallPolicyDataSource{}
+	_ datasource.DataSource              = &FirewallPolicyRulesDataSource{}
+	_ datasource.DataSourceWithConfigure = &FirewallPolicyRulesDataSource{}
 )
 
-func NewFirewallPolicyDataSource() datasource.DataSource {
-	return &FirewallPolicyDataSource{}
+func NewFirewallPolicyRulesDataSource() datasource.DataSource {
+	return &FirewallPolicyRulesDataSource{}
 }
 
-type FirewallPolicyDataSource struct {
+type FirewallPolicyRulesDataSource struct {
 	client *service.ApiFirewallPolicyService
 }
 
-func (d *FirewallPolicyDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_firewall_policy"
+func (d *FirewallPolicyRulesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_firewall_policy_rules"
 }
 
-func (d *FirewallPolicyDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = models.FirewallPolicyDataSourceSchema(ctx)
+func (d *FirewallPolicyRulesDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = models.FirewallPolicyRulesSchema(ctx)
 }
 
-func (d *FirewallPolicyDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *FirewallPolicyRulesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -57,8 +56,8 @@ func (d *FirewallPolicyDataSource) Configure(_ context.Context, req datasource.C
 	d.client = policyService
 }
 
-func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data models.FirewallPolicyModel
+func (d *FirewallPolicyRulesDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data models.FirewallPolicyRulesModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -67,20 +66,10 @@ func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.Read
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Firewall Policy Id",
-			"id cannot be empty",
-		)
-		return
-	}
-
-	tflog.Info(ctx, fmt.Sprintf("Reading Firewall Policy data source with Id: %s", id))
-
-	apiResponse, err := d.client.GetFirewallPolicy(id)
+	apiResponse, err := d.client.GetFirewallPolicyRules(id)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading firewall policy",
+			"Error reading firewall policy rules",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -94,13 +83,11 @@ func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	model, diags := models.NewFirewallPolicyModel(ctx, *apiResponse)
+	model, diags := models.NewFirewallPolicyRulesModel(ctx, id, *apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	tflog.Info(ctx, fmt.Sprintf("Successfully read firewall policy data source with Id: %s", id))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
