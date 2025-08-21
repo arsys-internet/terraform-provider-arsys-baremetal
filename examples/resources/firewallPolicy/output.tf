@@ -12,3 +12,8 @@ output "firewall_policy_rule_add" {
 output "firewall_policy_server_rule_remove" {
   value = arsys-baremetal_firewall_policy_rule_remove.remove
 }
+
+// Output for a specific firewall policy after a server IP is assigned
+output "firewall_policy_server_ips" {
+  value = arsys-baremetal_firewall_policy_server_ips.example
+}

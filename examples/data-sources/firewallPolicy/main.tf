@@ -16,3 +16,14 @@ data "arsys-baremetal_firewall_policy_rule" "example" {
   firewall_policy_id = var.firewall_policy_id
   id                 = var.rule_id
 }
+
+//Example to discover all server IPs that have been associated with a firewall policy
+data "arsys-baremetal_firewall_policy_server_ips" "all" {
+  id = var.firewall_policy_id
+}
+
+# Example to retrieve a specific server IP assigned to a firewall policy
+data "arsys-baremetal_firewall_policy_server_ip" "example" {
+  firewall_policy_id = var.firewall_policy_id
+  server_ip_id       = var.server_ip_id
+}
