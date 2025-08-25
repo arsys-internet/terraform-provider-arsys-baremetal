@@ -60,7 +60,7 @@ func (d *PublicIpsDataSource) Read(ctx context.Context, _ datasource.ReadRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading public IPs",
-			fmt.Sprintf("Could not read public IPs: %s", err),
+			fmt.Sprintf("Could not read public IPs: %s", err.Error()),
 		)
 		return
 	}
