@@ -1,4 +1,4 @@
-package privateNetwork
+package subnet
 
 import (
 	"encoding/json"

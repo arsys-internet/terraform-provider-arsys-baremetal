@@ -49,7 +49,7 @@ terraform import arsys-baremetal_public_ip.example_import {ip uuid}
 
 ### Destroy
 
-To destroy a IP, use the following command:
+To destroy an IP, use the following command:
 
 ```shell
 terraform destroy -target=arsys-baremetal_public_ip.example

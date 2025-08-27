@@ -180,6 +180,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewServersDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
+		NewSubnetsDataSource,
+		NewSubnetDataSource,
 	}
 }
 

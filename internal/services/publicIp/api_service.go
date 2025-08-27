@@ -18,7 +18,8 @@ type ApiPublicIpService struct {
 	client *client.APIClient
 }
 
-var subnetTypeRegex = regexp.MustCompile(`^IPV[46]`)
+var ipTypeRegex = regexp.MustCompile(`^IPV[46]`)
+var subnetRegex = regexp.MustCompile(`^IPV[46]Subnet$`)
 
 type ApiPublicIpServiceInterface interface {
 	GetPublicIp(id string) (*models.PublicIpResponse, error)
@@ -27,6 +28,7 @@ type ApiPublicIpServiceInterface interface {
 	UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error)
 	DeletePublicIp(id string) error
 	GetSubnets() ([]models.PublicIpResponse, error)
+	GetSubnet(id string) (*models.PublicIpResponse, error)
 }
 
 func NewApiPublicIpService(client *client.APIClient) *ApiPublicIpService {
@@ -68,7 +70,7 @@ func (s *ApiPublicIpService) GetPublicIp(id string) (*models.PublicIpResponse, e
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	if subnetTypeRegex.MatchString(publicIp.Type) {
+	if !ipTypeRegex.MatchString(publicIp.Type) {
 		return nil, fmt.Errorf("public ip not found")
 	}
 
@@ -100,7 +102,7 @@ func (s *ApiPublicIpService) GetPublicIps() ([]models.PublicIpResponse, error) {
 
 	var filteredPublicIps []models.PublicIpResponse
 	for _, ip := range publicIps {
-		if subnetTypeRegex.MatchString(ip.Type) {
+		if ipTypeRegex.MatchString(ip.Type) {
 			filteredPublicIps = append(filteredPublicIps, ip)
 		}
 	}
@@ -206,13 +208,42 @@ func (s *ApiPublicIpService) GetSubnets() ([]models.PublicIpResponse, error) {
 
 	var filteredPublicIps []models.PublicIpResponse
 	for _, ip := range publicIps {
-		subnetRegex := regexp.MustCompile(`^IPV[46]Subnet$`)
 		if subnetRegex.MatchString(ip.Type) {
 			filteredPublicIps = append(filteredPublicIps, ip)
 		}
 	}
 
 	return filteredPublicIps, nil
+}
+
+func (s *ApiPublicIpService) GetSubnet(id string) (*models.PublicIpResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/public_ips/%s", id))
+
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get subnet")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var subnet models.PublicIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&subnet); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	if !subnetRegex.MatchString(subnet.Type) {
+		return nil, fmt.Errorf("subnet not found")
+	}
+
+	return &subnet, nil
 }
 
 func (s *ApiPublicIpService) GetResource(id string) (util.ResourceModel, error) {
