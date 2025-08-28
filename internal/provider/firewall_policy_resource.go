@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
+	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -84,69 +84,9 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 			"Missing required field",
 			"'rules' field is required when creating a firewall policy",
 		)
-	}
-	var rulesObjects []types.Object
-	if diags := data.Rules.ElementsAs(ctx, &rulesObjects, false); diags.HasError() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("rules"),
-			"Invalid rules format",
-			"Could not parse rules array",
-		)
-		return
-	}
-
-	if len(rulesObjects) == 0 {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("rules"),
-			"Empty rules array",
-			"'rules' must contain at least one rule",
-		)
-		return
-	}
-
-	for i, ruleObj := range rulesObjects {
-		attrs := ruleObj.Attributes()
-
-		protocolAttr, protocolExists := attrs["protocol"]
-		if protocolExists {
-			if protocolVal, ok := protocolAttr.(types.String); ok && !protocolVal.IsNull() {
-				portFromAttr, portFromExists := attrs["port_from"]
-				if !portFromExists {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("rules").AtListIndex(i).AtName("port_from"),
-						"Missing required field",
-						fmt.Sprintf("'port_from' field is required in rule[%d]", i),
-					)
-					continue
-				}
-
-				if portFromVal, ok := portFromAttr.(types.Int64); ok && portFromVal.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("rules").AtListIndex(i).AtName("port_from"),
-						"Missing required field",
-						fmt.Sprintf("'port_from' field is required in rule[%d]", i),
-					)
-				}
-
-				portToAttr, portToExists := attrs["port_to"]
-				if !portToExists {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("rules").AtListIndex(i).AtName("port_to"),
-						"Missing required field",
-						fmt.Sprintf("'port_to' field is required in rule[%d]", i),
-					)
-					continue
-				}
-
-				if portToVal, ok := portToAttr.(types.Int64); ok && portToVal.IsNull() {
-					resp.Diagnostics.AddAttributeError(
-						path.Root("rules").AtListIndex(i).AtName("port_to"),
-						"Missing required field",
-						fmt.Sprintf("'port_to' field is required in rule[%d]", i),
-					)
-				}
-			}
-		}
+	} else {
+		rulesDiags := firewallPolicies.ValidateFirewallRules(data.Rules, path.Root("rules"))
+		resp.Diagnostics.Append(rulesDiags...)
 	}
 
 	if resp.Diagnostics.HasError() {
@@ -186,7 +126,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 
 	_, diags := util.WaitForResourceState(
 		ctx,
-		apiResponse.ID,
+		apiResponse.Id,
 		r.client,
 		waitOptions,
 	)
@@ -197,7 +137,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	finalFirewallPolicy, err := r.client.GetFirewallPolicy(apiResponse.ID)
+	finalFirewallPolicy, err := r.client.GetFirewallPolicy(apiResponse.Id)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
@@ -213,7 +153,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created firewall policy with ID: %s", finalModel.ID.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created firewall policy with Id: %s", finalModel.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
@@ -226,14 +166,14 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy with Id: %s", id))
 
 	apiResponse, err := r.client.GetFirewallPolicy(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", id))
+			tflog.Info(ctx, fmt.Sprintf("Firewall policy with Id %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -246,7 +186,7 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", id))
+		tflog.Info(ctx, fmt.Sprintf("Firewall policy with Id %s not found, removing from state", id))
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -274,8 +214,8 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	id := state.ID.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Updating firewall policy with ID: %s", id))
+	id := state.Id.ValueString()
+	tflog.Info(ctx, fmt.Sprintf("Updating firewall policy with Id: %s", id))
 
 	hasChanges := false
 	if !plan.Name.Equal(state.Name) {
@@ -315,7 +255,7 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 		finalModel.Description = plan.Description
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully updated firewall policy with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Successfully updated firewall policy with Id: %s", id))
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
@@ -327,9 +267,9 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Deleting firewall policy with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleting firewall policy with Id: %s", id))
 
 	err := r.client.DeleteFirewallPolicy(id)
 	if err != nil {
@@ -369,7 +309,7 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Deleted firewall policy with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleted firewall policy with Id: %s", id))
 }
 
 func (r *FirewallPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

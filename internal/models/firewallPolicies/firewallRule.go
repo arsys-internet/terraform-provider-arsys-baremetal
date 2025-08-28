@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -19,7 +20,7 @@ import (
 )
 
 type FirewallRuleResponse struct {
-	ID          string  `json:"id"`
+	Id          string  `json:"id"`
 	Protocol    string  `json:"protocol"`
 	PortFrom    int     `json:"port_from"`
 	PortTo      int     `json:"port_to"`
@@ -39,7 +40,7 @@ func NewFirewallRuleObject(rule FirewallRuleResponse) (types.Object, diag.Diagno
 	}
 
 	attrs := map[string]attr.Value{
-		"id":          types.StringValue(rule.ID),
+		"id":          types.StringValue(rule.Id),
 		"protocol":    types.StringValue(rule.Protocol),
 		"port_from":   types.Int64Value(int64(rule.PortFrom)),
 		"port_to":     types.Int64Value(int64(rule.PortTo)),
@@ -83,10 +84,12 @@ func NewFirewallRulesList(rules []FirewallRuleResponse) (types.List, diag.Diagno
 }
 
 type FirewallRuleCreateRequest struct {
-	Protocol string `json:"protocol"`
-	PortFrom *int   `json:"port_from,omitempty"`
-	PortTo   *int   `json:"port_to,omitempty"`
-	Source   string `json:"source,omitempty"`
+	Protocol    string  `json:"protocol"`
+	PortFrom    int     `json:"port_from"`
+	PortTo      int     `json:"port_to"`
+	Source      *string `json:"source,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Action      *string `json:"action,omitempty"`
 }
 
 func ConvertRulesToCreateRequest(rules types.List) ([]FirewallRuleCreateRequest, error) {
@@ -111,18 +114,31 @@ func ConvertRulesToCreateRequest(rules types.List) ([]FirewallRuleCreateRequest,
 			rule.Protocol = protocolVal.ValueString()
 		}
 
-		if portFromVal, ok := attrs["port_from"].(types.Int64); ok && !portFromVal.IsNull() {
-			port := int(portFromVal.ValueInt64())
-			rule.PortFrom = &port
+		if portFromVal, ok := attrs["port_from"].(types.Int64); !ok || portFromVal.IsNull() {
+			return nil, fmt.Errorf("rule[%d]: port_from is required", i)
+		} else {
+			rule.PortFrom = int(portFromVal.ValueInt64())
 		}
 
-		if portToVal, ok := attrs["port_to"].(types.Int64); ok && !portToVal.IsNull() {
-			port := int(portToVal.ValueInt64())
-			rule.PortTo = &port
+		if portToVal, ok := attrs["port_to"].(types.Int64); !ok || portToVal.IsNull() {
+			return nil, fmt.Errorf("rule[%d]: port_to is required", i)
+		} else {
+			rule.PortTo = int(portToVal.ValueInt64())
 		}
 
-		if sourceVal, ok := attrs["source"].(types.String); ok && !sourceVal.IsNull() {
-			rule.Source = sourceVal.ValueString()
+		if sourceVal, ok := attrs["source"].(types.String); ok && !sourceVal.IsNull() && sourceVal.ValueString() != "" {
+			source := sourceVal.ValueString()
+			rule.Source = &source
+		}
+
+		if descVal, ok := attrs["description"].(types.String); ok && !descVal.IsNull() {
+			desc := descVal.ValueString()
+			rule.Description = &desc
+		}
+
+		if actionVal, ok := attrs["action"].(types.String); ok && !actionVal.IsNull() && actionVal.ValueString() != "" {
+			action := actionVal.ValueString()
+			rule.Action = &action
 		}
 
 		result = append(result, rule)
@@ -222,13 +238,6 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
-		"id": rschema.StringAttribute{
-			Computed:    true,
-			Description: "Rule identifier",
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
-		},
 		"description": rschema.StringAttribute{
 			Optional:    true,
 			Computed:    true,
@@ -239,10 +248,63 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 		},
 		"action": rschema.StringAttribute{
 			Computed:    true,
+			Optional:    true,
 			Description: "Rule action (allow/deny)",
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
 			},
 		},
+		"id": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Rule identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
 	}
+}
+
+func ValidateFirewallRules(rules types.List, basePath path.Path) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if rules.IsNull() || rules.IsUnknown() {
+		return diags
+	}
+
+	var rulesObjects []types.Object
+	if ruleDiags := rules.ElementsAs(context.Background(), &rulesObjects, false); ruleDiags.HasError() {
+		diags.Append(ruleDiags...)
+		return diags
+	}
+
+	for i, ruleObj := range rulesObjects {
+		attrs := ruleObj.Attributes()
+		ruleBasePath := basePath.AtListIndex(i)
+
+		if protocolVal, ok := attrs["protocol"].(types.String); !ok || protocolVal.IsNull() || protocolVal.ValueString() == "" {
+			diags.AddAttributeError(
+				ruleBasePath.AtName("protocol"),
+				"Missing required field",
+				fmt.Sprintf("'protocol' field is required in rule[%d]", i),
+			)
+		}
+
+		if portFromVal, ok := attrs["port_from"].(types.Int64); !ok || portFromVal.IsNull() {
+			diags.AddAttributeError(
+				ruleBasePath.AtName("port_from"),
+				"Missing required field",
+				fmt.Sprintf("'port_from' field is required in rule[%d]", i),
+			)
+		}
+
+		if portToVal, ok := attrs["port_to"].(types.Int64); !ok || portToVal.IsNull() {
+			diags.AddAttributeError(
+				ruleBasePath.AtName("port_to"),
+				"Missing required field",
+				fmt.Sprintf("'port_to' field is required in rule[%d]", i),
+			)
+		}
+	}
+
+	return diags
 }

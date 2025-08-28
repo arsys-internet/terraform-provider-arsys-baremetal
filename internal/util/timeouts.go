@@ -53,8 +53,12 @@ func getDefaultsForResource(resourcePrefix string) resourceDefaults {
 		return resourceDefaults{8 * time.Minute, 15 * time.Second, 15 * time.Second}
 	case "FIREWALL_POLICY":
 		return resourceDefaults{5 * time.Minute, 10 * time.Second, 5 * time.Second}
+	case "FIREWALL_POLICY_OPERATIONS":
+		return resourceDefaults{40 * time.Minute, 30 * time.Second, 20 * time.Second}
 	case "PUBLIC_IP":
 		return resourceDefaults{5 * time.Minute, 10 * time.Second, 5 * time.Second}
+	case "SUBNET":
+		return resourceDefaults{15 * time.Minute, 15 * time.Second, 15 * time.Second}
 	default:
 		// Generic default fallback
 		return resourceDefaults{20 * time.Minute, 20 * time.Second, 5 * time.Second}

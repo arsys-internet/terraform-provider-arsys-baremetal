@@ -69,14 +69,14 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading public ip with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading public ip with Id: %s", id))
 
 	apiResponse, err := r.client.GetPublicIp(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Public ip with ID %s not found, removing from state", id))
+			tflog.Info(ctx, fmt.Sprintf("Public ip with Id %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -89,7 +89,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Public ip with ID %s not found, removing from state", id))
+		tflog.Info(ctx, fmt.Sprintf("Public ip with Id %s not found, removing from state", id))
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -129,7 +129,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created public ip with ID: %s", model.ID.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created public ip with Id: %s", model.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
@@ -148,7 +148,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	id := state.ID.ValueString()
+	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating public ip with ID: %s", id))
 
 	updateRequest := plan.ToUpdateRequest()
@@ -182,7 +182,7 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Deleting public ip with ID: %s", id))
 
@@ -212,7 +212,7 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	_, diags := util.WaitForResourceState(
 		ctx,
-		data.ID.ValueString(),
+		data.Id.ValueString(),
 		r.client,
 		waitOptions,
 	)

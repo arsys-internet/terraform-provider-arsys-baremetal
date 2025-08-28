@@ -64,17 +64,9 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Datacenter Id",
-			"Datacenter ID cannot be empty",
-		)
-		return
-	}
-
-	tflog.Info(ctx, fmt.Sprintf("Reading datacenter with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading datacenter with Id: %s", id))
 
 	apiResponse, err := d.client.GetDatacenter(id)
 	if err != nil {
@@ -83,7 +75,7 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 				"Datacenter Not Found",
 				fmt.Sprintf("Datacenter with id %s not found", id),
 			)
-			tflog.Info(ctx, fmt.Sprintf("Datacenter with ID %s not found", id))
+			tflog.Info(ctx, fmt.Sprintf("Datacenter with Id %s not found", id))
 			return
 		}
 

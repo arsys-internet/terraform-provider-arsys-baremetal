@@ -11,14 +11,14 @@ import (
 )
 
 type FirewallServerIPResponse struct {
-	ID         string `json:"id"`
+	Id         string `json:"id"`
 	IP         string `json:"ip"`
 	ServerName string `json:"server_name"`
 }
 
 func NewFirewallServerIPObject(serverIP FirewallServerIPResponse) (types.Object, diag.Diagnostics) {
 	attrs := map[string]attr.Value{
-		"id":          types.StringValue(serverIP.ID),
+		"id":          types.StringValue(serverIP.Id),
 		"ip":          types.StringValue(serverIP.IP),
 		"server_name": types.StringValue(serverIP.ServerName),
 	}

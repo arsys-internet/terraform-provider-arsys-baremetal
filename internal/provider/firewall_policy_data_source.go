@@ -65,17 +65,17 @@ func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	if id == "" {
 		resp.Diagnostics.AddError(
 			"Invalid Firewall Policy Id",
-			"Firewall Policy Id cannot be empty",
+			"id cannot be empty",
 		)
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Reading Firewall Policy data source with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading Firewall Policy data source with Id: %s", id))
 
 	apiResponse, err := d.client.GetFirewallPolicy(id)
 	if err != nil {
@@ -89,7 +89,7 @@ func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.Read
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Firewall policy not found",
-			fmt.Sprintf("Firewall policy with ID %s not found", id),
+			fmt.Sprintf("Firewall policy with Id %s not found", id),
 		)
 		return
 	}
@@ -100,7 +100,7 @@ func (d *FirewallPolicyDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully read firewall policy data source with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Successfully read firewall policy data source with Id: %s", id))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }

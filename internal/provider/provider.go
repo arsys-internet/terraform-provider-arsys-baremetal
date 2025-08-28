@@ -145,10 +145,15 @@ func (p *BaremetalProvider) Configure(ctx context.Context, req provider.Configur
 func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewFirewallPolicyResource,
+		NewFirewallPolicyServerIPsAssignResource,
+		NewFirewallPolicyRuleResource,
+		NewFirewallPolicyRemoveRuleResource,
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
 		NewPublicNetworkResource,
 		NewPublicNetworkServerResource,
+		NewServerResource,
+		NewSubnetResource,
 	}
 }
 
@@ -158,20 +163,30 @@ func (p *BaremetalProvider) EphemeralResources(_ context.Context) []func() ephem
 
 func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewBaremetalModelDataSource,
+		NewBaremetalModelsDataSource,
 		NewDatacenterDataSource,
 		NewDatacentersDataSource,
 		NewFirewallPolicyDataSource,
 		NewFirewallPoliciesDataSource,
+		NewFirewallPolicyServerIPDataSource,
+		NewFirewallPolicyServerIPsDataSource,
+		NewFirewallPolicyRuleDataSource,
+		NewFirewallPolicyRulesDataSource,
 		NewPrivateNetworkDataSource,
 		NewPrivateNetworksDataSource,
 		NewPublicIpDataSource,
 		NewPublicIpsDataSource,
 		NewPublicNetworkDataSource,
 		NewPublicNetworksDataSource,
+		NewServerDataSource,
+		NewServersDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
 		NewSshKeyDataSource,
 		NewSshKeysDataSource,
+		NewSubnetsDataSource,
+		NewSubnetDataSource,
 	}
 }
 

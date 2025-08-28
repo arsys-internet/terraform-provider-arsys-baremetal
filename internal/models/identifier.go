@@ -1,20 +1,24 @@
 package models
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type IdentifierModel struct {
-	ID   types.String `tfsdk:"id"`
+	Id   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 }
 
 type IdentifierResponse struct {
-	ID   string `json:"id"`
+	Id   string `json:"id"`
 	Name string `json:"name"`
 }
 
@@ -32,40 +36,40 @@ func IdentifierObjectType() types.ObjectType {
 }
 
 func NewIdentifierObject(identifier IdentifierResponse) (types.Object, diag.Diagnostics) {
-	return types.ObjectValue(
-		IdentifierAttributeTypes(),
-		map[string]attr.Value{
-			"id":   types.StringValue(identifier.ID),
-			"name": types.StringValue(identifier.Name),
-		},
-	)
+	model := IdentifierModel{
+		Id:   types.StringValue(identifier.Id),
+		Name: types.StringValue(identifier.Name),
+	}
+
+	return types.ObjectValueFrom(context.Background(), IdentifierObjectType().AttrTypes, model)
 }
 
 func NewIdentifierList(responses []IdentifierResponse) (types.List, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	if len(responses) == 0 {
-		return types.ListValue(IdentifierObjectType(), []attr.Value{})
+		return types.ListValueFrom(context.Background(), IdentifierObjectType(), []IdentifierModel{})
 	}
 
-	values := make([]attr.Value, 0, len(responses))
-
-	for _, server := range responses {
-		serverObj, identifierDiags := NewIdentifierObject(server)
-		diags.Append(identifierDiags...)
-		if !identifierDiags.HasError() {
-			values = append(values, serverObj)
+	var models []IdentifierModel
+	for _, response := range responses {
+		model := IdentifierModel{
+			Id:   types.StringValue(response.Id),
+			Name: types.StringValue(response.Name),
 		}
+		models = append(models, model)
 	}
 
-	return types.ListValue(IdentifierObjectType(), values)
+	list, listDiags := types.ListValueFrom(context.Background(), IdentifierObjectType(), models)
+	diags.Append(listDiags...)
+	return list, diags
 }
 
 func BaseIdentifierAttributes() map[string]schema.Attribute {
 	return map[string]schema.Attribute{
 		"id": schema.StringAttribute{
 			Computed:    true,
-			Description: "Resource ID",
+			Description: "Resource Id",
 		},
 		"name": schema.StringAttribute{
 			Computed:    true,
@@ -85,6 +89,25 @@ func IdentifierResourceNestedObject() rschema.NestedAttributeObject {
 				Computed:    true,
 				Description: "Name",
 			},
+		},
+	}
+}
+
+func BaseIdentifierResourceAttributes() map[string]rschema.Attribute {
+	return map[string]rschema.Attribute{
+		"id": rschema.StringAttribute{
+			Computed:    true,
+			Description: "Identifier",
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+		},
+		"name": rschema.StringAttribute{
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				stringplanmodifier.UseStateForUnknown(),
+			},
+			Description: "Name",
 		},
 	}
 }
