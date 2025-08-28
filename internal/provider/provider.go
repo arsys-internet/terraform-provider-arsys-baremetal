@@ -153,6 +153,7 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewPublicNetworkResource,
 		NewPublicNetworkServerResource,
 		NewServerResource,
+		NewSubnetResource,
 	}
 }
 
@@ -182,6 +183,8 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewServersDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
+		NewSubnetsDataSource,
+		NewSubnetDataSource,
 	}
 }
 

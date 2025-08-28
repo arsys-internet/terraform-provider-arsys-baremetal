@@ -10,25 +10,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
-var _ datasource.DataSource = &PublicIpDataSource{}
+var _ datasource.DataSource = &SubnetDataSource{}
 
-func NewPublicIpDataSource() datasource.DataSource {
-	return &PublicIpDataSource{}
+func NewSubnetDataSource() datasource.DataSource {
+	return &SubnetDataSource{}
 }
 
-type PublicIpDataSource struct {
+type SubnetDataSource struct {
 	client service.ApiPublicIpService
 }
 
-func (d *PublicIpDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_public_ip"
+func (d *SubnetDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_subnet"
 }
 
-func (d *PublicIpDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *SubnetDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = models.PublicIpDataSourceSchema(ctx)
 }
 
-func (d *PublicIpDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SubnetDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -55,7 +55,7 @@ func (d *PublicIpDataSource) Configure(_ context.Context, req datasource.Configu
 	d.client = *publicIpService
 }
 
-func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SubnetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data models.PublicIpModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -65,18 +65,18 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	id := data.Id.ValueString()
 
-	apiResponse, err := d.client.GetPublicIp(id)
+	apiResponse, err := d.client.GetSubnet(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
-				"Public IP not found",
-				fmt.Sprintf("Public IP with Id %s was not found", id),
+				"Subnet not found",
+				fmt.Sprintf("Subnet with Id %s was not found", id),
 			)
 			return
 		}
 
 		resp.Diagnostics.AddError(
-			"Error reading the public IP",
+			"Error reading subnet",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -84,8 +84,8 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Public IP not found",
-			fmt.Sprintf("Public IP with Id %s was not found", id),
+			"Subnet not found",
+			fmt.Sprintf("Subnet with Id %s was not found", id),
 		)
 		return
 	}

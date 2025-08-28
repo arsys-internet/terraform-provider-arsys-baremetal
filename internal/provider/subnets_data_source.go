@@ -10,25 +10,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ datasource.DataSource = &PublicIpsDataSource{}
+var _ datasource.DataSource = &SubnetsDataSource{}
 
-func NewPublicIpsDataSource() datasource.DataSource {
-	return &PublicIpsDataSource{}
+func NewSubnetsDataSource() datasource.DataSource {
+	return &SubnetsDataSource{}
 }
 
-type PublicIpsDataSource struct {
+type SubnetsDataSource struct {
 	client service.ApiPublicIpService
 }
 
-func (d *PublicIpsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_public_ips"
+func (d *SubnetsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_subnets"
 }
 
-func (d *PublicIpsDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = models.PublicIpsDataSourceSchema(ctx)
+func (d *SubnetsDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = models.SubnetsDatasourceSchema(ctx)
 }
 
-func (d *PublicIpsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SubnetsDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -55,23 +55,23 @@ func (d *PublicIpsDataSource) Configure(_ context.Context, req datasource.Config
 	d.client = *publicIpService
 }
 
-func (d *PublicIpsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
-	apiResponse, err := d.client.GetPublicIps()
+func (d *SubnetsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, resp *datasource.ReadResponse) {
+	apiResponse, err := d.client.GetSubnets()
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading public IPs",
+			"Error reading subnets",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
-	model, diags := models.NewPublicIps(ctx, apiResponse)
+	model, diags := models.NewSubnets(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully read %d public IPs", len(apiResponse)))
+	tflog.Info(ctx, fmt.Sprintf("Successfully read %d subnets", len(apiResponse)))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
