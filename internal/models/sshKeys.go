@@ -21,8 +21,9 @@ func sshKeyObjectType() types.ObjectType {
 			"name":          types.StringType,
 			"description":   types.StringType,
 			"state":         types.StringType,
-			"servers":       IdentifierObjectType(),
+			"servers":       types.ListType{ElemType: IdentifierObjectType()},
 			"md5":           types.StringType,
+			"public_key":    types.StringType,
 			"creation_date": types.StringType,
 		},
 	}
