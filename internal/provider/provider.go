@@ -153,6 +153,7 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewPublicNetworkResource,
 		NewPublicNetworkServerResource,
 		NewServerResource,
+		NewSshKeyResource,
 		NewSubnetResource,
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -22,6 +23,7 @@ type SshKeyModel struct {
 	Md5          types.String `tfsdk:"md5"`
 	PublicKey    types.String `tfsdk:"public_key"`
 	CreationDate types.String `tfsdk:"creation_date"`
+	PrivateKey   types.String `tfsdk:"private_key"`
 }
 
 type SshKeyResponse struct {
@@ -33,6 +35,7 @@ type SshKeyResponse struct {
 	Md5          string               `json:"md5"`
 	PublicKey    string               `json:"public_key"`
 	CreationDate string               `json:"creation_date"`
+	PrivateKey   *string              `json:"private_key,omitempty"`
 }
 
 func newSshKeyFromResponse(_ context.Context, ssh *SshKeyResponse) (*SshKeyModel, diag.Diagnostics) {
@@ -56,6 +59,12 @@ func newSshKeyFromResponse(_ context.Context, ssh *SshKeyResponse) (*SshKeyModel
 	model.Md5 = types.StringValue(ssh.Md5)
 	model.PublicKey = types.StringValue(ssh.PublicKey)
 	model.CreationDate = types.StringValue(ssh.CreationDate)
+
+	if ssh.PrivateKey != nil {
+		model.PrivateKey = types.StringValue(*ssh.PrivateKey)
+	} else {
+		model.PrivateKey = types.StringNull()
+	}
 
 	serversList, listDiags := NewIdentifierList(ssh.Servers)
 	diags.Append(listDiags...)
@@ -151,116 +160,119 @@ func SshKeyDataSourceSchema(_ context.Context) schema.Schema {
 					),
 				},
 			},
+			"private_key": schema.StringAttribute{
+				Computed:    true,
+				Description: "SSH key private key",
+			},
 		},
 	}
 }
 
-//
-//type SshKeyCreateRequest struct {
-//	ReverseDns   string `json:"reverse_dns,omitempty"`
-//	DatacenterId string `json:"datacenter_id,omitempty"`
-//	Type         string `json:"type,omitempty"`
-//}
-//
-//func (m *SshKeyResourceModel) ToCreateRequest() SshKeyCreateRequest {
-//	return SshKeyCreateRequest{
-//		ReverseDns:   m.ReverseDNS.ValueString(),
-//		DatacenterId: m.DatacenterId.ValueString(),
-//		Type:         m.Type.ValueString(),
-//	}
-//}
-//
-//type SshKeyResourceModel struct {
-//	SshKeyModel
-//	DatacenterId types.String `tfsdk:"datacenter_id"`
-//}
+type SshKeyCreateRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	PublicKey   string `json:"public_key,omitempty"`
+}
 
-//func NewSshKeyResourceModel(ctx context.Context, ssh *SshKeyResponse) (*SshKeyResourceModel, diag.Diagnostics) {
-//	baseModel, diags := newSshKeyFromResponse(ctx, ssh)
-//	if diags.HasError() {
-//		return nil, diags
-//	}
-//
-//	resourceModel := &SshKeyResourceModel{
-//		SshKeyModel:  *baseModel,
-//		DatacenterId: types.StringValue(ip.Datacenter.ID),
-//	}
-//
-//	return resourceModel, diags
-//}
+func (m *SshKeyModel) ToCreateRequest() SshKeyCreateRequest {
+	return SshKeyCreateRequest{
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+		PublicKey:   m.PublicKey.ValueString(),
+	}
+}
 
-//func SshKeyResourceSchema(_ context.Context) rschema.Schema {
-//	return rschema.Schema{
-//		Description: "Public ip resource",
-//		Attributes: map[string]rschema.Attribute{
-//			"id": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "Public ip identifier",
-//			},
-//			"reverse_dns": rschema.StringAttribute{
-//				Optional:    true,
-//				Computed:    true,
-//				Description: "Reverse DNS name",
-//				Validators: []validator.String{
-//					stringvalidator.LengthAtMost(util.MaxNameLength),
-//					stringvalidator.LengthAtLeast(1),
-//				},
-//			},
-//			"datacenter_id": rschema.StringAttribute{
-//				Optional:    true,
-//				Computed:    true,
-//				Description: "Datacenter identifier where the ip will be created",
-//				Validators: []validator.String{
-//					stringvalidator.RegexMatches(
-//						regexp.MustCompile(util.HexID32Pattern),
-//						"must be a valid datacenter_id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
-//					),
-//				},
-//			},
-//			"type": rschema.StringAttribute{
-//				Optional:    true,
-//				Computed:    true,
-//				Description: "IP type",
-//				Validators: []validator.String{
-//					stringvalidator.OneOf("IPV4", "IPV6"),
-//				},
-//			},
-//			"ip": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "IP address",
-//			},
-//			"datacenter":  BaseDatacenterNestedAttribute(),
-//			"assigned_to": AssignedToNestedAttribute(),
-//			"subnet_id": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "ID of the subnet to which the IP belongs",
-//			},
-//			"is_dhcp": rschema.BoolAttribute{
-//				Computed:    true,
-//				Description: "IP use DHCP",
-//			},
-//			"state": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "Current state of the IP (ACTIVE, etc.)",
-//			},
-//			"creation_date": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "IP creation date",
-//			},
-//		},
-//	}
-//}
-//
-//type SshKeyUpdateRequest struct {
-//	ReverseDns string `json:"reverse_dns"`
-//}
-//
-//func (m *SshKeyResourceModel) ToUpdateRequest() SshKeyUpdateRequest {
-//	return SshKeyUpdateRequest{
-//		ReverseDns: m.ReverseDNS.ValueString(),
-//	}
-//}
+func NewSshKeyResourceModel(ctx context.Context, ssh *SshKeyResponse) (*SshKeyModel, diag.Diagnostics) {
+	baseModel, diags := newSshKeyFromResponse(ctx, ssh)
+	if diags.HasError() {
+		return nil, diags
+	}
 
-//func (m *SshKeyResourceModel) GetState() string {
-//	return m.State.ValueString()
-//}
+	return baseModel, diags
+}
+
+func SshKeyResourceSchema(_ context.Context) rschema.Schema {
+	return rschema.Schema{
+		Description: "SSH key resource",
+		Attributes: map[string]rschema.Attribute{
+			"id": rschema.StringAttribute{
+				Computed:    true,
+				Description: "SSH key identifier",
+			},
+			"name": rschema.StringAttribute{
+				Required:    true,
+				Description: "SSH key name",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(util.MaxNameLength),
+					stringvalidator.LengthAtLeast(1),
+				},
+			},
+			"description": rschema.StringAttribute{
+				Computed:    true,
+				Optional:    true,
+				Description: "SSH key description",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
+				},
+			},
+			"state": rschema.StringAttribute{
+				Computed:    true,
+				Description: "Current state of the SSH key",
+			},
+			"servers": rschema.ListNestedAttribute{
+				Computed:     true,
+				Description:  "List of servers associated with the SSH key",
+				NestedObject: IdentifierResourceNestedObject(),
+			},
+			"md5": rschema.StringAttribute{
+				Computed:    true,
+				Description: "MD5 hash of the SSH key",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid MD5 hash (32 hexadecimal characters)",
+					),
+				},
+			},
+			"public_key": rschema.StringAttribute{
+				Computed:    true,
+				Optional:    true,
+				Description: "Current state of the IP (ACTIVE, etc.)",
+				Validators: []validator.String{
+					stringvalidator.LengthAtMost(util.MaxNameLength),
+					stringvalidator.LengthAtLeast(1),
+				},
+			},
+			"creation_date": rschema.StringAttribute{
+				Computed:    true,
+				Description: "SSH key creation date in ISO 8601 format",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.DateTimePattern),
+						"must be a date in ISO 8601 format (e.g., 2023-05-29T09:43:31+00:00)",
+					),
+				},
+			},
+			"private_key": rschema.StringAttribute{
+				Computed:    true,
+				Description: "SSH key private key",
+			},
+		},
+	}
+}
+
+type SshKeyUpdateRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+}
+
+func (m *SshKeyModel) ToUpdateRequest() SshKeyUpdateRequest {
+	return SshKeyUpdateRequest{
+		Name:        m.Name.ValueString(),
+		Description: m.Description.ValueString(),
+	}
+}
+
+func (m *SshKeyModel) GetState() string {
+	return m.State.ValueString()
+}

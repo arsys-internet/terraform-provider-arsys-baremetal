@@ -25,6 +25,7 @@ func sshKeyObjectType() types.ObjectType {
 			"md5":           types.StringType,
 			"public_key":    types.StringType,
 			"creation_date": types.StringType,
+			"private_key":   types.StringType,
 		},
 	}
 }
