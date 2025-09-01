@@ -181,8 +181,8 @@ func (r *PrivateNetworkServersResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	firewallPolicyID := data.Id.ValueString()
+	firewallPolicyId := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Removing private network assignment from Terraform state only: %s", firewallPolicyID))
+	tflog.Info(ctx, fmt.Sprintf("Removing private network assignment from Terraform state only: %s", firewallPolicyId))
 	tflog.Info(ctx, "Note: Servers remain assigned to the private network - only removing from Terraform management")
 }

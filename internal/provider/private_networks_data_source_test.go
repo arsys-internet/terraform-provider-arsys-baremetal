@@ -73,7 +73,7 @@ func testAccCheckPrivateNetworkInList(targetName string) resource.TestCheckFunc 
 func validatePrivateNetworkEssentials(attributes map[string]string, index int, targetName string) error {
 	idKey := fmt.Sprintf("private_networks.%d.id", index)
 	if id, exists := attributes[idKey]; !exists || id == "" {
-		return fmt.Errorf("private network '%s' missing ID", targetName)
+		return fmt.Errorf("private network '%s' missing Id", targetName)
 	}
 
 	nameKey := fmt.Sprintf("private_networks.%d.name", index)

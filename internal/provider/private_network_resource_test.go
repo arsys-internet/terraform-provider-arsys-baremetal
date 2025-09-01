@@ -201,7 +201,7 @@ func testAccCheckPrivateNetworkDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccPrivateNetworkResourceConfig(name, datacenterID, networkAddress, subnetMask, description string) string {
+func testAccPrivateNetworkResourceConfig(name, datacenterId, networkAddress, subnetMask, description string) string {
 	return fmt.Sprintf(`
 resource "arsys-baremetal_private_network" "test" {
   name            = %[1]q
@@ -210,7 +210,7 @@ resource "arsys-baremetal_private_network" "test" {
   subnet_mask     = %[4]q
   description     = %[5]q
 }
-`, name, datacenterID, networkAddress, subnetMask, description)
+`, name, datacenterId, networkAddress, subnetMask, description)
 }
 
 func getTestPrivateNetworkService() *service.ApiPrivateNetworkService {

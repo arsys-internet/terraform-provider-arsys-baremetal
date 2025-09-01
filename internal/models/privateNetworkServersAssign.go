@@ -5,9 +5,11 @@ import (
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -99,6 +101,9 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 			"servers": rschema.SetAttribute{
 				ElementType: types.StringType,
 				Required:    true,
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+				},
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.RequiresReplace(),
 				},
@@ -151,7 +156,14 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 				Computed:    true,
 				Description: "Private network state",
 			},
-			"datacenter": BaseDatacenterNestedAttribute(),
+			"datacenter": rschema.SingleNestedAttribute{
+				Computed:    true,
+				Description: "Server datacenter",
+				Attributes:  BaseDatacenterResourceAttributes(),
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Creation timestamp",
