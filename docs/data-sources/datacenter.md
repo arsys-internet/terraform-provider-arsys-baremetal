@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `datacenters` - List of datacenters
 
-### Get By ID
+### Get By Id
 
 ```hcl
 data "arsys-baremetal_datacenter" "example" {

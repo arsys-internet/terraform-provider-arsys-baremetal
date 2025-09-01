@@ -12,6 +12,6 @@ resource "arsys-baremetal_ssh_key" "example" {
   description = "new SSH key for accessing servers"
 }
 
-# Example of importing an existing SSH key by ID
+# Example of importing an existing SSH key by Id
 resource "arsys-baremetal_ssh_key" "test_import" {
 }

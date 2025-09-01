@@ -25,7 +25,7 @@ The following attributes are returned by the datasource:
 
 * `ssh_keys` - List of SSH keys
 
-### Get By ID
+### Get By Id
 
 ```hcl
 data "arsys-baremetal_ssh_key" "example" {

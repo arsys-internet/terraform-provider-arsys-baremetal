@@ -11,6 +11,6 @@ resource "arsys-baremetal_public_ip" "example" {
   reverse_dns = "dns5678.domain.com"
 }
 
-# Example of importing an existing public IP by ID
+# Example of importing an existing public IP by Id
 resource "arsys-baremetal_public_ip" "test_import" {
 }

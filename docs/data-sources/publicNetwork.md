@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `public_networks` - List of public networks
 
-### Get By ID
+### Get By Id
 
 ```hcl
 data "arsys-baremetal_public_network" "example" {

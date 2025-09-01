@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `server_appliances` - List of server appliances
 
-### Get By ID
+### Get By Id
 
 ```hcl
 data "arsys-baremetal_server_appliance" "example" {

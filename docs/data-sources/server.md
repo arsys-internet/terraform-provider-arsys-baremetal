@@ -125,7 +125,7 @@ The following attributes are returned by the datasource:
         * `name` - Monitoring policy name
     * `snapshot` - Snapshot information (nullable)
 
-### Get By ID
+### Get By Id
 
 ```hcl
 data "arsys-baremetal_server" "example" {
