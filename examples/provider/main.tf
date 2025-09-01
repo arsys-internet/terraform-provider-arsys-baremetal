@@ -1,4 +1,4 @@
-// Example of a Terraform configuration using the arsys-baremetal provider
+# Example of a Terraform configuration using the arsys-baremetal provider
 terraform {
   required_providers {
     arsys-baremetal = {

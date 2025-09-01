@@ -10,6 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -198,6 +201,9 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 			"id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "SSH key identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": rschema.StringAttribute{
 				Required:    true,
@@ -218,11 +224,17 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Current state of the SSH key",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"servers": rschema.ListNestedAttribute{
 				Computed:     true,
 				Description:  "List of servers associated with the SSH key",
 				NestedObject: IdentifierResourceNestedObject(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"md5": rschema.StringAttribute{
 				Computed:    true,
@@ -233,14 +245,20 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 						"must be a valid MD5 hash (32 hexadecimal characters)",
 					),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"public_key": rschema.StringAttribute{
 				Computed:    true,
 				Optional:    true,
-				Description: "Current state of the IP (ACTIVE, etc.)",
+				Description: "SSH public key content",
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxNameLength),
 					stringvalidator.LengthAtLeast(1),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"creation_date": rschema.StringAttribute{
@@ -252,10 +270,16 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 						"must be a date in ISO 8601 format (e.g., 2023-05-29T09:43:31+00:00)",
 					),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"private_key": rschema.StringAttribute{
 				Computed:    true,
 				Description: "SSH key private key",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}

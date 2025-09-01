@@ -26,7 +26,7 @@ resource "arsys-baremetal_firewall_policy" "example" {
       port_to   = 22
       source    = "192.168.1.0/24"
     },
-    //Additional rules can be added here
+    # Additional rules can be added here
   ]
 }
 ```

@@ -1,4 +1,4 @@
-// Example to create a private network
+# Example to create a private network
 resource "arsys-baremetal_private_network" "example_private_network" {
   name            = "p_network_terraform0"
   network_address = "192.168.4.0"
@@ -7,7 +7,7 @@ resource "arsys-baremetal_private_network" "example_private_network" {
   description     = "Private network for Terraform"
 }
 
-// Example to update a private network
+# Example to update a private network
 resource "arsys-baremetal_private_network" "example_private_network" {
   name            = "p_network_terraform_update"
   description     = "Updated private network for Terraform"
@@ -18,4 +18,4 @@ resource "arsys-baremetal_private_network" "example_private_network" {
 # Example to import an existing private network by its ID
 resource "arsys-baremetal_private_network" "test_private_network_import" {
 }
-// Execute terraform import command to import the existing private network
+# Execute terraform import command to import the existing private network
