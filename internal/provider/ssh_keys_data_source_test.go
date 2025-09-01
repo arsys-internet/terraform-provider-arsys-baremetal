@@ -116,7 +116,6 @@ resource "arsys-baremetal_ssh_key" "test" {
 func testAccSshKeysDataSourceConfig() string {
 	return testAccSshKeysResourceConfig() + `
 data "arsys-baremetal_ssh_keys" "all" {
-  # Este data source lista todas las SSH keys
 }
 `
 }

@@ -45,7 +45,7 @@ func (d *SshKeyDataSource) Configure(_ context.Context, req datasource.Configure
 		return
 	}
 
-	policyService, ok := client.(*service.ApiSshKeyService)
+	sshKeyService, ok := client.(*service.ApiSshKeyService)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected DataSource Configure Type",
@@ -54,7 +54,7 @@ func (d *SshKeyDataSource) Configure(_ context.Context, req datasource.Configure
 		return
 	}
 
-	d.client = policyService
+	d.client = sshKeyService
 }
 
 func (d *SshKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
@@ -69,13 +69,13 @@ func (d *SshKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	if id == "" {
 		resp.Diagnostics.AddError(
-			"Invalid Firewall Policy Id",
-			"Firewall Policy Id cannot be empty",
+			"Invalid SSH key Id",
+			"SSH key Id cannot be empty",
 		)
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Reading Firewall Policy data source with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading SSH key data source with ID: %s", id))
 
 	apiResponse, err := d.client.GetSshKey(id)
 	if err != nil {
@@ -89,7 +89,7 @@ func (d *SshKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"SSH key not found",
-			fmt.Sprintf("Firewall policy with ID %s not found", id),
+			fmt.Sprintf("SSH key with ID %s not found", id),
 		)
 		return
 	}

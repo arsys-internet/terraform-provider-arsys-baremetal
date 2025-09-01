@@ -72,7 +72,7 @@ func NewSshKeys(ctx context.Context, sshKeysResponse []SshKeyResponse) (*SshKeys
 
 func SshKeysDataSourceSchema(_ context.Context) schema.Schema {
 	return schema.Schema{
-		Description: "Data source for listing public IPs",
+		Description: "Data source for listing SSH keys",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:    true,

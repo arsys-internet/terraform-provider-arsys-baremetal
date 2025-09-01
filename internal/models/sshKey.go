@@ -151,7 +151,7 @@ func SshKeyDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"public_key": schema.StringAttribute{
 				Computed:    true,
-				Description: "Current state of the IP (ACTIVE, etc.)",
+				Description: "SSH public key content",
 			},
 			"creation_date": schema.StringAttribute{
 				Computed:    true,
