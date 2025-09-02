@@ -1,0 +1,118 @@
+package provider
+
+import (
+	"context"
+	"fmt"
+	"terraform-provider-arsys-baremetal/internal/models"
+	service "terraform-provider-arsys-baremetal/internal/services/publicNetwork"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+)
+
+var (
+	_ datasource.DataSource              = &PublicNetworkIpDataSource{}
+	_ datasource.DataSourceWithConfigure = &PublicNetworkIpDataSource{}
+)
+
+func NewPublicNetworkIpDataSource() datasource.DataSource {
+	return &PublicNetworkIpDataSource{}
+}
+
+type PublicNetworkIpDataSource struct {
+	client *service.ApiPublicNetworkService
+}
+
+func (d *PublicNetworkIpDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_public_network_ip"
+}
+
+func (d *PublicNetworkIpDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = models.PublicNetworkIpDataSourceSchema(ctx)
+}
+
+func (d *PublicNetworkIpDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	client := service.GetPublicNetworkService(req.ProviderData)
+	if client == nil {
+		resp.Diagnostics.AddError(
+			"Unexpected DataSource Configure Type",
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
+		)
+		return
+	}
+
+	publicNetworkIpService, ok := client.(*service.ApiPublicNetworkService)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected DataSource Configure Type",
+			fmt.Sprintf("An internal error occurred. Please report this issue to the provider developers."),
+		)
+		return
+	}
+
+	d.client = publicNetworkIpService
+}
+
+func (d *PublicNetworkIpDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data models.PublicNetworkIpModel
+
+	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	publicNetworkId := data.PublicNetworkId.ValueString()
+
+	if publicNetworkId == "" {
+		resp.Diagnostics.AddError(
+			"Invalid public network Id",
+			"Public network Id cannot be empty",
+		)
+		return
+	}
+
+	id := data.Id.ValueString()
+
+	if id == "" {
+		resp.Diagnostics.AddError(
+			"Invalid IP Id",
+			"IP Id cannot be empty",
+		)
+		return
+	}
+
+	tflog.Info(ctx, fmt.Sprintf("Reading IPs data source with ID %s in the public network %s", id, publicNetworkId))
+
+	apiResponse, err := d.client.GetPublicNetworkIp(publicNetworkId, id)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading IP in the public network",
+			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"IP in the public network not found",
+			fmt.Sprintf("IP with ID %s in the public network %s not found", id, publicNetworkId),
+		)
+		return
+	}
+
+	model, diags := models.NewPublicNetworkIpModel(ctx, apiResponse)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	//model.PublicNetworkId = data.PublicNetworkId
+
+	tflog.Info(ctx, fmt.Sprintf("Successfully read IP with ID %s in the public network %s", id, publicNetworkId))
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
+}

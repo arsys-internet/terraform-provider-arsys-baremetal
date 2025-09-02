@@ -24,6 +24,8 @@ type ApiPublicNetworkServiceInterface interface {
 	UpdatePublicNetwork(id string, request *models.PublicNetworkUpdateRequest) (*models.PublicNetworkResponse, error)
 	DeletePublicNetwork(id string) error
 	AssignServersToPublicNetwork(id string, request *models.PublicNetworkServerRequest) error
+	GetPublicNetworkIp(publicNetworkId string, id string) (*models.PublicNetworkIpResponse, error)
+	GetPublicNetworkIps(publicNetworkId string) ([]models.PublicNetworkIpResponse, error)
 	GetResource(id string) (util.ResourceModel, error)
 }
 
@@ -186,6 +188,57 @@ func (s *ApiPublicNetworkService) AssignServersToPublicNetwork(id string, reques
 	}
 
 	return nil
+}
+
+func (s *ApiPublicNetworkService) GetPublicNetworkIp(publicNetworkId string, id string) (*models.PublicNetworkIpResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/public_networks/%s/ips/%s", publicNetworkId, id))
+
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get ips in the public network")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var publicIp models.PublicNetworkIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&publicIp); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+	return &publicIp, nil
+}
+
+func (s *ApiPublicNetworkService) GetPublicNetworkIps(publicNetworkId string) ([]models.PublicNetworkIpResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/public_networks/%s/ips", publicNetworkId))
+
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get ips in the public network")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var publicIps []models.PublicNetworkIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&publicIps); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	return publicIps, nil
 }
 
 func (s *ApiPublicNetworkService) GetResource(id string) (util.ResourceModel, error) {
