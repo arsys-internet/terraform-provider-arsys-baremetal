@@ -22,6 +22,7 @@ type PublicNetworkIpsModel struct {
 func publicNetworkIpObjectType() types.ObjectType {
 	return types.ObjectType{
 		AttrTypes: map[string]attr.Type{
+			"public_network_id":    types.StringType,
 			"id":                   types.StringType,
 			"ip_address":           types.StringType,
 			"description":          types.StringType,
@@ -53,8 +54,6 @@ func publicNetworkIpNestedAttributeObject() schema.NestedAttributeObject {
 				Computed:    true,
 				Description: "Public Network IP identifier",
 			}
-		} else if name == "public_network_id" {
-			//
 		} else {
 			attributes[name] = attribute
 		}

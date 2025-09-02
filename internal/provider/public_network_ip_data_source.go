@@ -110,8 +110,6 @@ func (d *PublicNetworkIpDataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}
 
-	//model.PublicNetworkId = data.PublicNetworkId
-
 	tflog.Info(ctx, fmt.Sprintf("Successfully read IP with ID %s in the public network %s", id, publicNetworkId))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)

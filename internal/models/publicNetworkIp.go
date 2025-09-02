@@ -14,9 +14,24 @@ import (
 )
 
 type PublicNetworkIpModel struct {
-	PublicNetworkId types.String `tfsdk:"public_network_id"`
-
-	IpListItemModel
+	PublicNetworkId    types.String `tfsdk:"public_network_id"`
+	Id                 types.String `tfsdk:"id"`
+	IpAddress          types.String `tfsdk:"ip_address"`
+	Description        types.String `tfsdk:"description"`
+	NetworkInterfaceId types.String `tfsdk:"network_interface_id"`
+	LbId               types.String `tfsdk:"lb_id"`
+	InverseDns         types.String `tfsdk:"inverse_dns"`
+	StartDate          types.String `tfsdk:"start_date"`
+	SiteId             types.String `tfsdk:"site_id"`
+	IsMain             types.Int64  `tfsdk:"is_main"`
+	Mask               types.Int64  `tfsdk:"mask"`
+	FirewallId         types.String `tfsdk:"firewall_id"`
+	Gateway            types.String `tfsdk:"gateway"`
+	Broadcast          types.String `tfsdk:"broadcast"`
+	NetworkId          types.String `tfsdk:"network_id"`
+	NetsSameVlan       types.Int64  `tfsdk:"nets_same_vlan"`
+	Type               types.String `tfsdk:"type"`
+	State              types.String `tfsdk:"state"`
 }
 
 type PublicNetworkIpResponse struct {
@@ -39,103 +54,7 @@ type PublicNetworkIpResponse struct {
 	State              string  `json:"state"`
 }
 
-type IpListItemModel struct {
-	Id                 types.String `tfsdk:"id"`
-	IpAddress          types.String `tfsdk:"ip_address"`
-	Description        types.String `tfsdk:"description"`
-	NetworkInterfaceId types.String `tfsdk:"network_interface_id"`
-	LbId               types.String `tfsdk:"lb_id"`
-	InverseDns         types.String `tfsdk:"inverse_dns"`
-	StartDate          types.String `tfsdk:"start_date"`
-	SiteId             types.String `tfsdk:"site_id"`
-	IsMain             types.Int64  `tfsdk:"is_main"`
-	Mask               types.Int64  `tfsdk:"mask"`
-	FirewallId         types.String `tfsdk:"firewall_id"`
-	Gateway            types.String `tfsdk:"gateway"`
-	Broadcast          types.String `tfsdk:"broadcast"`
-	NetworkId          types.String `tfsdk:"network_id"`
-	NetsSameVlan       types.Int64  `tfsdk:"nets_same_vlan"`
-	Type               types.String `tfsdk:"type"`
-	State              types.String `tfsdk:"state"`
-}
-
-//func newPublicNetworkIpListItemFromResponse(_ context.Context, ip *models.PublicNetworkIpResponse) (*IpListItemModel, diag.Diagnostics) {
-//	diags := diag.Diagnostics{}
-//
-//	if ip == nil {
-//		diags.AddError("Response Error", "Public network ip response is nil")
-//		return nil, diags
-//	}
-//
-//	model := &IpListItemModel{}
-//
-//	model.Id = types.StringValue(ip.Id)
-//	model.IpAddress = types.StringValue(ip.IpAddress)
-//	model.Description = types.StringValue(ip.Description)
-//	if ip.NetworkInterfaceId != nil {
-//		model.NetworkInterfaceId = types.StringValue(*ip.NetworkInterfaceId)
-//	} else {
-//		model.NetworkInterfaceId = types.StringNull()
-//	}
-//	if ip.LbId != nil {
-//		model.LbId = types.StringValue(*ip.LbId)
-//	} else {
-//		model.LbId = types.StringNull()
-//	}
-//	model.InverseDns = types.StringValue(ip.InverseDns)
-//	model.StartDate = types.StringValue(ip.StartDate)
-//	model.SiteId = types.StringValue(ip.SiteId)
-//	model.IsMain = types.Int64Value(int64(ip.IsMain))
-//	model.Mask = types.Int64Value(int64(ip.Mask))
-//	if ip.FirewallId != nil {
-//		model.FirewallId = types.StringValue(*ip.FirewallId)
-//	} else {
-//		model.FirewallId = types.StringNull()
-//	}
-//	if ip.Gateway != nil {
-//		model.Gateway = types.StringValue(*ip.Gateway)
-//	} else {
-//		model.Gateway = types.StringNull()
-//	}
-//	if ip.Broadcast != nil {
-//		model.Broadcast = types.StringValue(*ip.Broadcast)
-//	} else {
-//		model.Broadcast = types.StringNull()
-//	}
-//	model.NetworkId = types.StringValue(ip.NetworkId)
-//	model.Type = types.StringValue(ip.Type)
-//	model.State = types.StringValue(ip.State)
-//
-//	return model, diags
-//}
-//
-//func NewPublicNetworkIpListItemsFromList(ctx context.Context, ipList []models.PublicNetworkIpResponse) ([]IpListItemModel, diag.Diagnostics) {
-//	diags := diag.Diagnostics{}
-//	var mdls []IpListItemModel
-//
-//	if len(ipList) == 0 {
-//		return []IpListItemModel{}, diags
-//	}
-//
-//	for i, ip := range ipList {
-//		model, modelDiags := newPublicNetworkIpListItemFromResponse(ctx, &ip)
-//		if modelDiags.HasError() {
-//			diags.AddError(
-//				"List Constructor Error",
-//				fmt.Sprintf("failed to create model for item %d: %s", i, modelDiags.Errors()[0].Summary()),
-//			)
-//			continue
-//		}
-//		diags.Append(modelDiags...)
-//		if model != nil {
-//			mdls = append(mdls, *model)
-//		}
-//	}
-//
-//	return mdls, diags
-//}
-
-func newPublicNetworkIpFromResponse(_ context.Context, ip *PublicNetworkIpResponse) (*IpListItemModel, diag.Diagnostics) {
+func newPublicNetworkIpFromResponse(_ context.Context, ip *PublicNetworkIpResponse) (*PublicNetworkIpModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	if ip == nil {
@@ -143,8 +62,9 @@ func newPublicNetworkIpFromResponse(_ context.Context, ip *PublicNetworkIpRespon
 		return nil, diags
 	}
 
-	model := &IpListItemModel{}
+	model := &PublicNetworkIpModel{}
 
+	model.PublicNetworkId = types.StringValue(ip.NetworkId)
 	model.Id = types.StringValue(ip.Id)
 	model.IpAddress = types.StringValue(ip.IpAddress)
 	model.Description = types.StringValue(ip.Description)
@@ -186,16 +106,16 @@ func newPublicNetworkIpFromResponse(_ context.Context, ip *PublicNetworkIpRespon
 	return model, diags
 }
 
-func NewPublicNetworkIpModel(ctx context.Context, ip *PublicNetworkIpResponse) (*IpListItemModel, diag.Diagnostics) {
+func NewPublicNetworkIpModel(ctx context.Context, ip *PublicNetworkIpResponse) (*PublicNetworkIpModel, diag.Diagnostics) {
 	return newPublicNetworkIpFromResponse(ctx, ip)
 }
 
-func NewPublicNetworkIpFromList(ctx context.Context, sshList []PublicNetworkIpResponse) ([]IpListItemModel, diag.Diagnostics) {
+func NewPublicNetworkIpFromList(ctx context.Context, sshList []PublicNetworkIpResponse) ([]PublicNetworkIpModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
-	var models []IpListItemModel
+	var models []PublicNetworkIpModel
 
 	if len(sshList) == 0 {
-		return []IpListItemModel{}, diags
+		return []PublicNetworkIpModel{}, diags
 	}
 
 	for i, ssh := range sshList {
