@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
+	"terraform-provider-arsys-baremetal/internal/util/helper"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -39,7 +40,7 @@ type ServerApplianceResponse struct {
 	Os                      string   `json:"os"`
 	OsVersion               string   `json:"os_version"`
 	OsArchitecture          string   `json:"os_architecture"`
-	OsImageType             string   `json:"os_image_type"`
+	OsImageType             *string  `json:"os_image_type"`
 	Type                    string   `json:"type"`
 	ServerTypeCompatibility []string `json:"server_type_compatibility"`
 	MinHddSize              int      `json:"min_hdd_size"`
@@ -66,12 +67,9 @@ func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*Server
 	model.OsArchitecture = types.StringValue(sa.OsArchitecture)
 	model.Type = types.StringValue(sa.Type)
 	model.MinHddSize = types.Int64Value(int64(sa.MinHddSize))
-	if sa.Version != nil {
-		model.Version = types.StringValue(*sa.Version)
-	} else {
-		model.Version = types.StringNull()
-	}
-	model.OsImageType = types.StringValue(sa.OsImageType)
+
+	helper.StringPtrToTypesStringWithNullEmpty(&model.Version, sa.Version)
+	helper.StringPtrToTypesStringWithNullEmpty(&model.OsImageType, sa.OsImageType)
 
 	elements := make([]attr.Value, len(sa.AvailableDatacenters))
 	for i, dc := range sa.AvailableDatacenters {

@@ -9,6 +9,14 @@ func AssignStringPtr(target **string, source types.String) {
 	}
 }
 
+func StringPtrToTypesStringWithNullEmpty(target *types.String, source *string) {
+	if source == nil || *source == "" {
+		*target = types.StringNull()
+	} else {
+		*target = types.StringValue(*source)
+	}
+}
+
 func AssignFloatPtr(target **float64, source types.Float64) {
 	if !source.IsNull() && source.ValueFloat64() != 0 {
 		value := source.ValueFloat64()
