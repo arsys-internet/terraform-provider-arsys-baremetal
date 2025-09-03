@@ -44,7 +44,7 @@ type ServerApplianceResponse struct {
 	ServerTypeCompatibility []string `json:"server_type_compatibility"`
 	MinHddSize              int      `json:"min_hdd_size"`
 	Licenses                []string `json:"licenses"`
-	Version                 string   `json:"version"`
+	Version                 *string  `json:"version"`
 	Categories              []string `json:"categories"`
 }
 
@@ -66,7 +66,11 @@ func NewServerAppliance(_ context.Context, sa *ServerApplianceResponse) (*Server
 	model.OsArchitecture = types.StringValue(sa.OsArchitecture)
 	model.Type = types.StringValue(sa.Type)
 	model.MinHddSize = types.Int64Value(int64(sa.MinHddSize))
-	model.Version = types.StringValue(sa.Version)
+	if sa.Version != nil {
+		model.Version = types.StringValue(*sa.Version)
+	} else {
+		model.Version = types.StringNull()
+	}
 	model.OsImageType = types.StringValue(sa.OsImageType)
 
 	elements := make([]attr.Value, len(sa.AvailableDatacenters))
