@@ -26,6 +26,7 @@ type ApiPublicNetworkServiceInterface interface {
 	AssignServersToPublicNetwork(id string, request *models.PublicNetworkServerRequest) error
 	GetPublicNetworkIp(publicNetworkId string, id string) (*models.PublicNetworkIpResponse, error)
 	GetPublicNetworkIps(publicNetworkId string) ([]models.PublicNetworkIpResponse, error)
+	AssignIpToPublicNetwork(id string, request *models.PublicNetworkIpRequest) (*[]models.PublicNetworkIpResponse, error)
 	GetResource(id string) (util.ResourceModel, error)
 }
 
@@ -239,6 +240,32 @@ func (s *ApiPublicNetworkService) GetPublicNetworkIps(publicNetworkId string) ([
 	}
 
 	return publicIps, nil
+}
+
+func (s *ApiPublicNetworkService) AssignIpToPublicNetwork(id string, request *models.PublicNetworkIpRequest) (*[]models.PublicNetworkIpResponse, error) {
+	resp, err := s.client.Put(fmt.Sprintf("/public_networks/%s/access", id), request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusAccepted, "assign ips to public network")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var response models.PublicNetworkIpCreateResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+	return &response.Data.Items, nil
+
 }
 
 func (s *ApiPublicNetworkService) GetResource(id string) (util.ResourceModel, error) {

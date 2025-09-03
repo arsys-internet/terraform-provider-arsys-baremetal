@@ -37,7 +37,6 @@ func publicNetworkIpObjectType() types.ObjectType {
 			"gateway":              types.StringType,
 			"broadcast":            types.StringType,
 			"network_id":           types.StringType,
-			"nets_same_vlan":       types.Int64Type,
 			"type":                 types.StringType,
 			"state":                types.StringType,
 		},

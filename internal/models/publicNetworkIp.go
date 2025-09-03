@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -29,9 +30,11 @@ type PublicNetworkIpModel struct {
 	Gateway            types.String `tfsdk:"gateway"`
 	Broadcast          types.String `tfsdk:"broadcast"`
 	NetworkId          types.String `tfsdk:"network_id"`
-	NetsSameVlan       types.Int64  `tfsdk:"nets_same_vlan"`
 	Type               types.String `tfsdk:"type"`
 	State              types.String `tfsdk:"state"`
+	//Action             types.Bool     `tfsdk:"action"`
+	//Ips                []types.String `tfsdk:"ips"`
+	//Items              types.List     `tfsdk:"items"`
 }
 
 type PublicNetworkIpResponse struct {
@@ -49,7 +52,6 @@ type PublicNetworkIpResponse struct {
 	Gateway            *string `json:"gateway"`
 	Broadcast          *string `json:"broadcast"`
 	NetworkId          string  `json:"network_id"`
-	NetsSameVlan       int     `json:"nets_same_vlan"`
 	Type               string  `json:"type"`
 	State              string  `json:"state"`
 }
@@ -99,7 +101,6 @@ func newPublicNetworkIpFromResponse(_ context.Context, ip *PublicNetworkIpRespon
 		model.Broadcast = types.StringNull()
 	}
 	model.NetworkId = types.StringValue(ip.NetworkId)
-	model.NetsSameVlan = types.Int64Value(int64(ip.NetsSameVlan))
 	model.Type = types.StringValue(ip.Type)
 	model.State = types.StringValue(ip.State)
 
@@ -110,16 +111,16 @@ func NewPublicNetworkIpModel(ctx context.Context, ip *PublicNetworkIpResponse) (
 	return newPublicNetworkIpFromResponse(ctx, ip)
 }
 
-func NewPublicNetworkIpFromList(ctx context.Context, sshList []PublicNetworkIpResponse) ([]PublicNetworkIpModel, diag.Diagnostics) {
+func NewPublicNetworkIpFromList(ctx context.Context, ipList []PublicNetworkIpResponse) ([]PublicNetworkIpModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 	var models []PublicNetworkIpModel
 
-	if len(sshList) == 0 {
+	if len(ipList) == 0 {
 		return []PublicNetworkIpModel{}, diags
 	}
 
-	for i, ssh := range sshList {
-		model, modelDiags := NewPublicNetworkIpModel(ctx, &ssh)
+	for i, ip := range ipList {
+		model, modelDiags := NewPublicNetworkIpModel(ctx, &ip)
 		if modelDiags.HasError() {
 			diags.AddError(
 				"List Constructor Error",
@@ -212,10 +213,6 @@ func PublicNetworkIpDataSourceSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "Network identifier",
 			},
-			"nets_same_vlan": schema.Int64Attribute{
-				Computed:    true,
-				Description: "Networks in same VLAN",
-			},
 			"type": schema.StringAttribute{
 				Computed:    true,
 				Description: "IP type",
@@ -228,131 +225,159 @@ func PublicNetworkIpDataSourceSchema(_ context.Context) schema.Schema {
 	}
 }
 
-//type SshKeyCreateRequest struct {
-//	Name        string `json:"name"`
-//	Description string `json:"description,omitempty"`
-//	PublicKey   string `json:"public_key,omitempty"`
-//}
-//
-//func (m *SshKeyModel) ToCreateRequest() SshKeyCreateRequest {
-//	return SshKeyCreateRequest{
-//		Name:        m.Name.ValueString(),
-//		Description: m.Description.ValueString(),
-//		PublicKey:   m.PublicKey.ValueString(),
-//	}
-//}
-//
-//func NewSshKeyResourceModel(ctx context.Context, ssh *SshKeyResponse) (*SshKeyModel, diag.Diagnostics) {
-//	baseModel, diags := newSshKeyFromResponse(ctx, ssh)
-//	if diags.HasError() {
-//		return nil, diags
-//	}
-//
-//	return baseModel, diags
-//}
-//
-//func SshKeyResourceSchema(_ context.Context) rschema.Schema {
-//	return rschema.Schema{
-//		Description: "SSH key resource",
-//		Attributes: map[string]rschema.Attribute{
-//			"id": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "SSH key identifier",
-//				PlanModifiers: []planmodifier.String{
-//					stringplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//			"name": rschema.StringAttribute{
-//				Required:    true,
-//				Description: "SSH key name",
-//				Validators: []validator.String{
-//					stringvalidator.LengthAtMost(util.MaxNameLength),
-//					stringvalidator.LengthAtLeast(1),
-//				},
-//			},
-//			"description": rschema.StringAttribute{
-//				Computed:    true,
-//				Optional:    true,
-//				Description: "SSH key description",
-//				Validators: []validator.String{
-//					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
-//				},
-//			},
-//			"state": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "Current state of the SSH key",
-//				PlanModifiers: []planmodifier.String{
-//					stringplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//			"servers": rschema.ListNestedAttribute{
-//				Computed:     true,
-//				Description:  "List of servers associated with the SSH key",
-//				NestedObject: IdentifierResourceNestedObject(),
-//				PlanModifiers: []planmodifier.List{
-//					listplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//			"md5": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "MD5 hash of the SSH key",
-//				Validators: []validator.String{
-//					stringvalidator.RegexMatches(
-//						regexp.MustCompile(util.HexID32Pattern),
-//						"must be a valid MD5 hash (32 hexadecimal characters)",
-//					),
-//				},
-//				PlanModifiers: []planmodifier.String{
-//					stringplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//			"public_key": rschema.StringAttribute{
-//				Computed:    true,
-//				Optional:    true,
-//				Description: "SSH public key content",
-//				Validators: []validator.String{
-//					stringvalidator.LengthAtMost(util.MaxNameLength),
-//					stringvalidator.LengthAtLeast(1),
-//				},
-//				PlanModifiers: []planmodifier.String{
-//					stringplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//			"creation_date": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "SSH key creation date in ISO 8601 format",
-//				Validators: []validator.String{
-//					stringvalidator.RegexMatches(
-//						regexp.MustCompile(util.DateTimePattern),
-//						"must be a date in ISO 8601 format (e.g., 2023-05-29T09:43:31+00:00)",
-//					),
-//				},
-//				PlanModifiers: []planmodifier.String{
-//					stringplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//			"private_key": rschema.StringAttribute{
-//				Computed:    true,
-//				Description: "SSH key private key",
-//				PlanModifiers: []planmodifier.String{
-//					stringplanmodifier.UseStateForUnknown(),
-//				},
-//			},
-//		},
-//	}
-//}
-//
-//type SshKeyUpdateRequest struct {
-//	Name        string `json:"name"`
-//	Description string `json:"description,omitempty"`
-//}
-//
-//func (m *SshKeyModel) ToUpdateRequest() SshKeyUpdateRequest {
-//	return SshKeyUpdateRequest{
-//		Name:        m.Name.ValueString(),
-//		Description: m.Description.ValueString(),
-//	}
-//}
+type PublicNetworkIpResourceModel struct {
+	PublicNetworkId types.String   `tfsdk:"public_network_id"`
+	Id              types.String   `tfsdk:"id"`
+	Action          types.Bool     `tfsdk:"action"`
+	Ips             []types.String `tfsdk:"ips"`
+	Items           types.List     `tfsdk:"items"`
+}
+type PublicNetworkIpRequest struct {
+	PublicNetworkId string   `json:"public_network_id"`
+	Action          bool     `json:"action"`
+	Ips             []string `json:"ips"`
+}
+
+type PublicNetworkIpCreateResponse struct {
+	Sync   bool    `json:"sync"`
+	Data   IpsData `json:"data"`
+	TaskId string  `json:"task_id"`
+}
+
+type IpsData struct {
+	Items []PublicNetworkIpResponse `json:"items"`
+	//Links AttachIpsLinks            `json:"links"`
+}
+
+func (m *PublicNetworkIpResourceModel) ToCreateRequest() PublicNetworkIpRequest {
+	ips := make([]string, len(m.Ips))
+	for i, ip := range m.Ips {
+		ips[i] = ip.ValueString()
+	}
+	return PublicNetworkIpRequest{
+		Action: m.Action.ValueBool(),
+		Ips:    ips,
+	}
+}
+
+func NewPublicNetworkIpResourceModel(ctx context.Context, data *PublicNetworkIpResourceModel, apiResponse []PublicNetworkIpResponse) (*PublicNetworkIpResourceModel, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	// Convert API response items to the Items field
+	ipModels, listDiags := NewPublicNetworkIpFromList(ctx, apiResponse)
+	diags.Append(listDiags...)
+
+	if !listDiags.HasError() {
+		itemsList, convertDiags := types.ListValueFrom(ctx, publicNetworkIpObjectType(), ipModels)
+		diags.Append(convertDiags...)
+		if !convertDiags.HasError() {
+			data.Items = itemsList
+		}
+	}
+
+	return data, diags
+}
+
+func PublicNetworkIpResourceSchema(_ context.Context) rschema.Schema {
+	return rschema.Schema{
+		Description: "Public network IP resource",
+		Attributes: map[string]rschema.Attribute{
+			"public_network_id": rschema.StringAttribute{
+				Required:    true,
+				Description: "Public network identifier",
+			},
+			"id": rschema.StringAttribute{
+				Computed:    true,
+				Description: "Public network IP identifier",
+			},
+			"action": rschema.BoolAttribute{
+				Required:    true,
+				Description: "Action to perform on the IPs",
+			},
+			"ips": rschema.ListAttribute{
+				Required:    true,
+				ElementType: types.StringType,
+				Description: "List of IP IDs to attach to the network",
+			},
+			"items": rschema.ListNestedAttribute{
+				Computed:    true,
+				Description: "List of attached IPs",
+				NestedObject: rschema.NestedAttributeObject{
+					Attributes: map[string]rschema.Attribute{
+						"public_network_id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Public network identifier",
+						},
+						"id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "IP identifier",
+						},
+						"ip_address": rschema.StringAttribute{
+							Computed:    true,
+							Description: "IP address",
+						},
+						"description": rschema.StringAttribute{
+							Computed:    true,
+							Description: "IP description",
+						},
+						"network_interface_id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Network interface ID",
+						},
+						"lb_id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Load balancer ID",
+						},
+						"inverse_dns": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Inverse DNS",
+						},
+						"start_date": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Start date",
+						},
+						"site_id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Site identifier",
+						},
+						"is_main": rschema.Int64Attribute{
+							Computed:    true,
+							Description: "Is main IP",
+						},
+						"mask": rschema.Int64Attribute{
+							Computed:    true,
+							Description: "Network mask",
+						},
+						"firewall_id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Firewall identifier",
+						},
+						"gateway": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Gateway address",
+						},
+						"broadcast": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Broadcast address",
+						},
+						"network_id": rschema.StringAttribute{
+							Computed:    true,
+							Description: "Network identifier",
+						},
+						"type": rschema.StringAttribute{
+							Computed:    true,
+							Description: "IP type",
+						},
+						"state": rschema.StringAttribute{
+							Computed:    true,
+							Description: "IP state",
+						},
+					},
+				},
+			},
+		},
+	}
+}
 
 //func (m *SshKeyModel) GetState() string {
 //	return m.State.ValueString()
