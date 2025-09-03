@@ -10,7 +10,7 @@ func AssignStringPtr(target **string, source types.String) {
 }
 
 func StringPtrToTypesStringWithNullEmpty(target *types.String, source *string) {
-	if source == nil || *source == "" {
+	if source == nil {
 		*target = types.StringNull()
 	} else {
 		*target = types.StringValue(*source)
