@@ -18,7 +18,7 @@ type ApiPublicIpService struct {
 	client *client.APIClient
 }
 
-var ipTypeRegex = regexp.MustCompile(`^IPV[46]`)
+var ipTypeRegex = regexp.MustCompile(`^IPV[46]$`)
 var subnetRegex = regexp.MustCompile(`^IPV[46]Subnet$`)
 
 type ApiPublicIpServiceInterface interface {

@@ -66,21 +66,15 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid server appliance Id",
-			"Server appliance ID cannot be empty",
-		)
-		return
-	}
-
-	tflog.Info(ctx, fmt.Sprintf("Reading server appliance with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading server appliance with id: %s", id))
 
 	apiResponse, err := d.client.GetServerAppliance(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Server appliance with ID %s not found, removing from state", id))
-			resp.State.RemoveResource(ctx)
+			resp.Diagnostics.AddError(
+				"Error reading the server appliance",
+				fmt.Sprintf("Server appliance with id %s was not found", id),
+			)
 			return
 		}
 
@@ -92,8 +86,10 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Server appliance with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Error reading server appliance",
+			fmt.Sprintf("Server appliance with id %s was not found", id),
+		)
 		return
 	}
 
