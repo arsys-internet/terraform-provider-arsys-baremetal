@@ -27,7 +27,7 @@ data "arsys-baremetal_firewall_policy_rules" "all_rules" {
 
 ## Argument Reference
 
-* `id` - (Required) Id of an existing firewall policy that you want to retrieve rules from.
+* `id` - (Required) ID of an existing firewall policy that you want to retrieve rules from.
 
 `id` must be provided. If none, the datasource will return an error.
 
@@ -45,7 +45,7 @@ The following attributes are returned by the datasource:
     * `description` - Description of the rule
     * `action` - Action of the rule (ALLOW, DENY)
 
-### Get Specific Rule by Id
+### Get Specific Rule by ID
 
 ## Example Usage
 
@@ -58,8 +58,8 @@ data "arsys-baremetal_firewall_policy_rule" "ssh_rule" {
 
 ## Argument Reference
 
-* `firewall_policy_id` - (Required) Id of an existing firewall policy containing the rule.
-* `id` - (Required) Id of the specific rule that you want to retrieve.
+* `firewall_policy_id` - (Required) ID of an existing firewall policy containing the rule.
+* `id` - (Required) ID of the specific rule that you want to retrieve.
 
 Both `firewall_policy_id` and `id` must be provided. If none, the datasource will return an error.
 
@@ -68,7 +68,7 @@ Both `firewall_policy_id` and `id` must be provided. If none, the datasource wil
 The following attributes are returned by the datasource:
 
 * `id` - Identifier of the rule
-* `firewall_policy_id` - Id of the parent firewall policy
+* `firewall_policy_id` - ID of the parent firewall policy
 * `protocol` - Protocol of the rule (TCP, UDP, ICMP, TCP/UDP, IPSEC, GRE)
 * `port_from` - Starting port number
 * `port_to` - Ending port number

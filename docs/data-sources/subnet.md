@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `subnets` - List of subnets
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_public_subnet" "example" {

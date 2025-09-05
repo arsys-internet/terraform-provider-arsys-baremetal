@@ -41,7 +41,7 @@ The following attributes are returned by the datasource:
     * `ip` - IP address of the server
     * `server_name` - Name of the server
 
-### Get Specific Server Ip by Id
+### Get Specific Server IP by ID
 
 ## Example Usage
 
@@ -64,6 +64,6 @@ Both `firewall_policy_id` and `server_ip_id` must be provided. If none, the data
 The following attributes are returned by the datasource:
 
 * `id` - Identifier of the server IP
-* `firewall_policy_id` - Id of the parent firewall policy
+* `firewall_policy_id` - ID of the parent firewall policy
 * `ip` - IP address of the server
 * `server_name` - Name of the server

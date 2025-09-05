@@ -26,7 +26,7 @@ resource "arsys-baremetal_firewall_policy_server_ips" "example" {
 
 The following arguments are supported:
 
-* `id` - (Required) Id of the existing Firewall Policy.
+* `id` - (Required) ID of the existing Firewall Policy.
 * `server_ips` - (Required) A list of server_ips to be added to the Firewall Policy. Each element is an id of a server
   IP that you want to assign to the Firewall Policy.
 

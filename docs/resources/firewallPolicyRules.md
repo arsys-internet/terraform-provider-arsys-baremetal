@@ -87,14 +87,14 @@ resource "arsys-baremetal_firewall_policy_rule_remove" "example" {
 
 The following arguments are supported:
 
-* `id`- (Required) The Id of the existing Firewall Policy to remove the rule from.
-* `rule_id` - (Required) The Id of the specific rule to remove from the Firewall Policy.
+* `id`- (Required) ID of the existing Firewall Policy to remove the rule from.
+* `rule_id` - (Required) ID of the specific rule to remove from the Firewall Policy.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The Id of the Firewall Policy.
+* `id` - ID of the Firewall Policy.
 * `name` - The name of the Firewall Policy.
 * `description` - The description of the Firewall Policy.
 * `state` - The current state of the Firewall Policy.

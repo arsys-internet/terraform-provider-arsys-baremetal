@@ -1,4 +1,4 @@
-# Output for basic server by Id
+# Output for basic server by ID
 output "basic_server" {
   value = arsys-baremetal_server.basic_server
 }
