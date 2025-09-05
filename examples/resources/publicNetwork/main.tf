@@ -11,7 +11,7 @@ resource "arsys-baremetal_public_network" "example_public_network" {
   description = "Updated public network for Terraform"
 }
 
-# Example to import an existing public network by its ID
+# Example to import an existing public network by ID
 resource "arsys-baremetal_public_network" "test_public_network_import" {
 }
 # Execute terraform import command to import the existing public network

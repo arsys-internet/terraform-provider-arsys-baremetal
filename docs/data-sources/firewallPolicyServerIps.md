@@ -27,7 +27,7 @@ data "arsys-baremetal_firewall_policy_server_ips" "example" {
 
 ## Argument Reference
 
-* `id` - (Required) Id of an existing firewall policy that you want to retrieve server ips from.
+* `id` - (Required) ID of an existing firewall policy that you want to retrieve server ips from.
 
 `id` must be provided. If none, the datasource will return an error.
 
@@ -54,8 +54,8 @@ data "arsys-baremetal_firewall_policy_server_ip" "example" {
 
 ## Argument Reference
 
-* `firewall_policy_id` - (Required) Id of an existing firewall policy containing the server ip.
-* `server_ip_id` - (Required) Id of the specific server ip that you want to retrieve.
+* `firewall_policy_id` - (Required) ID of an existing firewall policy containing the server ip.
+* `server_ip_id` - (Required) ID of the specific server ip that you want to retrieve.
 
 Both `firewall_policy_id` and `server_ip_id` must be provided. If none, the datasource will return an error.
 

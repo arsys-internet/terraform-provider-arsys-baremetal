@@ -1,7 +1,7 @@
 package util
 
 const (
-	HexID32Pattern = `^[0-9A-Fa-f]{32}$`
+	HexID32Pattern = `^[0-9A-F]{32}$`
 
 	IPv4Pattern = `^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`
 
@@ -11,4 +11,5 @@ const (
 	MaxNameLength        = 128
 	MaxDescriptionLength = 256
 	DateTimePattern      = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}$`
+	Md5Pattern           = `^[0-9a-f]{32}$`
 )

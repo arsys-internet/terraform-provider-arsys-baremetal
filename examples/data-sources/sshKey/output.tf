@@ -3,7 +3,7 @@ output "all_ssh_keys" {
   value = data.arsys-baremetal_ssh_keys.all
 }
 
-# Output for a specific SSH key by Id
+# Output for a specific SSH key by ID
 output "ssh_key" {
   value = data.arsys-baremetal_ssh_key.example
 }

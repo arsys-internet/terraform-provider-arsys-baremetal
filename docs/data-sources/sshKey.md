@@ -4,7 +4,7 @@ layout: "arsys-baremetal"
 page_title: "Arsys Baremetal: SSH Key Data Source"
 sidebar_current: "docs-data-source-ssh_key"
 description: |-
-  Provides information about an SSH Key in Arsys Baremetal.
+  Provides information about an SSH Keys in Arsys Baremetal.
 ---
 
 # arsys-baremetal\_ssh\_key
@@ -37,7 +37,7 @@ data "arsys-baremetal_ssh_key" "example" {
 
 The following arguments are supported:
 
-* `id` - (Required) The SSH key identifier. Must be a valid ID with 32 hexadecimal characters (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF).
+* `id` - (Required) ID of an existing SSH key that you want to search for.
 
 ## Attribute Reference
 

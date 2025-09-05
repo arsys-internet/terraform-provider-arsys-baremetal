@@ -15,7 +15,7 @@ resource "arsys-baremetal_private_network" "example_private_network" {
   subnet_mask     = "255.255.255.0"
 }
 
-# Example to import an existing private network by its ID
+# Example to import an existing private network by ID
 resource "arsys-baremetal_private_network" "test_private_network_import" {
 }
 # Execute terraform import command to import the existing private network

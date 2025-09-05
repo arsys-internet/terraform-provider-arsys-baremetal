@@ -39,7 +39,7 @@ resource "arsys-baremetal_firewall_policy_rule_add" "example" {
 
 The following arguments are supported:
 
-* `id` - (Required) The Id of the existing Firewall Policy to add rules to.
+* `id` - (Required) ID of the existing Firewall Policy to add rules to.
 * `rules` - (Required) A list of rules to be added to the Firewall Policy. Each rule should contain:
     * `protocol` - (Required) The protocol of the rule (e.g., TCP, UDP).
     * `port_from` - (Required) The starting port of the rule.
@@ -52,7 +52,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The Id of the Firewall Policy.
+* `id` - ID of the Firewall Policy.
 * `name` - The name of the Firewall Policy.
 * `description` - The description of the Firewall Policy.
 * `state` - The current state of the Firewall Policy.

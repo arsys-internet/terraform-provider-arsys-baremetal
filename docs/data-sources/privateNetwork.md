@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `private_networks` - List of private networks
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_private_network" "example" {

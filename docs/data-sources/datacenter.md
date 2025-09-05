@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `datacenters` - List of datacenters
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_datacenter" "example" {
@@ -38,7 +38,7 @@ data "arsys-baremetal_datacenter" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)ID of an existing datacenter that you want to search for.
+* `id` - (Required) ID of an existing datacenter that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 

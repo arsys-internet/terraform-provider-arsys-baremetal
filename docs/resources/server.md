@@ -68,20 +68,20 @@ For the creation of a baremetal server, the following arguments are supported:
 ### Required Arguments
 
 * `name` - (Required) The name of the server
-* `appliance_id` - (Required) The ID of the OS appliance/image to install
-* `datacenter_id` - (Required) The ID of the datacenter where the server will be created
+* `appliance_id` - (Required) ID of the OS appliance/image to install
+* `datacenter_id` - (Required) ID of the datacenter where the server will be created
 * `hardware` - (Required) Hardware configuration block
-    * `baremetal_model_id` - (Required) The ID of the baremetal model to use
+    * `baremetal_model_id` - (Required) ID of the baremetal model to use
 
 ### Optional Arguments
 
 * `description` - The description of the server
 * `password` - Password for the server. If not provided, a random password will be generated
 * `power_on` - (Boolean) Whether to power on the server after creation. Defaults to `true`
-* `firewall_policy_id` - The ID of the firewall policy to associate with the server
-* `ip_id` - The ID of an existing IP to assign to the server
-* `load_balancer_id` - The ID of a load balancer to associate with the server
-* `monitoring_policy_id` - The ID of a monitoring policy to associate with the server
+* `firewall_policy_id` - ID of the firewall policy to associate with the server
+* `ip_id` - ID of an existing IP to assign to the server
+* `load_balancer_id` - ID of a load balancer to associate with the server
+* `monitoring_policy_id` - ID of a monitoring policy to associate with the server
 * `install_backup_agent` - (Boolean) Whether to install the backup agent. Defaults to `false`
 * `availability_zone_id` - The ID of the availability zone
 

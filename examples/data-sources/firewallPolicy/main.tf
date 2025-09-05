@@ -1,7 +1,7 @@
 # Example to discover all firewall policies that have been created
 data "arsys-baremetal_firewall_policies" "all" {}
 
-# Example to retrieve a specific firewall policy by Id
+# Example to retrieve a specific firewall policy by ID
 data "arsys-baremetal_firewall_policy" "example" {
   id = var.firewall_policy_id # Replace with the actual firewall policy ID
 }
@@ -11,7 +11,7 @@ data "arsys-baremetal_firewall_policy_rules" "example" {
   id = var.firewall_policy_id
 }
 
-# Example to retrieve a specific firewall policy rule by Id
+# Example to retrieve a specific firewall policy rule by ID
 data "arsys-baremetal_firewall_policy_rule" "example" {
   firewall_policy_id = var.firewall_policy_id
   id                 = var.rule_id
