@@ -763,8 +763,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxNameLength),
-					stringvalidator.LengthAtLeast(1),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.NamePattern),
+						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
+					),
 				},
 			},
 			"description": rschema.StringAttribute{

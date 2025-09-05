@@ -38,7 +38,7 @@ data "arsys-baremetal_firewall_policy" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)Id of an existing firewall policy that you want to search for.
+* `id` - (Required) ID of an existing firewall policy that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 
