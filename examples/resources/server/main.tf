@@ -1,4 +1,4 @@
-//Example to create a baremetal server with minimal configuration
+# Example to create a baremetal server with minimal configuration
 resource "arsys-baremetal_server" "basic_server" {
   name          = "test-baremetal-server"
   appliance_id  = var.rocky_linux_appliance_id
@@ -9,7 +9,7 @@ resource "arsys-baremetal_server" "basic_server" {
   }
 }
 
-// Example to create a baremetal server with complete configuration
+# Example to create a baremetal server with complete configuration
 resource "arsys-baremetal_server" "complete_server" {
   name          = "baremetal-complete-server"
   description   = "Complete baremetal server configuration with Terraform"
@@ -33,7 +33,7 @@ resource "arsys-baremetal_server" "complete_server" {
 }
 
 
-// Example to update a server
+# Example to update a server
 resource "arsys-baremetal_server" "complete_server" {
   name        = "baremetal-complete-server-update"
   description = "Updated baremetal server configuration with Terraform"
@@ -41,4 +41,4 @@ resource "arsys-baremetal_server" "complete_server" {
 
 # Example to import an existing server by ID
 resource "arsys-baremetal_server" "server_import" {}
-// Execute terraform import command to import the existing server
+# Execute terraform import command to import the existing server

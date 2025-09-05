@@ -26,7 +26,7 @@ resource "arsys-baremetal_subnet" "example" {
 
 The following arguments are supported:
 * *`mask`* - (Required) The subnet mask(24,25,26,27,28)
-* *`datacenter_id`* - (Required) The ID of the data center where the subnet will be created. Cannot be updated after
+* *`datacenter_id`* - (Required) ID of the data center where the subnet will be created. Cannot be updated after
 creation.
 
 ## Attributes Reference
@@ -37,7 +37,7 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - The automatically generated name of the subnet.
 * `description` - The description of the subnet.
 * `mask` - The subnet mask(24,25,26,27,28).
-* `datacenter_id` - The ID of the data center where the subnet is located.
+* `datacenter_id` - ID of the data center where the subnet is located.
 * `public_name` - The public name of the subnet.
 * `ip` - The IP address of the subnet.
 * `gateway` - The gateway IP address.

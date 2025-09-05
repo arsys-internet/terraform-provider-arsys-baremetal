@@ -38,7 +38,7 @@ data "arsys-baremetal_server_appliance" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)ID of an existing server appliance that you want to search for.
+* `id` - (Required) ID of an existing server appliance that you want to search for.
   `id` must be provided. If none, the datasource will return an error.
 
 ## Attributes Reference
