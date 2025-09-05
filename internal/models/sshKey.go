@@ -144,7 +144,7 @@ func SshKeyDataSourceSchema(_ context.Context) schema.Schema {
 				Description: "MD5 hash of the SSH key",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
+						regexp.MustCompile(util.Md5Pattern),
 						"must be a valid MD5 hash (32 hexadecimal characters)",
 					),
 				},
