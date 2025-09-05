@@ -67,14 +67,6 @@ func (d *SshKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid SSH key Id",
-			"SSH key Id cannot be empty",
-		)
-		return
-	}
-
 	tflog.Info(ctx, fmt.Sprintf("Reading SSH key data source with ID: %s", id))
 
 	apiResponse, err := d.client.GetSshKey(id)
