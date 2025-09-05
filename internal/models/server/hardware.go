@@ -1,8 +1,11 @@
 package server
 
 import (
+	"regexp"
+	"terraform-provider-arsys-baremetal/internal/util"
 	"terraform-provider-arsys-baremetal/internal/util/helper"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -12,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -220,6 +224,11 @@ func HardwareResourceSchema() map[string]rschema.Attribute {
 			Computed: true,
 			PlanModifiers: []planmodifier.String{
 				stringplanmodifier.UseStateForUnknown(),
+			},
+			Validators: []validator.String{
+				stringvalidator.RegexMatches(
+					regexp.MustCompile(util.HexID32Pattern),
+					"must be a valid baremetal_model_id"),
 			},
 			Description: "Baremetal model identifier",
 		},
