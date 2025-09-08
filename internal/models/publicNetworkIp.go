@@ -6,10 +6,15 @@ import (
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -147,7 +152,7 @@ func PublicNetworkIpDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid ID",
 					),
 				},
 			},
@@ -157,7 +162,7 @@ func PublicNetworkIpDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid ID",
 					),
 				},
 			},
@@ -263,7 +268,6 @@ func (m *PublicNetworkIpResourceModel) ToCreateRequest() PublicNetworkIpRequest 
 func NewPublicNetworkIpResourceModel(ctx context.Context, data *PublicNetworkIpResourceModel, apiResponse []PublicNetworkIpResponse) (*PublicNetworkIpResourceModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	// Convert API response items to the Items field
 	ipModels, listDiags := NewPublicNetworkIpFromList(ctx, apiResponse)
 	diags.Append(listDiags...)
 
@@ -285,19 +289,43 @@ func PublicNetworkIpResourceSchema(_ context.Context) rschema.Schema {
 			"public_network_id": rschema.StringAttribute{
 				Required:    true,
 				Description: "Public network identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid ID",
+					),
+				},
 			},
 			"id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Public network IP identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid ID",
+					),
+				},
 			},
 			"action": rschema.BoolAttribute{
 				Required:    true,
 				Description: "Action to perform on the IPs",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
 			},
 			"ips": rschema.ListAttribute{
 				Required:    true,
 				ElementType: types.StringType,
 				Description: "List of IP IDs to attach to the network",
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
+				},
 			},
 			"items": rschema.ListNestedAttribute{
 				Computed:    true,
@@ -379,6 +407,6 @@ func PublicNetworkIpResourceSchema(_ context.Context) rschema.Schema {
 	}
 }
 
-//func (m *SshKeyModel) GetState() string {
-//	return m.State.ValueString()
-//}
+func (m *PublicNetworkIpModel) GetState() string {
+	return m.State.ValueString()
+}

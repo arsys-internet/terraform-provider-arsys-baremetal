@@ -20,7 +20,7 @@ func NewPublicNetworkIpDataSource() datasource.DataSource {
 }
 
 type PublicNetworkIpDataSource struct {
-	client *service.ApiPublicNetworkService
+	client *service.ApiPublicNetworkIpService
 }
 
 func (d *PublicNetworkIpDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -36,7 +36,7 @@ func (d *PublicNetworkIpDataSource) Configure(_ context.Context, req datasource.
 		return
 	}
 
-	client := service.GetPublicNetworkService(req.ProviderData)
+	client := service.GetPublicNetworkIpService(req.ProviderData)
 	if client == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected DataSource Configure Type",
@@ -45,7 +45,7 @@ func (d *PublicNetworkIpDataSource) Configure(_ context.Context, req datasource.
 		return
 	}
 
-	publicNetworkIpService, ok := client.(*service.ApiPublicNetworkService)
+	publicNetworkIpService, ok := client.(*service.ApiPublicNetworkIpService)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected DataSource Configure Type",
@@ -67,23 +67,7 @@ func (d *PublicNetworkIpDataSource) Read(ctx context.Context, req datasource.Rea
 
 	publicNetworkId := data.PublicNetworkId.ValueString()
 
-	if publicNetworkId == "" {
-		resp.Diagnostics.AddError(
-			"Invalid public network Id",
-			"Public network Id cannot be empty",
-		)
-		return
-	}
-
 	id := data.Id.ValueString()
-
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid IP Id",
-			"IP Id cannot be empty",
-		)
-		return
-	}
 
 	tflog.Info(ctx, fmt.Sprintf("Reading IPs data source with ID %s in the public network %s", id, publicNetworkId))
 

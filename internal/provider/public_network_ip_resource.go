@@ -6,6 +6,7 @@ import (
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicNetwork"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -24,7 +25,7 @@ func NewPublicNetworkIpResource() resource.Resource {
 }
 
 type PublicNetworkIpResource struct {
-	client *service.ApiPublicNetworkService
+	client *service.ApiPublicNetworkIpService
 }
 
 func (r *PublicNetworkIpResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -40,7 +41,7 @@ func (r *PublicNetworkIpResource) Configure(_ context.Context, req resource.Conf
 		return
 	}
 
-	client := service.GetPublicNetworkService(req.ProviderData)
+	client := service.GetPublicNetworkIpService(req.ProviderData)
 	if client == nil {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -49,7 +50,7 @@ func (r *PublicNetworkIpResource) Configure(_ context.Context, req resource.Conf
 		return
 	}
 
-	PublicNetworkIpService, ok := client.(*service.ApiPublicNetworkService)
+	PublicNetworkIpService, ok := client.(*service.ApiPublicNetworkIpService)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -78,7 +79,7 @@ func (r *PublicNetworkIpResource) Read(ctx context.Context, req resource.ReadReq
 
 		tflog.Info(ctx, fmt.Sprintf("Reading IP %s in the public network with ID: %s", id, publicNetworkId))
 
-		apiResponse, err := r.client.GetPublicNetworkIp(publicNetworkId, id)
+		apiResponse, err := r.client.GetPublicNetworkIps(publicNetworkId)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				tflog.Info(ctx, fmt.Sprintf("IP %s not found in the Public network with ID %s, removing from state", id, publicNetworkId))
@@ -99,7 +100,7 @@ func (r *PublicNetworkIpResource) Read(ctx context.Context, req resource.ReadReq
 			return
 		}
 
-		readModel, diags := models.NewPublicNetworkIpModel(ctx, apiResponse)
+		readModel, diags := models.NewPublicNetworkIpResourceModel(ctx, &data, apiResponse)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -117,98 +118,90 @@ func (r *PublicNetworkIpResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	if data.PublicNetworkId.IsNull() || data.PublicNetworkId.ValueString() == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("datacenter_id"),
-			"Missing required field",
-			"Either 'datacenter_id' field is required when associating an IP to public network",
-		)
-	}
-
-	if data.Action.IsNull() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("action"),
-			"Missing required field",
-			"Either 'action' field is required when associating an IP to public network",
-		)
-	}
-
-	if len(data.Ips) == 0 {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("ips"),
-			"Missing required field",
-			"Either 'ips' field is required when associating an IP to public network",
-		)
-	}
+	publicNetworkId := data.PublicNetworkId.ValueString()
+	isAssigning := data.Action.ValueBool()
 
 	createRequest := data.ToCreateRequest()
 
-	apiResponse, err := r.client.AssignIpToPublicNetwork(data.PublicNetworkId.ValueString(), &createRequest)
+	apiResponse, err := r.client.AssignIpToPublicNetwork(publicNetworkId, &createRequest)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error associating an IP to public network",
+			"Error processing IP assignment/unassignment",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
-	model, diags := models.NewPublicNetworkIpResourceModel(ctx, &data, *apiResponse)
+	if data.Id.IsNull() || data.Id.ValueString() == "" {
+		data.Id = types.StringValue(publicNetworkId)
+	}
+
+	if isAssigning {
+
+		timeouts := util.GetResourceTimeouts("PUBLIC_NETWORK")
+		waitOptions := util.NewWaitOptions(
+			timeouts.Default,
+			timeouts.RetryInterval,
+			timeouts.MinTimeout,
+			[]string{util.StatusConfiguring},
+			[]string{util.StatePoweredOn, util.StatePoweredOff},
+		)
+
+		for _, ip := range *apiResponse {
+			compositeId := service.CreateCompositeID(publicNetworkId, ip.Id)
+
+			_, diags := util.WaitForResourceState(
+				ctx,
+				compositeId,
+				r.client,
+				waitOptions,
+			)
+
+			resp.Diagnostics.Append(diags...)
+			if resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError(
+					"Wait failed for IP assignment",
+					fmt.Sprintf("IP %s failed to reach ready state", ip.Id),
+				)
+				return
+			}
+		}
+
+		tflog.Info(ctx, fmt.Sprintf("All %d IPs are now ready", len(*apiResponse)))
+	} else {
+		tflog.Info(ctx, fmt.Sprintf("Unassigned %d IPs from public network", len(*apiResponse)))
+	}
+
+	finalIps, err := r.client.GetPublicNetworkIps(publicNetworkId)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error getting final IP state",
+			fmt.Sprintf("Could not get final IP state: %s", err.Error()),
+		)
+		return
+	}
+
+	finalModel, diags := models.NewPublicNetworkIpResourceModel(ctx, &data, finalIps)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	//timeouts := util.GetResourceTimeouts("PUBLIC_NETWORK")
-	//
-	//waitOptions := util.NewWaitOptions(
-	//	timeouts.Default,
-	//	timeouts.RetryInterval,
-	//	timeouts.MinTimeout,
-	//	[]string{util.StateDeploying},
-	//	[]string{util.StatePoweredOn, util.StatePoweredOff},
-	//)
-	//
-	//waitResult, diags := util.WaitForResourceState(
-	//	ctx,
-	//	apiResponse.Id,
-	//	r.client,
-	//	waitOptions,
-	//)
-	//
-	//resp.Diagnostics.Append(diags...)
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
-	//
-	//finalModel := model
-	//if waitResult != nil && waitResult.Resource != nil {
-	//	if PublicNetworkIpModel, ok := waitResult.Resource.(*models.PublicNetworkIpModel); ok {
-	//		finalModel = PublicNetworkIpModel
-	//		tflog.Info(ctx, fmt.Sprintf("Public network reached final state: %s", waitResult.FinalState))
-	//	}
-	//}
+	if isAssigning {
+		tflog.Info(ctx, fmt.Sprintf("Successfully assigned IPs to public network %s", publicNetworkId))
+	} else {
+		tflog.Info(ctx, fmt.Sprintf("Successfully unassigned IPs from public network %s", publicNetworkId))
+	}
 
-	//resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 
-	data.Id = types.StringValue(fmt.Sprintf("%s-%s", data.PublicNetworkId.ValueString(), strings.Join(createRequest.Ips, "-")))
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
 
-func (r *PublicNetworkIpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	createReq := resource.CreateRequest{
-		Plan: req.Plan,
-	}
-
-	createResp := &resource.CreateResponse{
-		State:       resp.State,
-		Diagnostics: resp.Diagnostics,
-	}
-
-	r.Create(ctx, createReq, createResp)
-
-	resp.State = createResp.State
-	resp.Diagnostics = createResp.Diagnostics
+func (r *PublicNetworkIpResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError(
+		"Update not supported",
+		"This resource cannot be updated. Please check your Terraform configuration.",
+	)
 }
 
 func (r *PublicNetworkIpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

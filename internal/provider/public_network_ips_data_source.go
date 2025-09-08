@@ -17,7 +17,7 @@ func NewPublicNetworkIpsDataSource() datasource.DataSource {
 }
 
 type PublicNetworkIpsDataSource struct {
-	client service.ApiPublicNetworkService
+	client service.ApiPublicNetworkIpService
 }
 
 func (d *PublicNetworkIpsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -33,7 +33,7 @@ func (d *PublicNetworkIpsDataSource) Configure(_ context.Context, req datasource
 		return
 	}
 
-	client := service.GetPublicNetworkService(req.ProviderData)
+	client := service.GetPublicNetworkIpService(req.ProviderData)
 
 	if client == nil {
 		resp.Diagnostics.AddError(
@@ -43,7 +43,7 @@ func (d *PublicNetworkIpsDataSource) Configure(_ context.Context, req datasource
 		return
 	}
 
-	publicNetworkService, ok := client.(*service.ApiPublicNetworkService)
+	publicNetworkService, ok := client.(*service.ApiPublicNetworkIpService)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Datasource Configure Type",
