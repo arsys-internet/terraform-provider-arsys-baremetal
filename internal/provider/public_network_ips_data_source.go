@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-var _ datasource.DataSource = &PublicNetworksDataSource{}
+var _ datasource.DataSource = &PublicNetworkIpsDataSource{}
 
 func NewPublicNetworkIpsDataSource() datasource.DataSource {
 	return &PublicNetworkIpsDataSource{}

@@ -9,7 +9,7 @@ description: |-
 
 # arsys-baremetal\_public\_network\_ips
 
-Associate and disassociate **Servers** with **Public Networks** in Arsys Baremetal.
+Associate and disassociate **IPs** with **Public Networks** in Arsys Baremetal.
 
 ## Example Usage
 
