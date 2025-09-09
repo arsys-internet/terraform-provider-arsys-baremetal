@@ -15,28 +15,28 @@ import (
 )
 
 var (
-	_ resource.Resource                = &PublicNetworkIpResource{}
-	_ resource.ResourceWithConfigure   = &PublicNetworkIpResource{}
-	_ resource.ResourceWithImportState = &PublicNetworkIpResource{}
+	_ resource.Resource                = &PublicNetworkIpsResource{}
+	_ resource.ResourceWithConfigure   = &PublicNetworkIpsResource{}
+	_ resource.ResourceWithImportState = &PublicNetworkIpsResource{}
 )
 
-func NewPublicNetworkIpResource() resource.Resource {
-	return &PublicNetworkIpResource{}
+func NewPublicNetworkIpsResource() resource.Resource {
+	return &PublicNetworkIpsResource{}
 }
 
-type PublicNetworkIpResource struct {
+type PublicNetworkIpsResource struct {
 	client *service.ApiPublicNetworkIpService
 }
 
-func (r *PublicNetworkIpResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_public_network_ip"
+func (r *PublicNetworkIpsResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_public_network_ips"
 }
 
-func (r *PublicNetworkIpResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PublicNetworkIpsResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = models.PublicNetworkIpResourceSchema(ctx)
 }
 
-func (r *PublicNetworkIpResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PublicNetworkIpsResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -62,7 +62,7 @@ func (r *PublicNetworkIpResource) Configure(_ context.Context, req resource.Conf
 	r.client = PublicNetworkIpService
 }
 
-func (r *PublicNetworkIpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data models.PublicNetworkIpResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -110,7 +110,7 @@ func (r *PublicNetworkIpResource) Read(ctx context.Context, req resource.ReadReq
 	}
 }
 
-func (r *PublicNetworkIpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *PublicNetworkIpsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data models.PublicNetworkIpResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -197,14 +197,14 @@ func (r *PublicNetworkIpResource) Create(ctx context.Context, req resource.Creat
 
 }
 
-func (r *PublicNetworkIpResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PublicNetworkIpsResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
 		"This resource cannot be updated. Please check your Terraform configuration.",
 	)
 }
 
-func (r *PublicNetworkIpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PublicNetworkIpsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data models.PublicNetworkIpResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -218,6 +218,6 @@ func (r *PublicNetworkIpResource) Delete(ctx context.Context, req resource.Delet
 	tflog.Info(ctx, "Note: Server IPs remain assigned to the public network - only removing from Terraform management")
 }
 
-func (r *PublicNetworkIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PublicNetworkIpsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

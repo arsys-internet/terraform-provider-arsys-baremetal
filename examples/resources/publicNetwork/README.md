@@ -12,4 +12,5 @@ This example demonstrates how to create and manage public networks using the Ars
 
 ## Other examples associated with the resource
 
-- Associate and disassociate servers to public network using `arsys-baremetal_public_network_server`
+- Associate and disassociate servers to public network using `arsys-baremetal_public_network_servers`
+- Associate and disassociate IPs to public network using `arsys-baremetal_public_network_ips`

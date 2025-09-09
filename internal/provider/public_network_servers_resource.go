@@ -12,25 +12,25 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var _ resource.Resource = &PublicNetworkServerResource{}
+var _ resource.Resource = &PublicNetworkServersResource{}
 
 func NewPublicNetworkServerResource() resource.Resource {
-	return &PublicNetworkServerResource{}
+	return &PublicNetworkServersResource{}
 }
 
-type PublicNetworkServerResource struct {
+type PublicNetworkServersResource struct {
 	client service.ApiPublicNetworkServiceInterface
 }
 
-func (r *PublicNetworkServerResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_public_network_server"
+func (r *PublicNetworkServersResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_public_network_servers"
 }
 
-func (r *PublicNetworkServerResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PublicNetworkServersResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = models.PublicNetworkServerSchema(ctx)
 }
 
-func (r *PublicNetworkServerResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PublicNetworkServersResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -48,7 +48,7 @@ func (r *PublicNetworkServerResource) Configure(_ context.Context, req resource.
 	r.client = client
 }
 
-func (r *PublicNetworkServerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *PublicNetworkServersResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data models.PublicNetworkServerResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -109,7 +109,7 @@ func (r *PublicNetworkServerResource) Create(ctx context.Context, req resource.C
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *PublicNetworkServerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data models.PublicNetworkServerResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -138,7 +138,7 @@ func (r *PublicNetworkServerResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *PublicNetworkServerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data models.PublicNetworkServerResourceModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -199,7 +199,7 @@ func (r *PublicNetworkServerResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *PublicNetworkServerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PublicNetworkServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data models.PublicNetworkServerResourceModel
 
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)

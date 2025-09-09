@@ -150,7 +150,7 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewFirewallPolicyRemoveRuleResource,
 		NewPrivateNetworkResource,
 		NewPublicIpResource,
-		NewPublicNetworkIpResource,
+		NewPublicNetworkIpsResource,
 		NewPublicNetworkResource,
 		NewPublicNetworkServerResource,
 		NewServerResource,

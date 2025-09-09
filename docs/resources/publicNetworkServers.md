@@ -1,13 +1,13 @@
 ---
 subcategory: "Network"
 layout: "arsys-baremetal"
-page_title: "Arsys Baremetal: Public Network Server Resource"
-sidebar_current: "docs-resource-public_network_server"
+page_title: "Arsys Baremetal: Public Network Servers Resource"
+sidebar_current: "docs-resource-public_network_servers"
 description: |-
   Associate and disassociate Servers with Public Networks in Arsys Baremetal.
 ---
 
-# arsys-baremetal\_public\_network\_server
+# arsys-baremetal\_public\_network\_servers
 
 Associate and disassociate **Servers** with **Public Networks** in Arsys Baremetal.
 
@@ -16,7 +16,7 @@ Associate and disassociate **Servers** with **Public Networks** in Arsys Baremet
 ### Associate and disassociate servers with public network.
 
 ```hcl
-resource "arsys-baremetal_public_network_server" "example" {
+resource "arsys-baremetal_public_network_servers" "example" {
   public_network_id = "F17227DA6D4883B596A3861AA994EA56"
   servers = ["08CB1405D8732066D531486E7B7AAC31"]
 }

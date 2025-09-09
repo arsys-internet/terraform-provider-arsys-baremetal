@@ -37,9 +37,6 @@ type PublicNetworkIpModel struct {
 	NetworkId          types.String `tfsdk:"network_id"`
 	Type               types.String `tfsdk:"type"`
 	State              types.String `tfsdk:"state"`
-	//Action             types.Bool     `tfsdk:"action"`
-	//Ips                []types.String `tfsdk:"ips"`
-	//Items              types.List     `tfsdk:"items"`
 }
 
 type PublicNetworkIpResponse struct {
@@ -251,7 +248,6 @@ type PublicNetworkIpCreateResponse struct {
 
 type IpsData struct {
 	Items []PublicNetworkIpResponse `json:"items"`
-	//Links AttachIpsLinks            `json:"links"`
 }
 
 func (m *PublicNetworkIpResourceModel) ToCreateRequest() PublicNetworkIpRequest {
