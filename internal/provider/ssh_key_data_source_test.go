@@ -68,7 +68,7 @@ func TestAccSshKeyDataSource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_ssh_key.test",
 						tfjsonpath.New("md5"),
-						knownvalue.StringRegexp(regexp.MustCompile(util.HexID32Pattern)),
+						knownvalue.StringRegexp(regexp.MustCompile(util.Md5Pattern)),
 					),
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_ssh_key.test",
@@ -84,15 +84,6 @@ func TestAccSshKeyDataSource(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccSshKeyResourceConfig(name string, description string) string {
-	return `
-resource "arsys-baremetal_ssh_key" "test" {
-  name        = "` + name + `"
-  description = "` + description + `"
-}
-`
 }
 
 func testAccSshKeyDataSourceConfig() string {

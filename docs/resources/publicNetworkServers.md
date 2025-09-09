@@ -26,6 +26,6 @@ resource "arsys-baremetal_public_network_servers" "example" {
 
 The following arguments are supported:
 
-* `public_network_id` - (Required) The ID of the public network to which the servers will be associated.
+* `public_network_id` - (Required) ID of the public network to which the servers will be associated.
 * `servers` - (Required) A list of server IDs to associate with the public network. To disassociate a server, remove it
   from the list.

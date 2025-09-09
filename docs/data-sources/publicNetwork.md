@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `public_networks` - List of public networks
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_public_network" "example" {
@@ -59,7 +59,7 @@ The following attributes are returned by the datasource:
     * `name` - The name of the server
     * `mac` - The MAC address of the server
     * `tagged` - Indicates if the server is tagged
-* `ips` - List of IPs Id in the public network
+* `ips` - List of IPs ID in the public network
 * `availability_zones` - The availability zones of the public network
     * `id` - Identifier of the availability zone
     * `vlan_id` - Identifier of the VLAN

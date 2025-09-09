@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
 )
 
 var _ ApiServerApplianceServiceInterface = (*ApiServerApplianceService)(nil)
+var baremetalType = regexp.MustCompile(`^baremetal$`)
 
 type ApiServerApplianceService struct {
 	client *client.APIClient
@@ -59,6 +61,11 @@ func (s *ApiServerApplianceService) GetServerAppliance(id string) (*models.Serve
 	if err := json.NewDecoder(resp.Body).Decode(&serverAppliance); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
+
+	if !isBaremetalType(serverAppliance.ServerTypeCompatibility) {
+		return nil, fmt.Errorf("server appliance not found")
+	}
+
 	return &serverAppliance, nil
 }
 
@@ -85,5 +92,26 @@ func (s *ApiServerApplianceService) GetServerAppliances() ([]models.ServerApplia
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return serverAppliances, nil
+	return filterBaremetalAppliances(serverAppliances), nil
+}
+
+func filterBaremetalAppliances(appliances []models.ServerApplianceResponse) []models.ServerApplianceResponse {
+	var baremetalAppliances []models.ServerApplianceResponse
+
+	for _, appliance := range appliances {
+		if isBaremetalType(appliance.ServerTypeCompatibility) {
+			baremetalAppliances = append(baremetalAppliances, appliance)
+		}
+	}
+
+	return baremetalAppliances
+}
+
+func isBaremetalType(serverTypes []string) bool {
+	for _, serverType := range serverTypes {
+		if baremetalType.MatchString(serverType) {
+			return true
+		}
+	}
+	return false
 }

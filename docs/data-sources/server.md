@@ -125,7 +125,7 @@ The following attributes are returned by the datasource:
         * `name` - Monitoring policy name
     * `snapshot` - Snapshot information (nullable)
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_server" "example" {
@@ -135,7 +135,7 @@ data "arsys-baremetal_server" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)ID of an existing server that you want to search for.
+* `id` - (Required) ID of an existing server that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 

@@ -144,7 +144,7 @@ func SshKeyDataSourceSchema(_ context.Context) schema.Schema {
 				Description: "MD5 hash of the SSH key",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
+						regexp.MustCompile(util.Md5Pattern),
 						"must be a valid MD5 hash (32 hexadecimal characters)",
 					),
 				},
@@ -206,7 +206,8 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 				},
 			},
 			"name": rschema.StringAttribute{
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "SSH key name",
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxNameLength),
@@ -241,7 +242,7 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 				Description: "MD5 hash of the SSH key",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
+						regexp.MustCompile(util.Md5Pattern),
 						"must be a valid MD5 hash (32 hexadecimal characters)",
 					),
 				},
@@ -254,7 +255,6 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Description: "SSH public key content",
 				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxNameLength),
 					stringvalidator.LengthAtLeast(1),
 				},
 				PlanModifiers: []planmodifier.String{

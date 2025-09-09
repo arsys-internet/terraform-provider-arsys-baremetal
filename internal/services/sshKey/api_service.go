@@ -79,7 +79,7 @@ func (s *ApiSshKeyService) GetSshKeys() ([]models.SshKeyResponse, error) {
 		}
 	}(resp.Body)
 
-	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get public SSH keys")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get SSH keys")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -105,7 +105,7 @@ func (s *ApiSshKeyService) CreateSshKey(request *models.SshKeyCreateRequest) (*m
 		}
 	}(resp.Body)
 
-	errorResponse := util.HandleErrorResponse(resp, http.StatusCreated, "create public SSH key")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusCreated, "create SSH key")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -131,7 +131,7 @@ func (s *ApiSshKeyService) UpdateSshKey(id string, request *models.SshKeyUpdateR
 		}
 	}(resp.Body)
 
-	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "update public SSH key")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "update SSH key")
 	if errorResponse != nil {
 		return nil, errorResponse
 	}
@@ -157,7 +157,7 @@ func (s *ApiSshKeyService) DeleteSshKey(id string) error {
 		}
 	}(resp.Body)
 
-	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "delete public SSH key")
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "delete SSH key")
 	if errorResponse != nil {
 		return errorResponse
 	}

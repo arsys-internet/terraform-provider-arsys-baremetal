@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -301,6 +303,9 @@ func PublicIpResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Datacenter identifier where the ip will be created",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
@@ -312,6 +317,9 @@ func PublicIpResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "IP type",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 				Validators: []validator.String{
 					stringvalidator.OneOf("IPV4", "IPV6"),
 				},

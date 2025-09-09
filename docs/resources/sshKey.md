@@ -13,7 +13,7 @@ Creates and manages **SSH Keys** in Arsys Baremetal.
 
 ## Example Usage
 
-### Create or update a SSH key.
+### Create or update an SSH key.
 
 ```hcl 
 resource "arsys-baremetal_ssh_key" "example" {
@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the SSH key.
 * `description` - (Optional) The description of the SSH key.
-* `public_key` - (_Only for create_, Optional) The public key content. If not provided, a new key pair will be
+* `public_key` - (Only for creation, Optional) The public key content. If not provided, a new key pair will be
   generated.
 
 ## Attribute Reference
@@ -46,7 +46,7 @@ In addition to all arguments above, the following attributes are exported:
 * `md5` - MD5 hash of the SSH key (32 hexadecimal characters).
 * `public_key` - The SSH public key.
 * `creation_date` - SSH key creation date in ISO 8601 format.
-* `private_key` - SSH key private key (only available when SSH key is created).
+* `private_key` - SSH key private key (only available when an SSH key is created).
 
 ### Import
 

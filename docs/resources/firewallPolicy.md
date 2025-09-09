@@ -61,7 +61,7 @@ The following arguments are supported:
 
 # Import a Firewall Policy
 
-Resource Firewall Policy can be imported using creating the resource the `resource id`, e.g.
+Resource Firewall Policy can be imported using creating the resource the `resource ID`, e.g.
 **Note:** The resource must be declared before importing. No arguments are required!.
 
 Example:

@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `subnets` - List of subnets
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_public_subnet" "example" {
@@ -38,7 +38,7 @@ data "arsys-baremetal_public_subnet" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)Id of an existing subnet that you want to search for.
+* `id` - (Required) ID of an existing subnet that you want to search for.
   `id` must be provided. If none, the datasource will return an error.
 
 ## Attributes Reference

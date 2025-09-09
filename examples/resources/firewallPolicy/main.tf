@@ -19,7 +19,7 @@ resource "arsys-baremetal_firewall_policy" "test_policy" {
   description = "update"
 }
 
-# Example to import an existing firewall policy by its ID
+# Example to import an existing firewall policy by ID
 resource "arsys-baremetal_firewall_policy" "test_policy_import" {
 }
 # Execute terraform import command to import the existing firewall policy

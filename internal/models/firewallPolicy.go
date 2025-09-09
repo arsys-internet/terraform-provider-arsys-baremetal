@@ -225,7 +225,10 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Description: "Firewall policy name",
 				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxNameLength),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.NamePattern),
+						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
+					),
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),

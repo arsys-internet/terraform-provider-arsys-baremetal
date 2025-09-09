@@ -30,12 +30,12 @@ When updating a public network, datacenter_id is only needed for the creation.
 The following arguments are supported:
 
 * `public_name` - (Required) The name of the public network.
-* `datacenter_id` - (Required) The ID of the data center where the public network will be created.
+* `datacenter_id` - (Required) ID of the data center where the public network will be created.
 * `description` - (Optional) The description of the public network.
 
 ### Import
 
-Resource Public Network can be imported using creating the resource the `resource id`, e.g.
+Resource Public Network can be imported using creating the resource the `resource ID`, e.g.
 **Note:** The resource must be declared before importing. No arguments are required!
 
 Example:

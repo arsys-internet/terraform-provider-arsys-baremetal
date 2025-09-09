@@ -158,6 +158,14 @@ func (r *SshKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating SSH key with ID: %s", id))
 
+	if plan.Name.IsNull() || plan.Name.ValueString() == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("name"),
+			"Missing required field",
+			"Either 'name' field is required when updating a SSH key",
+		)
+	}
+
 	updateRequest := plan.ToUpdateRequest()
 
 	updatedSshKey, err := r.client.UpdateSshKey(id, &updateRequest)

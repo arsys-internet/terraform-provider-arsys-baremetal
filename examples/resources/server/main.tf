@@ -39,6 +39,6 @@ resource "arsys-baremetal_server" "complete_server" {
   description = "Updated baremetal server configuration with Terraform"
 }
 
-# Example to import an existing server by Id
+# Example to import an existing server by ID
 resource "arsys-baremetal_server" "server_import" {}
 # Execute terraform import command to import the existing server
