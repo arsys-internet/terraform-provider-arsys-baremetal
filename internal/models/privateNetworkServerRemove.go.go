@@ -126,7 +126,6 @@ func PrivateNetworkServerResourceRemoveSchema(_ context.Context) rschema.Schema 
 				},
 			},
 			"subnet_mask": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Subnet mask",
 				PlanModifiers: []planmodifier.String{
