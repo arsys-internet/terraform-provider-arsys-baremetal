@@ -7,9 +7,9 @@ description: |-
   Get information about IPs in a Public Networks in Arsys Baremetal.
 ---
 
-# arsys-baremetal\_public_network_ips
+# arsys-baremetal\_public\_network\_ips
 
-The **Public Network IPs data source** can be used to search and return all existing IPS in a public networks.
+The **Public Network IPs data source** can be used to search and return all existing IPS in a public network.
 Also, it can be used to search for and return an existing IP in a public network.
 You can provide a string for the id parameter which will be compared with created public networks.
 If a single match is found, it will be returned. If it is not found, an error will be returned.
@@ -34,7 +34,7 @@ data "arsys-baremetal_public_network_ips" "all" {
 
 The following attributes are returned by the datasource:
 
-* `public_network_ips` - List of IPs in a public networks
+* `public_network_ips` - List of IPs in a public network
 
 ### Get IP By ID
 
@@ -48,9 +48,9 @@ data "arsys-baremetal_public_network_ip" "example" {
 
 * `public_network_id` - (Required) ID of an existing public network that you want to search for.
 
-* `id` - (Required) ID of an existing IP in the public network that you want to search for.
-
 `public_network_id` must be provided. If none, the datasource will return an error.
+
+* `id` - (Required) ID of an existing IP in the public network that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 
