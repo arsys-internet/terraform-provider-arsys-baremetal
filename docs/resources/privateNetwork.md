@@ -32,14 +32,14 @@ When updating a private network, datacenter_id is only needed for the creation.
 The following arguments are supported:
 
 * `name` - (Required) The name of the private network.
-* `datacenter_id` - (Required) The Id of the data center where the private network will be created.
+* `datacenter_id` - (Required) ID of the data center where the private network will be created.
 * `description` - (Optional) The description of the private network.
 * `network_address` - (Optional) The network address of the private network.
 * `subnet_mask` - (Optional) The subnet mask of the private network.
 
 ### Import
 
-Resource Private Network can be imported using creating the resource the `resource id`, e.g.
+Resource Private Network can be imported using creating the resource the `resource ID`, e.g.
 **Note:** The resource must be declared before importing. No arguments are required!
 
 Example:

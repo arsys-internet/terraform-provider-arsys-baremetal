@@ -10,9 +10,9 @@ description: |-
 # arsys-baremetal\_public\_ip
 
 The **Public IPs data source** can be used to search and return all existing public IPs.
-Also, can be used to search for and return an existing IP.
+Also, it can be used to search for and return an existing IP.
 You can provide a string for the id parameter which will be compared with created IPs.
-If a single match is found, it will be returned. If it is not found an error will be returned.
+If a single match is found, it will be returned. If it is not found, an error will be returned.
 
 ## Example Usage
 
@@ -38,7 +38,7 @@ data "arsys-baremetal_public_ip" "example" {
 
 ## Argument Reference
 
-* `id` - (Required)ID of an existing IP that you want to search for.
+* `id` - (Required) ID of an existing IP that you want to search for.
   `id` must be provided. If none, the datasource will return an error.
 
 ## Attributes Reference
@@ -47,7 +47,7 @@ The following attributes are returned by the datasource:
 
 * `id` - Identifier of the public IP
 * `ip` - The address of the public IP
-* `type` - The type of the IP ("IPV4", "IPV6")
+* `type` - The type of the IP ("IPV4," "IPV6")
 * `assigned_to` - Resource where the IP is assigned
     * `id` - Identifier of the resource
     * `name` - The name of the resource

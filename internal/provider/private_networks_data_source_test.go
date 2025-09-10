@@ -118,7 +118,6 @@ resource "arsys-baremetal_private_network" "test" {
 func testAccPrivateNetworksDataSourceConfig() string {
 	return testAccPrivateNetworksResourceConfig() + `
 data "arsys-baremetal_private_networks" "all" {
-  # Este data source lista todas las private networks
 }
 `
 }

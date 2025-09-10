@@ -81,6 +81,11 @@ func validateFirstPublicIpEssentials(attributes map[string]string) error {
 		return fmt.Errorf("first public IP missing type")
 	}
 
+	ipType := attributes[typeKey]
+	if ipType != "IPV4" && ipType != "IPV6" {
+		return fmt.Errorf("expected type 'IPV4' or 'IPV6', got '%s'", ipType)
+	}
+
 	stateKey := "public_ips.0.state"
 	if _, exists := attributes[stateKey]; !exists {
 		return fmt.Errorf("first public IP missing state")

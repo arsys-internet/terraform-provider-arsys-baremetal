@@ -129,7 +129,6 @@ func validateFirstServerApplianceEssentials(attributes map[string]string) error 
 func testAccServerAppliancesDataSourceConfig() string {
 	return `
 data "arsys-baremetal_server_appliances" "all" {
-  # Este data source lista todos los server appliances
 }
 `
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
@@ -505,11 +504,7 @@ func NewServerResourceModelFromUpdate(_ context.Context, sr *ServerBaseResponse,
 
 	model.Name = types.StringValue(sr.Name)
 
-	if sr.Description != nil && *sr.Description != "" {
-		model.Description = types.StringValue(*sr.Description)
-	} else {
-		model.Description = types.StringNull()
-	}
+	helper.StringPtrToTypesStringWithNullEmpty(&model.Description, sr.Description)
 
 	return &model, diags
 }
@@ -763,8 +758,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxNameLength),
-					stringvalidator.LengthAtLeast(1),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.NamePattern),
+						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
+					),
 				},
 			},
 			"description": rschema.StringAttribute{
@@ -821,7 +818,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			"ssh_password": rschema.BoolAttribute{
 				Computed: true,
 				Optional: true,
-				Default:  booldefault.StaticBool(true),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -909,7 +905,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Optional:    true,
 				Description: "Whether RSA key authentication is enabled",
-				Default:     booldefault.StaticBool(false),
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -1075,7 +1070,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 			"install_backup_agent": rschema.BoolAttribute{
 				Optional:    true,
 				Computed:    true,
-				Default:     booldefault.StaticBool(false),
 				Description: "Whether to install backup agent",
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),

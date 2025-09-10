@@ -152,9 +152,12 @@ func (p *BaremetalProvider) Resources(_ context.Context) []func() resource.Resou
 		NewPrivateNetworkServersAssignResource,
 		NewPrivateNetworkServerRemoveResource,
 		NewPublicIpResource,
+		NewPublicNetworkIpsResource,
 		NewPublicNetworkResource,
 		NewPublicNetworkServerResource,
 		NewServerResource,
+		NewSshKeyResource,
+		NewSubnetResource,
 	}
 }
 
@@ -181,11 +184,17 @@ func (p *BaremetalProvider) DataSources(_ context.Context) []func() datasource.D
 		NewPublicIpDataSource,
 		NewPublicIpsDataSource,
 		NewPublicNetworkDataSource,
+		NewPublicNetworkIpDataSource,
+		NewPublicNetworkIpsDataSource,
 		NewPublicNetworksDataSource,
 		NewServerDataSource,
 		NewServersDataSource,
 		NewServerApplianceDataSource,
 		NewServerAppliancesDataSource,
+		NewSshKeyDataSource,
+		NewSshKeysDataSource,
+		NewSubnetsDataSource,
+		NewSubnetDataSource,
 	}
 }
 

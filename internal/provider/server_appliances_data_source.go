@@ -62,7 +62,7 @@ func (d *ServerAppliancesDataSource) Read(ctx context.Context, _ datasource.Read
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading server appliances",
-			fmt.Sprintf("Could not read server appliances: %s", err.Error()),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

@@ -65,20 +65,12 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid public IP Id",
-			"Public IP Id cannot be empty",
-		)
-		return
-	}
-
 	apiResponse, err := d.client.GetPublicIp(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Public IP not found",
-				fmt.Sprintf("Public IP with ID %s was not found", id),
+				fmt.Sprintf("Public IP with Id %s was not found", id),
 			)
 			return
 		}
@@ -93,7 +85,7 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Public IP not found",
-			fmt.Sprintf("Public IP with ID %s was not found", id),
+			fmt.Sprintf("Public IP with Id %s was not found", id),
 		)
 		return
 	}

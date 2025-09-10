@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -17,12 +18,17 @@ type ApiPublicIpService struct {
 	client *client.APIClient
 }
 
+var ipTypeRegex = regexp.MustCompile(`^IPV[46]$`)
+var subnetRegex = regexp.MustCompile(`^IPV[46]Subnet$`)
+
 type ApiPublicIpServiceInterface interface {
 	GetPublicIp(id string) (*models.PublicIpResponse, error)
 	GetPublicIps() ([]models.PublicIpResponse, error)
 	CreatePublicIp(request *models.PublicIpCreateRequest) (*models.PublicIpResponse, error)
 	UpdatePublicIp(id string, request *models.PublicIpUpdateRequest) (*models.PublicIpResponse, error)
 	DeletePublicIp(id string) error
+	GetSubnets() ([]models.PublicIpResponse, error)
+	GetSubnet(id string) (*models.PublicIpResponse, error)
 }
 
 func NewApiPublicIpService(client *client.APIClient) *ApiPublicIpService {
@@ -63,6 +69,11 @@ func (s *ApiPublicIpService) GetPublicIp(id string) (*models.PublicIpResponse, e
 	if err := json.NewDecoder(resp.Body).Decode(&publicIp); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
+
+	if !ipTypeRegex.MatchString(publicIp.Type) {
+		return nil, fmt.Errorf("public ip not found")
+	}
+
 	return &publicIp, nil
 }
 
@@ -89,7 +100,14 @@ func (s *ApiPublicIpService) GetPublicIps() ([]models.PublicIpResponse, error) {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
 
-	return publicIps, nil
+	var filteredPublicIps []models.PublicIpResponse
+	for _, ip := range publicIps {
+		if ipTypeRegex.MatchString(ip.Type) {
+			filteredPublicIps = append(filteredPublicIps, ip)
+		}
+	}
+
+	return filteredPublicIps, nil
 }
 
 func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateRequest) (*models.PublicIpResponse, error) {
@@ -163,6 +181,69 @@ func (s *ApiPublicIpService) DeletePublicIp(id string) error {
 	}
 
 	return nil
+}
+
+func (s *ApiPublicIpService) GetSubnets() ([]models.PublicIpResponse, error) {
+	resp, err := s.client.Get("/public_ips")
+
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get subnets")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var publicIps []models.PublicIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&publicIps); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	var filteredPublicIps []models.PublicIpResponse
+	for _, ip := range publicIps {
+		if subnetRegex.MatchString(ip.Type) {
+			filteredPublicIps = append(filteredPublicIps, ip)
+		}
+	}
+
+	return filteredPublicIps, nil
+}
+
+func (s *ApiPublicIpService) GetSubnet(id string) (*models.PublicIpResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/public_ips/%s", id))
+
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get subnet")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var subnet models.PublicIpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&subnet); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	if !subnetRegex.MatchString(subnet.Type) {
+		return nil, fmt.Errorf("subnet not found")
+	}
+
+	return &subnet, nil
 }
 
 func (s *ApiPublicIpService) GetResource(id string) (util.ResourceModel, error) {
