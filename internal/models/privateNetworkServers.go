@@ -24,7 +24,7 @@ func NewPrivateNetworkServers(ctx context.Context, id string, privateNetworkServ
 	model := &PrivateNetworkServersModel{}
 	model.Id = types.StringValue(id)
 	privateNetworkServers, listDiags := NewPrivateNetworkServersList(ctx, privateNetworkServersResponse)
-	diags.Append(diags...)
+	diags.Append(listDiags...)
 
 	if !listDiags.HasError() {
 		privateNetworkServersList, convertDiags := types.ListValueFrom(ctx, privateNetworkServerObjectType(), privateNetworkServers)

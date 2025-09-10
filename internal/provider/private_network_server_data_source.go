@@ -18,7 +18,7 @@ func NewPrivateNetworkServerDataSource() datasource.DataSource {
 }
 
 type PrivateNetworkServerDataSource struct {
-	client service.ApiPrivateNetworkService
+	client *service.ApiPrivateNetworkService
 }
 
 func (d *PrivateNetworkServerDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -53,7 +53,7 @@ func (d *PrivateNetworkServerDataSource) Configure(_ context.Context, req dataso
 		return
 	}
 
-	d.client = *privateNetworkService
+	d.client = privateNetworkService
 }
 
 func (d *PrivateNetworkServerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

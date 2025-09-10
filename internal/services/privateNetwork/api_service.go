@@ -100,7 +100,6 @@ func (s *ApiPrivateNetworkService) CreatePrivateNetwork(request *models.PrivateN
 	resp, err := s.client.Post("/private_networks", request)
 	if err != nil {
 		return nil, err
-
 	}
 
 	defer func(Body io.ReadCloser) {

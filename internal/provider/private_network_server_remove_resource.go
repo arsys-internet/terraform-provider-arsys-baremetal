@@ -94,14 +94,14 @@ func (r *PrivateNetworkServerRemoveResource) Create(ctx context.Context, req res
 	_, diags := util.WaitForResourceState(ctx, privateNetworkId, r.client, waitOptions)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		tflog.Error(ctx, "Wait for firewall policy state failed")
+		tflog.Error(ctx, "Wait for private network state failed")
 		return
 	}
 
 	privateNetwork, err := r.client.GetPrivateNetwork(privateNetworkId)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error getting final firewall policy state",
+			"Error getting final private network state",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -109,8 +109,8 @@ func (r *PrivateNetworkServerRemoveResource) Create(ctx context.Context, req res
 
 	if privateNetwork == nil {
 		resp.Diagnostics.AddError(
-			"Unexpected Firewall Policy State",
-			"API returned no firewall policy data after rule removal",
+			"Unexpected Private Network State",
+			"API returned no Private network data after rule removal",
 		)
 		return
 	}
@@ -121,7 +121,7 @@ func (r *PrivateNetworkServerRemoveResource) Create(ctx context.Context, req res
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully removed rule %s from firewall policy %s", serverId, privateNetworkId))
+	tflog.Info(ctx, fmt.Sprintf("Successfully removed server %s from private network %s", serverId, privateNetworkId))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }

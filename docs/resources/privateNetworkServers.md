@@ -16,7 +16,7 @@ Assign servers to an existing **Private Network** in Arsys baremetal.
 ### Assigns servers to an existing Private Network
 
 ```hcl
-resource "arsys-baremetal_servers_assign" "example" {
+resource "arsys-baremetal_private_network_servers_assign" "example" {
   id = "6EAC18BDB1084D6C2F5C984DE1E3EDBB"
   servers = ["825CD55B22A61C75A9B9ED48EC80D2EE", "A982AE3D56CEB4CEB2FB9B62C6B74691"]
 }
@@ -26,7 +26,7 @@ resource "arsys-baremetal_servers_assign" "example" {
 
 The following arguments are supported:
 
-* `id` - (Required) The Id of the existing Private Network to add rules to.
+* `id` - (Required) The Id of the existing Private Network to add servers to
 * `servers` - (Required) A list of servers to be added to the Private Network. Each element is an id of a server
   that you want to assign to the Private Network.
 
@@ -69,9 +69,9 @@ Removes a specific server from an existing **Private Network** in Arsys baremeta
 ### Remove a server from an existing Private Network
 
 ```hcl
-resource "arsys-baremetal_firewall_policy_server_remove" "example" {
-  id      = "4EFAD5836CE43ACA502FD5B99BEE44EF"
-  rule_id = "8FA2D5836CE43ACA502FD5B99BEE77AB"
+resource "arsys-baremetal_private_network_server_remove" "example" {
+  id        = "4EFAD5836CE43ACA502FD5B99BEE44EF"
+  server_id = "8FA2D5836CE43ACA502FD5B99BEE77AB"
 }
 ```
 
@@ -104,7 +104,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-This resource cannot be imported as it represents an operation to remove a server from an private network.
+This resource cannot be imported as it represents an operation to remove a server from a private network.
 
 ## Notes
 

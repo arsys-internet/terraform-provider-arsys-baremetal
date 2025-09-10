@@ -93,7 +93,7 @@ func PrivateNetworkServerResourceRemoveSchema(_ context.Context) rschema.Schema 
 			},
 			"server_id": rschema.StringAttribute{
 				Required:    true,
-				Description: "Private network identifier",
+				Description: "Server identifier",
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
