@@ -19,22 +19,39 @@ resource "arsys-baremetal_public_network" "test_public_network_import" {
 
 
 # Example to associate servers to public network
-resource "arsys-baremetal_public_network_server" "example_public_network_server" {
-  id      = var.public_network_id
+resource "arsys-baremetal_public_network_servers" "example_public_network_server" {
+  id = var.public_network_id
   servers = ["08CB1405D8732066D531486E7B7AAC30",
-             "08CB1405D8732066D531486E7B7AAC31"]
+  "08CB1405D8732066D531486E7B7AAC31"]
 }
 
 # Example to disassociate alls server from public network
-resource "arsys-baremetal_public_network_server" "example_public_network_server" {
+resource "arsys-baremetal_public_network_servers" "example_public_network_server" {
   id      = var.public_network_id
   servers = []
 }
 
 # Example to disassociate one server (08CB1405D8732066D531486E7B7AAC31) from public network
-resource "arsys-baremetal_public_network_server" "example_public_network_server" {
+resource "arsys-baremetal_public_network_servers" "example_public_network_server" {
   id      = var.public_network_id
   servers = ["08CB1405D8732066D531486E7B7AAC30"]
 }
 
+
+
+# Example to associate IPs to public network
+resource "arsys-baremetal_public_network_ips" "example_public_network_ip" {
+  public_network_id = var.public_network_id
+  action            = true
+  ips = ["08CB1405D8732066D531486E7B7AAC30",
+  "08CB1405D8732066D531486E7B7AAC31"]
+}
+
+# Example to disassociate IPs from public network
+resource "arsys-baremetal_public_network_ips" "example_public_network_ip" {
+  public_network_id = var.public_network_id
+  action            = false
+  ips = ["08CB1405D8732066D531486E7B7AAC30",
+  "08CB1405D8732066D531486E7B7AAC31"]
+}
 
