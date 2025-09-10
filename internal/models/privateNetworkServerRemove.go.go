@@ -84,7 +84,7 @@ func PrivateNetworkServerResourceRemoveSchema(_ context.Context) rschema.Schema 
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
+						"must be a valid private network ID",
 					),
 				},
 				PlanModifiers: []planmodifier.String{
@@ -97,7 +97,7 @@ func PrivateNetworkServerResourceRemoveSchema(_ context.Context) rschema.Schema 
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid server_id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
+						"must be a valid server_id",
 					),
 				},
 				PlanModifiers: []planmodifier.String{
@@ -105,42 +105,22 @@ func PrivateNetworkServerResourceRemoveSchema(_ context.Context) rschema.Schema 
 				},
 			},
 			"name": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Private network name",
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxNameLength),
-					stringvalidator.LengthAtLeast(1),
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.NamePattern),
-						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
-					),
-				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"description": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Private network description",
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
-				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"network_address": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Network address",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.IPv4Pattern),
-						"must be a valid IPv4 address (e.g., 192.168.1.0)",
-					),
-				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -149,12 +129,6 @@ func PrivateNetworkServerResourceRemoveSchema(_ context.Context) rschema.Schema 
 				Optional:    true,
 				Computed:    true,
 				Description: "Subnet mask",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.SubnetMaskPattern),
-						"must be a valid subnet mask (e.g., 255.255.255.0)",
-					),
-				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

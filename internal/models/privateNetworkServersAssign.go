@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -94,7 +95,7 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
+						"must be a valid private network ID",
 					),
 				},
 			},
@@ -110,51 +111,39 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 				Description: "List of server IP Ids to assign to the private network",
 			},
 			"name": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Private network name",
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxNameLength),
-					stringvalidator.LengthAtLeast(1),
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.NamePattern),
-						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
-					),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"description": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Private network description",
-				Validators: []validator.String{
-					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"network_address": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Network address",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.IPv4Pattern),
-						"must be a valid IPv4 address (e.g., 192.168.1.0)",
-					),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"subnet_mask": rschema.StringAttribute{
-				Optional:    true,
 				Computed:    true,
 				Description: "Subnet mask",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.SubnetMaskPattern),
-						"must be a valid subnet mask (e.g., 255.255.255.0)",
-					),
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Private network state",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"datacenter": rschema.SingleNestedAttribute{
 				Computed:    true,
@@ -167,15 +156,24 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Creation timestamp",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"cloudpanel_id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "CloudPanel identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"servers_detail": rschema.ListNestedAttribute{
 				Computed:     true,
 				Description:  "List of servers in the private network",
 				NestedObject: IdentifierResourceNestedObject(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}

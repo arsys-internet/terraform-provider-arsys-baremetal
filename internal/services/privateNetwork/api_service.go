@@ -97,8 +97,6 @@ func (s *ApiPrivateNetworkService) GetPrivateNetworks() ([]models.PrivateNetwork
 }
 
 func (s *ApiPrivateNetworkService) CreatePrivateNetwork(request *models.PrivateNetworkCreateRequest) (*models.PrivateNetworkResponse, error) {
-	fmt.Printf("API Service - Creating private network with request: %+v\n", request)
-
 	resp, err := s.client.Post("/private_networks", request)
 	if err != nil {
 		return nil, err
@@ -112,12 +110,8 @@ func (s *ApiPrivateNetworkService) CreatePrivateNetwork(request *models.PrivateN
 		}
 	}(resp.Body)
 
-	fmt.Printf("API Service - Response status code: %d\n", resp.StatusCode)
-	fmt.Printf("API Service - Response headers: %+v\n", resp.Header)
-
 	errorResponse := util.HandleErrorResponse(resp, http.StatusCreated, "create private network")
 	if errorResponse != nil {
-		fmt.Printf("API Service - Error response: %v\n", errorResponse)
 		return nil, errorResponse
 	}
 

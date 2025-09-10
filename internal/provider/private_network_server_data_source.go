@@ -67,16 +67,16 @@ func (d *PrivateNetworkServerDataSource) Read(ctx context.Context, req datasourc
 	id := data.Id.ValueString()
 	privateNetworkId := data.PrivateNetworkId.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading private network server with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading private network server with ID: %s", id))
 
 	apiResponse, err := d.client.GetPrivateNetworkServer(privateNetworkId, id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Private network Not Found",
-				fmt.Sprintf("Private network server with id %s not found", id),
+				fmt.Sprintf("Private network server with ID %s not found", id),
 			)
-			tflog.Info(ctx, fmt.Sprintf("Private network server with Id %s not found", id))
+			tflog.Info(ctx, fmt.Sprintf("Private network server with ID %s not found", id))
 			return
 		}
 
