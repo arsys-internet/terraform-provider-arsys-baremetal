@@ -71,12 +71,12 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading public ip with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading public ip with ID: %s", id))
 
 	apiResponse, err := r.client.GetPublicIp(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Public ip with Id %s not found, removing from state", id))
+			tflog.Info(ctx, fmt.Sprintf("Public ip with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -89,7 +89,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Public ip with Id %s not found, removing from state", id))
+		tflog.Info(ctx, fmt.Sprintf("Public ip with ID %s not found, removing from state", id))
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -123,13 +123,21 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating public ip. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	model, diags := models.NewPublicIpResourceModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created public ip with Id: %s", model.Id.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created public ip with ID: %s", model.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
@@ -158,6 +166,14 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 		resp.Diagnostics.AddError(
 			"Error updating public ip",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if updatedPublicIp == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while updating public ip. Please report this issue to the provider developers.",
 		)
 		return
 	}

@@ -101,6 +101,14 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating private network. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	model, diags := models.NewPrivateNetworkResourceModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -184,6 +192,14 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 		resp.Diagnostics.AddError(
 			"Error updating private network",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if updatedPrivateNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while updating private network. Please report this issue to the provider developers.",
 		)
 		return
 	}

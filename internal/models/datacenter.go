@@ -106,7 +106,7 @@ func DatacenterDataSourceSchema(_ context.Context) schema.Schema {
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(util.HexID32Pattern),
-				"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+				"must be a valid datacenter ID",
 			),
 		},
 	}

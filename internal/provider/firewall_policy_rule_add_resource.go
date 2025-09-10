@@ -127,6 +127,14 @@ func (r *FirewallPolicyRuleResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
+	if finalPolicy == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy after assign rule. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	finalModel, diags := models.NewFirewallPolicyRuleResourceModel(ctx, data.Rules, *finalPolicy)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -152,7 +160,7 @@ func (r *FirewallPolicyRuleResource) Read(ctx context.Context, req resource.Read
 	apiResponse, err := r.client.GetFirewallPolicy(firewallPolicyId)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
+			tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", firewallPolicyId))
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -165,7 +173,7 @@ func (r *FirewallPolicyRuleResource) Read(ctx context.Context, req resource.Read
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
+		tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", firewallPolicyId))
 		resp.State.RemoveResource(ctx)
 		return
 	}
@@ -182,7 +190,7 @@ func (r *FirewallPolicyRuleResource) Read(ctx context.Context, req resource.Read
 func (r *FirewallPolicyRuleResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"This resource cannot be updated. Please check your Terraform configuration.",
+		"This resource does not support updates. Changes will trigger resource replacement.",
 	)
 }
 

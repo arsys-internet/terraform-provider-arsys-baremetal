@@ -131,6 +131,14 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating public network. Please try again or report this issue to the provider developers",
+		)
+		return
+	}
+
 	model, diags := models.NewPublicNetworkModel(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -196,6 +204,14 @@ func (r *PublicNetworkResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError(
 			"Error updating public network",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if updatedPublicNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while updating public network. Please report this issue to the provider developers.",
 		)
 		return
 	}

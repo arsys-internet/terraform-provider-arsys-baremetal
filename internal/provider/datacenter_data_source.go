@@ -66,16 +66,16 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading datacenter with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading datacenter with ID: %s", id))
 
 	apiResponse, err := d.client.GetDatacenter(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Datacenter Not Found",
-				fmt.Sprintf("Datacenter with id %s not found", id),
+				fmt.Sprintf("Datacenter with ID %s not found", id),
 			)
-			tflog.Info(ctx, fmt.Sprintf("Datacenter with Id %s not found", id))
+			tflog.Info(ctx, fmt.Sprintf("Datacenter with ID %s not found", id))
 			return
 		}
 
@@ -88,8 +88,8 @@ func (d *DatacenterDataSource) Read(ctx context.Context, req datasource.ReadRequ
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Not Found",
-			fmt.Sprintf("Datacenter not found"),
+			"Internal Error",
+			"An unexpected error occurred while retrieving datacenter. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

@@ -211,11 +211,10 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid private network ID",
 					),
 				},
 			},
-			//TODO: solo computed que viene desde la api
 			"cloudpanel_id": schema.StringAttribute{
 				Computed:    true,
 				Description: "CloudPanel identifier",
@@ -254,7 +253,6 @@ func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
 	}
 }
 
-// TODO: Add plan modifiers to use state for unknown values
 func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Private network resource",
@@ -291,7 +289,7 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid datacenter_id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
+						"must be a valid datacenter_id",
 					),
 				},
 			},

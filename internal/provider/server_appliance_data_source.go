@@ -66,14 +66,14 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading server appliance with id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading server appliance with ID: %s", id))
 
 	apiResponse, err := d.client.GetServerAppliance(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Error reading the server appliance",
-				fmt.Sprintf("Server appliance with id %s was not found", id),
+				fmt.Sprintf("Server appliance with ID %s was not found", id),
 			)
 			return
 		}
@@ -87,8 +87,8 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Error reading server appliance",
-			fmt.Sprintf("Server appliance with id %s was not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving server appliance. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

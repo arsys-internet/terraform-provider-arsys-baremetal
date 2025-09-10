@@ -69,7 +69,7 @@ func (r *PublicNetworkServerResource) Create(ctx context.Context, req resource.C
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error assigning servers to public network",
-			fmt.Sprintf("Could not assign servers to public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}

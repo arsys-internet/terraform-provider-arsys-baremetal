@@ -109,7 +109,15 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 	if fwErr != nil {
 		resp.Diagnostics.AddError(
 			"Error getting final firewall policy state",
-			fmt.Sprintf("Could not get final firewall policy state: %s", fwErr.Error()),
+			fmt.Sprintf("Error: %s", fwErr.Error()),
+		)
+		return
+	}
+
+	if finalPolicy == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving final firewall policy. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -169,7 +177,7 @@ func (r *FirewallPolicyServerIPsAssignResource) Read(ctx context.Context, req re
 func (r *FirewallPolicyServerIPsAssignResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"This resource uses RequiresReplace for all changes. Any modifications should result in destroy + create, not update. Please check your Terraform configuration.",
+		"This resource does not support updates. Changes will trigger resource replacement.",
 	)
 }
 
