@@ -41,7 +41,7 @@ The following attributes are returned by the datasource:
     * `name` - Name of the server
     * `lock` - Status of the server lock (integer)
 
-### Get Specific Server Ip by ID
+### Get Specific Server by ID
 
 ## Example Usage
 
