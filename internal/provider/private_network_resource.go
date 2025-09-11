@@ -76,7 +76,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		)
 	}
 
-	if data.DatacenterID.IsNull() || data.DatacenterID.ValueString() == "" {
+	if data.DatacenterId.IsNull() || data.DatacenterId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
@@ -90,7 +90,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 
 	createRequest := data.ToCreateRequest()
 
-	tflog.Info(ctx, fmt.Sprintf("Creating private network: %s", createRequest.Name))
+	tflog.Info(ctx, fmt.Sprintf("Creating private network request: %+v", createRequest))
 
 	apiResponse, err := r.client.CreatePrivateNetwork(&createRequest)
 	if err != nil {
@@ -110,12 +110,13 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 	}
 
 	model, diags := models.NewPrivateNetworkResourceModel(ctx, apiResponse)
+	tflog.Info(ctx, fmt.Sprintf("Creating private network model: %+v", model))
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created private network with ID: %s", model.ID.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created private network with ID: %s", model.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
@@ -128,7 +129,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Reading private network with ID: %s", id))
 
@@ -137,7 +138,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Private network Not Found",
-				fmt.Sprintf("Private network with id %s not found", id),
+				fmt.Sprintf("Private network with ID %s not found", id),
 			)
 			tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found", id))
 			return
@@ -182,10 +183,10 @@ func (r *PrivateNetworkResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	id := state.ID.ValueString()
+	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating private network with ID: %s", id))
 
-	updateRequest := plan.ToUpdateRequest()
+	updateRequest := plan.ToUpdateRequestFromState(&state)
 
 	updatedPrivateNetwork, err := r.client.UpdatePrivateNetwork(id, &updateRequest)
 	if err != nil {
@@ -224,7 +225,7 @@ func (r *PrivateNetworkResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Deleting private network with ID: %s", id))
 

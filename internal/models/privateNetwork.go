@@ -5,18 +5,23 @@ import (
 	"fmt"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
+	helper "terraform-provider-arsys-baremetal/internal/util/helper"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type PrivateNetworkModel struct {
-	ID             types.String `tfsdk:"id"`
+	Id             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
 	Description    types.String `tfsdk:"description"`
 	NetworkAddress types.String `tfsdk:"network_address"`
@@ -25,16 +30,16 @@ type PrivateNetworkModel struct {
 	Datacenter     types.Object `tfsdk:"datacenter"`
 	CreationDate   types.String `tfsdk:"creation_date"`
 	Servers        types.List   `tfsdk:"servers"`
-	CloudPanelID   types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId   types.String `tfsdk:"cloudpanel_id"`
 }
 
 type PrivateNetworkResourceModel struct {
 	PrivateNetworkModel
-	DatacenterID types.String `tfsdk:"datacenter_id"`
+	DatacenterId types.String `tfsdk:"datacenter_id"`
 }
 
 type PrivateNetworkResponse struct {
-	ID             string                 `json:"id"`
+	Id             string                 `json:"id"`
 	Name           string                 `json:"name"`
 	Description    *string                `json:"description"`
 	NetworkAddress string                 `json:"network_address"`
@@ -44,6 +49,14 @@ type PrivateNetworkResponse struct {
 	CreationDate   string                 `json:"creation_date"`
 	Servers        []IdentifierResponse   `json:"servers"`
 	CloudPanelId   string                 `json:"cloudpanel_id"`
+}
+
+func (f *PrivateNetworkModel) GetState() string {
+	if f == nil {
+		return ""
+	}
+
+	return f.State.ValueString()
 }
 
 func newPrivateNetworkModelFromResponse(_ context.Context, pn *PrivateNetworkResponse) (*PrivateNetworkModel, diag.Diagnostics) {
@@ -56,13 +69,13 @@ func newPrivateNetworkModelFromResponse(_ context.Context, pn *PrivateNetworkRes
 
 	model := &PrivateNetworkModel{}
 
-	model.ID = types.StringValue(pn.ID)
+	model.Id = types.StringValue(pn.Id)
 	model.Name = types.StringValue(pn.Name)
 	model.NetworkAddress = types.StringValue(pn.NetworkAddress)
 	model.SubnetMask = types.StringValue(pn.SubnetMask)
 	model.State = types.StringValue(pn.State)
 	model.CreationDate = types.StringValue(pn.CreationDate)
-	model.CloudPanelID = types.StringValue(pn.CloudPanelId)
+	model.CloudPanelId = types.StringValue(pn.CloudPanelId)
 
 	if pn.Description != nil {
 		model.Description = types.StringValue(*pn.Description)
@@ -97,7 +110,7 @@ func NewPrivateNetworkResourceModel(ctx context.Context, pn *PrivateNetworkRespo
 
 	resourceModel := &PrivateNetworkResourceModel{
 		PrivateNetworkModel: *baseModel,
-		DatacenterID:        types.StringValue(pn.Datacenter.Id),
+		DatacenterId:        types.StringValue(pn.Datacenter.Id),
 	}
 
 	return resourceModel, diags
@@ -167,38 +180,62 @@ func NewPrivateNetworkFromList(ctx context.Context, pnList []PrivateNetworkRespo
 }
 
 func (m *PrivateNetworkResourceModel) ToCreateRequest() PrivateNetworkCreateRequest {
-	return PrivateNetworkCreateRequest{
-		Name:           m.Name.ValueString(),
-		Description:    m.Description.ValueString(),
-		NetworkAddress: m.NetworkAddress.ValueString(),
-		SubnetMask:     m.SubnetMask.ValueString(),
-		DatacenterID:   m.DatacenterID.ValueString(),
+	request := PrivateNetworkCreateRequest{
+		Name:         m.Name.ValueString(),
+		DatacenterId: m.DatacenterId.ValueString(),
 	}
+
+	helper.AssignStringPtr(&request.Description, m.Description)
+	helper.AssignStringPtr(&request.NetworkAddress, m.NetworkAddress)
+	helper.AssignStringPtr(&request.SubnetMask, m.SubnetMask)
+
+	return request
 }
 
-// TODO: Add validation for fields, if I update just
-func (m *PrivateNetworkResourceModel) ToUpdateRequest() PrivateNetworkUpdateRequest {
-	return PrivateNetworkUpdateRequest{
-		Name:           m.Name.ValueString(),
-		Description:    m.Description.ValueString(),
-		NetworkAddress: m.NetworkAddress.ValueString(),
-		SubnetMask:     m.SubnetMask.ValueString(),
+func (m *PrivateNetworkResourceModel) ToUpdateRequestFromState(state *PrivateNetworkResourceModel) PrivateNetworkUpdateRequest {
+	request := PrivateNetworkUpdateRequest{}
+
+	if !m.Name.Equal(state.Name) {
+		helper.AssignStringPtr(&request.Name, m.Name)
 	}
+
+	if !m.Description.Equal(state.Description) {
+		helper.AssignStringPtr(&request.Description, m.Description)
+	}
+
+	networkChanged := !m.NetworkAddress.Equal(state.NetworkAddress)
+	subnetChanged := !m.SubnetMask.Equal(state.SubnetMask)
+
+	if networkChanged || subnetChanged {
+		if !m.NetworkAddress.IsNull() {
+			helper.AssignStringPtr(&request.NetworkAddress, m.NetworkAddress)
+		} else {
+			helper.AssignStringPtr(&request.NetworkAddress, state.NetworkAddress)
+		}
+
+		if !m.SubnetMask.IsNull() {
+			helper.AssignStringPtr(&request.SubnetMask, m.SubnetMask)
+		} else {
+			helper.AssignStringPtr(&request.SubnetMask, state.SubnetMask)
+		}
+	}
+
+	return request
 }
 
 type PrivateNetworkCreateRequest struct {
-	Name           string `json:"name"`
-	Description    string `json:"description"`
-	NetworkAddress string `json:"network_address"`
-	SubnetMask     string `json:"subnet_mask"`
-	DatacenterID   string `json:"datacenter_id"`
+	Name           string  `json:"name"`
+	Description    *string `json:"description,omitempty"`
+	NetworkAddress *string `json:"network_address,omitempty"`
+	SubnetMask     *string `json:"subnet_mask,omitempty"`
+	DatacenterId   string  `json:"datacenter_id"`
 }
 
 type PrivateNetworkUpdateRequest struct {
-	Name           string `json:"name"`
-	Description    string `json:"description"`
-	NetworkAddress string `json:"network_address"`
-	SubnetMask     string `json:"subnet_mask"`
+	Name           *string `json:"name,omitempty"`
+	Description    *string `json:"description,omitempty"`
+	NetworkAddress *string `json:"network_address,omitempty"`
+	SubnetMask     *string `json:"subnet_mask,omitempty"`
 }
 
 func PrivateNetworkDataSourceSchema(_ context.Context) schema.Schema {
@@ -260,7 +297,11 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 			"id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Private network identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
+
 			"name": rschema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
@@ -273,6 +314,9 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
 					),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"description": rschema.StringAttribute{
 				Optional:    true,
@@ -280,6 +324,9 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Private network description",
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"datacenter_id": rschema.StringAttribute{
@@ -292,6 +339,9 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						"must be a valid datacenter_id",
 					),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"network_address": rschema.StringAttribute{
 				Optional:    true,
@@ -302,6 +352,9 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						regexp.MustCompile(util.IPv4Pattern),
 						"must be a valid IPv4 address (e.g., 192.168.1.0)",
 					),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"subnet_mask": rschema.StringAttribute{
@@ -314,24 +367,46 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						"must be a valid subnet mask (e.g., 255.255.255.0)",
 					),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Private network state",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
-			"datacenter": BaseDatacenterNestedAttribute(),
+			"datacenter": rschema.SingleNestedAttribute{
+				Computed:    true,
+				Description: "Server datacenter",
+				Attributes:  BaseDatacenterResourceAttributes(),
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Creation timestamp",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"cloudpanel_id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "CloudPanel identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"servers": rschema.ListNestedAttribute{
 				Computed:     true,
 				Description:  "List of servers in the private network",
 				NestedObject: IdentifierResourceNestedObject(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}

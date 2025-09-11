@@ -64,7 +64,7 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	id := data.ID.ValueString()
+	id := data.Id.ValueString()
 
 	tflog.Info(ctx, fmt.Sprintf("Reading private network with ID: %s", id))
 

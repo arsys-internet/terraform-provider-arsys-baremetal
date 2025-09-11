@@ -3,5 +3,16 @@ data "arsys-baremetal_private_networks" "all" {}
 
 # Example to retrieve a specific private network by ID
 data "arsys-baremetal_private_network" "example" {
-  id = "192117615D6F725215A21B05C87068BB"
+  id = var.private_network_id
+}
+
+# Example to discover all servers that are assigned to a specific private network
+data "arsys-baremetal_private_network_servers" "all" {
+  id = var.private_network_id
+}
+
+# Example to retrieve a specific server assigned to a private network
+data "arsys-baremetal_private_network_server" "example" {
+  private_network_id = var.private_network_id
+  id                 = var.id
 }
