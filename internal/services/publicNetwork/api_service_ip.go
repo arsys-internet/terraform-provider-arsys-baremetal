@@ -65,12 +65,11 @@ func (s *ApiPublicNetworkIpService) GetPublicNetworkIp(publicNetworkId string, i
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
+
 		if err != nil {
-			if err != nil {
-				tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
-					"error": err.Error(),
-				})
-			}
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -95,11 +94,9 @@ func (s *ApiPublicNetworkIpService) GetPublicNetworkIps(publicNetworkId string) 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			if err != nil {
-				tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
-					"error": err.Error(),
-				})
-			}
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -125,11 +122,9 @@ func (s *ApiPublicNetworkIpService) AssignIpToPublicNetwork(id string, request *
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			if err != nil {
-				tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
-					"error": err.Error(),
-				})
-			}
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
