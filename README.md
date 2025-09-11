@@ -4,7 +4,7 @@ A Terraform provider to manage Arsys Baremetal resources.
 
 ## Status
 
-Alpha Status: This provider is under active development and is subject to change and breaking changes may occur.
+Alpha Status: This provider is under active development and is subject to change, and breaking changes may occur.
 Not recommended for production use without proper testing.
 
 ## Requirements
@@ -15,14 +15,17 @@ Not recommended for production use without proper testing.
 ## Supported Services
 
     - Infrastructure
-        - Datacenters
+      - Servers
+      - Server appliances
+      - Datacenters
     - Network
-        - Public IPs
-        - Firewall Policies
-        - Private Network
-        - Public Network
-    - Compute engine
-        - Server appliances
+      - Public IPs
+      - Subnets
+      - Firewall Policies
+      - Private Networks
+      - Public Networks
+    - Security
+      - SSH Keys
 
 ## Installation
 
