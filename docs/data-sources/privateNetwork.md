@@ -60,4 +60,4 @@ The following attributes are returned by the datasource:
 * `servers` - The servers that are connected to the private network
     * `id` - Identifier of the server
     * `name` - The name of the server
-* `cloudpanel_id` - The CloudPanel ID of the private network
+* `cloudpanel_id` - CloudPanel ID of the private network

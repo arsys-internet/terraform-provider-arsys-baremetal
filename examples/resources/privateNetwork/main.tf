@@ -19,3 +19,16 @@ resource "arsys-baremetal_private_network" "example_private_network" {
 resource "arsys-baremetal_private_network" "test_private_network_import" {
 }
 # Execute terraform import command to import the existing private network
+
+# Example to assign servers to a private network
+resource "arsys-baremetal_private_network_servers_assign" "example_assign" {
+  id      = var.private_network_id
+  servers = ["825CD55B22A61C75A9B9ED48EC80D2EE", "A982AE3D56CEB4CEB2FB9B62C6B74691"]
+}
+
+# Example to remove a server from a private network
+resource "arsys-baremetal_private_network_server_remove" "example_remove" {
+  id        = var.private_network_id
+  server_id = var.id
+}
+
