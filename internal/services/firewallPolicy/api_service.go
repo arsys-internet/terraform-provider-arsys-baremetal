@@ -10,6 +10,8 @@ import (
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ ApiFirewallPolicyServiceInterface = (*ApiFirewallPolicyService)(nil)
@@ -59,7 +61,9 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicy(id string) (*models.Firewal
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -85,7 +89,9 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicies() ([]models.FirewallPolic
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -111,7 +117,9 @@ func (s *ApiFirewallPolicyService) CreateFirewallPolicy(request *models.Firewall
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -137,7 +145,9 @@ func (s *ApiFirewallPolicyService) UpdateFirewallPolicy(id string, request *mode
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -163,7 +173,9 @@ func (s *ApiFirewallPolicyService) DeleteFirewallPolicy(id string) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -202,7 +214,9 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIPs(id string) ([]fire
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -228,7 +242,9 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIP(firewallId string, 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -254,7 +270,9 @@ func (s *ApiFirewallPolicyService) AssignServerIPsToFirewallPolicy(id string, re
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -280,7 +298,9 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyRules(id string) (*[]firewal
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -306,7 +326,9 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyRule(firewallPolicyId, ruleI
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -332,7 +354,9 @@ func (s *ApiFirewallPolicyService) CreateFirewallPolicyRule(id string, request *
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -358,7 +382,9 @@ func (s *ApiFirewallPolicyService) DeleteFirewallPolicyRule(firewallPolicyId, ru
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 

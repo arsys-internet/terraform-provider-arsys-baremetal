@@ -1,6 +1,7 @@
 package serverAppliance
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,8 @@ import (
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ ApiServerApplianceServiceInterface = (*ApiServerApplianceService)(nil)
@@ -48,7 +51,9 @@ func (s *ApiServerApplianceService) GetServerAppliance(id string) (*models.Serve
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -78,7 +83,9 @@ func (s *ApiServerApplianceService) GetServerAppliances() ([]models.ServerApplia
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 

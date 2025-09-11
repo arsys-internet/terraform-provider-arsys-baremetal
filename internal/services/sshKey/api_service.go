@@ -9,6 +9,8 @@ import (
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ ApiSshKeyServiceInterface = (*ApiSshKeyService)(nil)
@@ -50,7 +52,9 @@ func (s *ApiSshKeyService) GetSshKey(id string) (*models.SshKeyResponse, error) 
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -75,7 +79,9 @@ func (s *ApiSshKeyService) GetSshKeys() ([]models.SshKeyResponse, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -101,7 +107,9 @@ func (s *ApiSshKeyService) CreateSshKey(request *models.SshKeyCreateRequest) (*m
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -127,7 +135,9 @@ func (s *ApiSshKeyService) UpdateSshKey(id string, request *models.SshKeyUpdateR
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -153,7 +163,9 @@ func (s *ApiSshKeyService) DeleteSshKey(id string) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 

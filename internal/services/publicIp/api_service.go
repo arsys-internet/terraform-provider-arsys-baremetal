@@ -10,6 +10,8 @@ import (
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/util"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 var _ ApiPublicIpServiceInterface = (*ApiPublicIpService)(nil)
@@ -56,7 +58,9 @@ func (s *ApiPublicIpService) GetPublicIp(id string) (*models.PublicIpResponse, e
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -86,7 +90,9 @@ func (s *ApiPublicIpService) GetPublicIps() ([]models.PublicIpResponse, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -119,7 +125,9 @@ func (s *ApiPublicIpService) CreatePublicIp(request *models.PublicIpCreateReques
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -145,7 +153,9 @@ func (s *ApiPublicIpService) UpdatePublicIp(id string, request *models.PublicIpU
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -171,7 +181,9 @@ func (s *ApiPublicIpService) DeletePublicIp(id string) error {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -192,7 +204,9 @@ func (s *ApiPublicIpService) GetSubnets() ([]models.PublicIpResponse, error) {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
@@ -225,7 +239,9 @@ func (s *ApiPublicIpService) GetSubnet(id string) (*models.PublicIpResponse, err
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Println(err)
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
 		}
 	}(resp.Body)
 
