@@ -66,24 +66,16 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Private Network Id",
-			"Private network Id cannot be empty",
-		)
-		return
-	}
-
-	tflog.Info(ctx, fmt.Sprintf("Reading private network with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading private network with ID: %s", id))
 
 	apiResponse, err := d.client.GetPrivateNetwork(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Private network Not Found",
-				fmt.Sprintf("Private network with id %s not found", id),
+				fmt.Sprintf("Private network with ID %s not found", id),
 			)
-			tflog.Info(ctx, fmt.Sprintf("Private network with Id %s not found", id))
+			tflog.Info(ctx, fmt.Sprintf("Private network with ID %s not found", id))
 			return
 		}
 

@@ -28,7 +28,7 @@ The following attributes are returned by the datasource:
 
 * `private_networks` - List of private networks
 
-### Get By Id
+### Get By ID
 
 ```hcl
 data "arsys-baremetal_private_network" "example" {
@@ -38,7 +38,7 @@ data "arsys-baremetal_private_network" "example" {
 
 ## Argument Reference
 
-* `id` - (Required) Id of an existing private network that you want to search for.
+* `id` - (Required) ID of an existing private network that you want to search for.
 
 `id` must be provided. If none, the datasource will return an error.
 
@@ -60,4 +60,4 @@ The following attributes are returned by the datasource:
 * `servers` - The servers that are connected to the private network
     * `id` - Identifier of the server
     * `name` - The name of the server
-* `cloudpanel_id` - The CloudPanel Id of the private network
+* `cloudpanel_id` - CloudPanel ID of the private network

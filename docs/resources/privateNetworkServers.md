@@ -26,7 +26,7 @@ resource "arsys-baremetal_private_network_servers_assign" "example" {
 
 The following arguments are supported:
 
-* `id` - (Required) The Id of the existing Private Network to add servers to
+* `id` - (Required) The ID of the existing Private Network to add servers to
 * `servers` - (Required) A list of servers to be added to the Private Network. Each element is an id of a server
   that you want to assign to the Private Network.
 
@@ -52,7 +52,7 @@ The following attributes are returned by the datasource:
 * `servers` - The servers that are connected to the private network
     * `id` - Identifier of the server
     * `name` - The name of the server
-* `cloudpanel_id` - The CloudPanel Id of the private network
+* `cloudpanel_id` - CloudPanel ID of the private network
 
 ## Notes
 
@@ -79,8 +79,8 @@ resource "arsys-baremetal_private_network_server_remove" "example" {
 
 The following arguments are supported:
 
-* `id`- (Required) The Id of the existing private network to remove the server from.
-* `server_id` - (Required) The Id of the specific server to remove from the private network.
+* `id`- (Required) The ID of the existing private network to remove the server from.
+* `server_id` - (Required) The ID of the specific server to remove from the private network.
 
 ## Attributes Reference
 
@@ -100,7 +100,7 @@ In addition to all arguments above, the following attributes are exported:
 * `servers` - The servers that are connected to the private network
     * `id` - Identifier of the server
     * `name` - The name of the server
-* `cloudpanel_id` - The CloudPanel Id of the private network
+* `cloudpanel_id` - The CloudPanel ID of the private network
 
 ## Import
 

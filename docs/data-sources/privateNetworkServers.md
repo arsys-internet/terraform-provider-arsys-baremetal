@@ -27,7 +27,7 @@ data "arsys-baremetal_private_network_servers" "all" {
 
 ## Argument Reference
 
-* `id` - (Required) Id of an existing private network that you want to retrieve servers from.
+* `id` - (Required) ID of an existing private network that you want to retrieve servers from.
 
 `id` must be provided. If none, the datasource will return an error.
 
@@ -41,7 +41,7 @@ The following attributes are returned by the datasource:
     * `name` - Name of the server
     * `lock` - Status of the server lock (integer)
 
-### Get Specific Server Ip by Id
+### Get Specific Server Ip by ID
 
 ## Example Usage
 
@@ -54,8 +54,8 @@ data "arsys-baremetal_private_network_server" "example" {
 
 ## Argument Reference
 
-* `private_network_id` - (Required) Id of an existing private network containing the server ip.
-* `id` - (Required) Id of the specific server ip that you want to retrieve.
+* `private_network_id` - (Required) ID of an existing private network containing the server ip.
+* `id` - (Required) ID of the specific server ip that you want to retrieve.
 
 Both `private_network_id` and `id` must be provided. If none, the datasource will return an error.
 
