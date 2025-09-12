@@ -155,7 +155,7 @@ func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.
 		Servers: servers,
 	}
 
-	//TODO: refactor esto para que devuelva la public network
+	//TODO: refactor this to return the public network
 	err := r.client.AssignServersToPublicNetwork(data.PublicNetworkId.ValueString(), request)
 	if err != nil {
 		resp.Diagnostics.AddError(
