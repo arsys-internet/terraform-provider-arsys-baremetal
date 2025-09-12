@@ -88,8 +88,10 @@ func (r *SshKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("SSH key with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving ssh key. Please try again or report this issue to the provider developers",
+		)
 		return
 	}
 
@@ -126,6 +128,14 @@ func (r *SshKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		resp.Diagnostics.AddError(
 			"Error creating SSH key",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating SSH key. Please try again or report this issue to the provider developers",
 		)
 		return
 	}
@@ -173,6 +183,14 @@ func (r *SshKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		resp.Diagnostics.AddError(
 			"Error updating SSH key",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if updatedSshKey == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while updating SSH key. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

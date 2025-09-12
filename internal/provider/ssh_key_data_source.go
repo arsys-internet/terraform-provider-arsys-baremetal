@@ -80,8 +80,8 @@ func (d *SshKeyDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"SSH key not found",
-			fmt.Sprintf("SSH key with ID %s not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving SSH key. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

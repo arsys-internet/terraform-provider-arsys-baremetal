@@ -148,7 +148,10 @@ func (r *FirewallPolicyRemoveRuleResource) Read(ctx context.Context, req resourc
 	}
 
 	if firewallPolicy == nil {
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy rule. Please report this issue to the provider developers.",
+		)
 		return
 	}
 

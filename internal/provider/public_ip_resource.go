@@ -71,26 +71,28 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading public ip with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading public IP with ID: %s", id))
 
 	apiResponse, err := r.client.GetPublicIp(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Public ip with ID %s not found, removing from state", id))
+			tflog.Info(ctx, fmt.Sprintf("Public IP with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
 		}
 
 		resp.Diagnostics.AddError(
-			"Error reading public ip",
+			"Error reading public IP",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Public ip with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving public IP. Please report this issue to the provider developers.",
+		)
 		return
 	}
 
@@ -117,7 +119,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 	apiResponse, err := r.client.CreatePublicIp(&createRequest)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating public ip",
+			"Error creating public IP",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -126,7 +128,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Internal Error",
-			"An unexpected error occurred while creating public ip. Please report this issue to the provider developers.",
+			"An unexpected error occurred while creating public IP. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -137,7 +139,7 @@ func (r *PublicIpResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Created public ip with ID: %s", model.Id.ValueString()))
+	tflog.Info(ctx, fmt.Sprintf("Created public IP with ID: %s", model.Id.ValueString()))
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }
@@ -157,14 +159,14 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	id := state.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Updating public ip with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Updating public IP with ID: %s", id))
 
 	updateRequest := plan.ToUpdateRequest()
 
 	updatedPublicIp, err := r.client.UpdatePublicIp(id, &updateRequest)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating public ip",
+			"Error updating public IP",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -173,7 +175,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 	if updatedPublicIp == nil {
 		resp.Diagnostics.AddError(
 			"Internal Error",
-			"An unexpected error occurred while updating public ip. Please report this issue to the provider developers.",
+			"An unexpected error occurred while updating public IP. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -184,7 +186,7 @@ func (r *PublicIpResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully updated public ip with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Successfully updated public IP with ID: %s", id))
 
 	diags = resp.State.Set(ctx, updatedModel)
 	resp.Diagnostics.Append(diags...)
@@ -200,17 +202,17 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Deleting public ip with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleting public IP with ID: %s", id))
 
 	err := r.client.DeletePublicIp(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Public ip %s was already deleted", id))
+			tflog.Info(ctx, fmt.Sprintf("Public IP %s was already deleted", id))
 			return
 		}
 
 		resp.Diagnostics.AddError(
-			"Error deleting public ip",
+			"Error deleting public IP",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -238,7 +240,7 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Deleted public ip with ID: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleted public IP with ID: %s", id))
 }
 
 func (r *PublicIpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

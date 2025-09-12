@@ -81,6 +81,14 @@ func (r *FirewallPolicyServerIPsAssignResource) Create(ctx context.Context, req 
 		return
 	}
 
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating assigning server IPs to firewall policy. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	timeouts := util.GetResourceTimeouts("FIREWALL_POLICY_OPERATIONS")
 	waitOptions := util.NewWaitOptions(
 		timeouts.Default,
@@ -160,8 +168,10 @@ func (r *FirewallPolicyServerIPsAssignResource) Read(ctx context.Context, req re
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy %s not found, removing from state", firewallPolicyId))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy. Please report this issue to the provider developers.",
+		)
 		return
 	}
 

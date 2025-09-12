@@ -101,7 +101,7 @@ func (r *SubnetResource) Read(_ context.Context, _ resource.ReadRequest, _ *reso
 func (r *SubnetResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"This resource does not support updates. Changes will trigger resource replacement.",
+		"This resource does not support updates. Check the provider documentation for more details.",
 	)
 }
 

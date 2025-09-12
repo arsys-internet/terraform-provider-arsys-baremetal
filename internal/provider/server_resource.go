@@ -215,8 +215,10 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Server with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving server. Please try again or report this issue to the provider developers",
+		)
 		return
 	}
 

@@ -85,7 +85,7 @@ func (d *PublicIpDataSource) Read(ctx context.Context, req datasource.ReadReques
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Internal Error",
-			"An unexpected error occurred while retrieving public IP. Please try again or report this issue to the provider developers",
+			"An unexpected error occurred while retrieving public ip. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

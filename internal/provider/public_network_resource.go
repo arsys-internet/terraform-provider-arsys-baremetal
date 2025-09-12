@@ -89,8 +89,10 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Public network with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while assigning IPs. Please try again or report this issue to the provider developers.",
+		)
 		return
 	}
 

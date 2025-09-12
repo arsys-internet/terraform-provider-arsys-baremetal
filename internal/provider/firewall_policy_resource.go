@@ -202,8 +202,10 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy. Please report this issue to the provider developers.",
+		)
 		return
 	}
 
