@@ -114,6 +114,14 @@ func (r *PrivateNetworkServersResource) Create(ctx context.Context, req resource
 		return
 	}
 
+	if privateNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving private network after assign server. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	finalModel, diags := models.NewPrivateNetworkServerAssignModel(ctx, *privateNetwork)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -152,8 +160,10 @@ func (r *PrivateNetworkServersResource) Read(ctx context.Context, req resource.R
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Private network %s not found, removing from state", firewallPolicyId))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving private network. Please try again or report this issue to the provider developers",
+		)
 		return
 	}
 
@@ -169,7 +179,7 @@ func (r *PrivateNetworkServersResource) Read(ctx context.Context, req resource.R
 func (r *PrivateNetworkServersResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"This resource uses RequiresReplace for all changes. Any modifications should result in destroy + create, not update. Please check your Terraform configuration.",
+		"This resource does not support updates. Changes will trigger resource replacement.",
 	)
 }
 

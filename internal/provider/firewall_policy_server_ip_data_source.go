@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 
 	service "terraform-provider-arsys-baremetal/internal/services/firewall_policy"
@@ -70,8 +71,16 @@ func (d *FirewallPolicyServerIPDataSource) Read(ctx context.Context, req datasou
 
 	apiResponse, err := d.client.GetFirewallPolicyServerIP(firewallPolicyId, serverIpId)
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			resp.Diagnostics.AddError(
+				"Firewall Policy Not Found",
+				fmt.Sprintf("Firewall policy server IP with ID %s not found in policy %s", serverIpId, firewallPolicyId),
+			)
+			return
+		}
+
 		resp.Diagnostics.AddError(
-			"Error reading firewall policy server IP",
+			"Error reading firewall policy",
 			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
@@ -79,8 +88,8 @@ func (d *FirewallPolicyServerIPDataSource) Read(ctx context.Context, req datasou
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Firewall policy not found",
-			fmt.Sprintf("Firewall policy with Id %s not found", firewallPolicyId),
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy server IP. Please report this issue to the provider developers.",
 		)
 		return
 	}

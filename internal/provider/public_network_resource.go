@@ -89,8 +89,10 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Public network with ID %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network after assigning IPs. Please try again or report this issue to the provider developers.",
+		)
 		return
 	}
 
@@ -127,6 +129,14 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError(
 			"Error creating public network",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating public network. Please try again or report this issue to the provider developers",
 		)
 		return
 	}
@@ -196,6 +206,14 @@ func (r *PublicNetworkResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError(
 			"Error updating public network",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if updatedPublicNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while updating public network. Please report this issue to the provider developers.",
 		)
 		return
 	}

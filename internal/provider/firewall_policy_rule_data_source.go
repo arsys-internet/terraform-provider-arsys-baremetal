@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewall_policy"
 
@@ -67,24 +68,16 @@ func (d *FirewallPolicyRuleDataSource) Read(ctx context.Context, req datasource.
 	firewallPolicyId := data.FirewallPolicyId.ValueString()
 	firewallPolicyRuleId := data.Id.ValueString()
 
-	if firewallPolicyId == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Firewall Policy Id",
-			"firewall_policy_id cannot be empty",
-		)
-		return
-	}
-
-	if firewallPolicyRuleId == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Firewall Policy Rule Id",
-			"id cannot be empty",
-		)
-		return
-	}
-
 	apiResponse, err := d.client.GetFirewallPolicyRule(firewallPolicyId, firewallPolicyRuleId)
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			resp.Diagnostics.AddError(
+				"Firewall Policy Rule Not Found",
+				fmt.Sprintf("Firewall policy rule with ID %s not found in policy %s", firewallPolicyRuleId, firewallPolicyId),
+			)
+			return
+		}
+
 		resp.Diagnostics.AddError(
 			"Error reading firewall policy rule",
 			fmt.Sprintf("Error: %s", err.Error()),
@@ -94,8 +87,8 @@ func (d *FirewallPolicyRuleDataSource) Read(ctx context.Context, req datasource.
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Firewall policy not found",
-			fmt.Sprintf("Firewall policy with Id %s not found", firewallPolicyId),
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy rule. Please report this issue to the provider developers.",
 		)
 		return
 	}

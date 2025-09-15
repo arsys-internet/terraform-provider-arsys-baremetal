@@ -88,8 +88,8 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Not Found",
-			fmt.Sprintf("Private network not found"),
+			"Internal Error",
+			"An unexpected error occurred while retrieving private network. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

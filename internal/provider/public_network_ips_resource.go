@@ -95,8 +95,10 @@ func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRe
 		}
 
 		if apiResponse == nil {
-			tflog.Info(ctx, fmt.Sprintf("IP %s not found in the public network %s not found, removing from state", id, publicNetworkId))
-			resp.State.RemoveResource(ctx)
+			resp.Diagnostics.AddError(
+				"Internal Error",
+				"An unexpected error occurred while retrieving public network IPs. Please try again or report this issue to the provider developers",
+			)
 			return
 		}
 
@@ -128,6 +130,14 @@ func (r *PublicNetworkIpsResource) Create(ctx context.Context, req resource.Crea
 		resp.Diagnostics.AddError(
 			"Error processing IP assignment/unassignment",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while assigning IPs to public network. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

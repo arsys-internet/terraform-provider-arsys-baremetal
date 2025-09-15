@@ -109,8 +109,8 @@ func (r *PrivateNetworkServerRemoveResource) Create(ctx context.Context, req res
 
 	if privateNetwork == nil {
 		resp.Diagnostics.AddError(
-			"Unexpected Private Network State",
-			"API returned no Private network data after rule removal",
+			"Internal Error",
+			"An unexpected error occurred while retrieving private network after server removal. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -148,7 +148,10 @@ func (r *PrivateNetworkServerRemoveResource) Read(ctx context.Context, req resou
 	}
 
 	if privateNetwork == nil {
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving private network. Please report this issue to the provider developers.",
+		)
 		return
 	}
 
@@ -168,7 +171,7 @@ func (r *PrivateNetworkServerRemoveResource) Read(ctx context.Context, req resou
 func (r *PrivateNetworkServerRemoveResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"This resource cannot be updated. Please check your Terraform configuration.",
+		"This resource does not support updates. Changes will trigger resource replacement.",
 	)
 }
 

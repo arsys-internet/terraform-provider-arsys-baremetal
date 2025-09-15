@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -288,7 +289,7 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
-					stringvalidator.LengthAtMost(256),
+					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
 				},
 			},
 			"public_name": rschema.StringAttribute{
@@ -454,6 +455,69 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 				},
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.UseStateForUnknown(),
+				},
+			},
+		},
+	}
+}
+
+func SubnetDataSourceSchema(_ context.Context) schema.Schema {
+	return schema.Schema{
+		Description: "Data source for subnet information",
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Required:    true,
+				Description: "Subnet identifier",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.HexID32Pattern),
+						"must be a valid subnet ID",
+					),
+				},
+			},
+			"ip": schema.StringAttribute{
+				Computed:    true,
+				Description: "IP address",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.IPv4Pattern),
+						"must be a valid IPv4 address",
+					),
+				},
+			},
+			"type": schema.StringAttribute{
+				Computed:    true,
+				Description: "IP type",
+				Validators: []validator.String{
+					stringvalidator.OneOf("IPV4", "IPV6"),
+				},
+			},
+			"assigned_to": AssignedToNestedAttribute(),
+			"subnet_id": schema.StringAttribute{
+				Computed:    true,
+				Description: "Id of the subnet to which the subnet belongs",
+			},
+			"reverse_dns": schema.StringAttribute{
+				Computed:    true,
+				Description: "Reverse DNS configured for the IP",
+			},
+			"is_dhcp": schema.BoolAttribute{
+				Computed:    true,
+				Description: "Indicates if the IP is configured to use DHCP",
+			},
+			"state": schema.StringAttribute{
+				Computed:    true,
+				Description: "Current state of the subnet (ACTIVE, etc.)",
+			},
+			"datacenter": BaseDatacenterNestedAttribute(),
+			"creation_date": schema.StringAttribute{
+				Computed:    true,
+				Description: "IP creation date in ISO 8601 format",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(util.DateTimePattern),
+						"must be a date in ISO 8601 format (e.g., 2023-05-29T09:43:31+00:00)",
+					),
 				},
 			},
 		},

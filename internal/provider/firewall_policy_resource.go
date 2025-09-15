@@ -98,7 +98,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating firewall policy",
-			fmt.Sprintf("Could not create firewall policy: %s", err),
+			fmt.Sprintf("Could not create firewall policy: %s", err.Error()),
 		)
 		return
 	}
@@ -111,6 +111,14 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		resp.Diagnostics.AddError(
 			"Error creating firewall policy",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating firewall policy. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -147,6 +155,14 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
+	if finalFirewallPolicy == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy after creation. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	finalModel, diags := models.NewFirewallPolicyModel(ctx, *finalFirewallPolicy)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -169,12 +185,12 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading firewall policy with ID: %s", id))
 
 	apiResponse, err := r.client.GetFirewallPolicy(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			tflog.Info(ctx, fmt.Sprintf("Firewall policy with Id %s not found, removing from state", id))
+			tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -187,8 +203,10 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	if apiResponse == nil {
-		tflog.Info(ctx, fmt.Sprintf("Firewall policy with Id %s not found, removing from state", id))
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy. Please report this issue to the provider developers.",
+		)
 		return
 	}
 
@@ -216,7 +234,7 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 	}
 
 	id := state.Id.ValueString()
-	tflog.Info(ctx, fmt.Sprintf("Updating firewall policy with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Updating firewall policy with ID: %s", id))
 
 	hasChanges := false
 	if !plan.Name.Equal(state.Name) {
@@ -237,11 +255,19 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 
 	updateRequest := plan.ToUpdateRequest()
 
-	_, err := r.client.UpdateFirewallPolicy(id, &updateRequest)
+	apiResponse, err := r.client.UpdateFirewallPolicy(id, &updateRequest)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error updating firewall policy",
 			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while updating firewall policy. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -256,7 +282,7 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 		finalModel.Description = plan.Description
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully updated firewall policy with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Successfully updated firewall policy with ID: %s", id))
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
@@ -270,7 +296,7 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 
 	id := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Deleting firewall policy with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleting firewall policy with ID: %s", id))
 
 	err := r.client.DeleteFirewallPolicy(id)
 	if err != nil {
@@ -310,7 +336,7 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Deleted firewall policy with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Deleted firewall policy with ID: %s", id))
 }
 
 func (r *FirewallPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

@@ -65,14 +65,6 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid public network Id",
-			"Public network ID cannot be empty",
-		)
-		return
-	}
-
 	apiResponse, err := d.client.GetPublicNetwork(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
@@ -92,8 +84,8 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Public network not found",
-			fmt.Sprintf("Public network with ID %s was not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network. Please report this issue to the provider developers.",
 		)
 		return
 	}
