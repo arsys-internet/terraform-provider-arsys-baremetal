@@ -85,7 +85,7 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid rule_id",
+						"must be a valid rule ID",
 					),
 				},
 				PlanModifiers: []planmodifier.String{

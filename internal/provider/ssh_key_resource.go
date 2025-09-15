@@ -90,7 +90,7 @@ func (r *SshKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Internal Error",
-			"An unexpected error occurred while retrieving ssh key. Please try again or report this issue to the provider developers",
+			"An unexpected error occurred while retrieving SSH key. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

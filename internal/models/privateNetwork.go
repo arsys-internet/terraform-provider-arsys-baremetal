@@ -336,7 +336,7 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid datacenter_id",
+						"must be a valid datacenter ID",
 					),
 				},
 				PlanModifiers: []planmodifier.String{

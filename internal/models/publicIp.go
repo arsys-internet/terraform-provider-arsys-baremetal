@@ -215,7 +215,7 @@ func PublicIpDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid public ip ID",
+						"must be a valid public IP ID",
 					),
 				},
 			},
