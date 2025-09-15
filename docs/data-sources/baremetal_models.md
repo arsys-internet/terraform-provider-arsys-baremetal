@@ -7,7 +7,7 @@ description: |-
   Get information about Baremetal Models in Arsys Baremetal.
 ---
 
-# arsys-baremetal\_datacenter
+# arsys-baremetal\_baremetal\_models
 
 The **Baremetal models data source** can be used to search and return all existing baremetal models.
 Also, it can be used to search for and return an existing baremetal model.
@@ -46,13 +46,6 @@ data "arsys-baremetal_baremetal_model" "example" {
 
 The following attributes are returned by the datasource:
 
-# Baremetal Model Data Source
-
-## Attributes Reference
-
-The following attributes are returned by the datasource:
-
-
 * `id` - Identifier of the Baremetal Model
 * `name` - The name of the Baremetal Model
 * `state_id` - Numeric identifier representing the current state of the Baremetal Model
@@ -69,7 +62,8 @@ The following attributes are returned by the datasource:
         * `disk_raid` - RAID configuration (e.g., "Hardware RAID 1", "Software RAID 5")
         * `disk_raid_count` - Number of disks in RAID configuration
         * `is_main` - Whether this is the main HDD (boolean)
-* `availability` - List of availability information per datacenter, including datacenter ID, availability status, connection speeds, and redundancy options
+* `availability` - List of availability information per datacenter, including datacenter ID, availability status,
+  connection speeds, and redundancy options
     * `datacenter_id` - Identifier of the datacenter where the baremetal model is available
     * `available` - Whether the baremetal model is available in this datacenter (boolean)
     * `available_connections_speeds` - List of available connection speeds (array of integers)
