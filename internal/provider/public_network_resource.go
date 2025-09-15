@@ -91,7 +91,7 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
 			"Internal Error",
-			"An unexpected error occurred while assigning IPs. Please try again or report this issue to the provider developers.",
+			"An unexpected error occurred while retrieving public network after assigning IPs. Please try again or report this issue to the provider developers.",
 		)
 		return
 	}
