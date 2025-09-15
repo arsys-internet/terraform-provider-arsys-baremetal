@@ -2,10 +2,13 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+
 	"terraform-provider-arsys-baremetal/internal/util"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,26 +20,30 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type FirewallPolicyRuleRemoveResourceModel struct {
-	RuleId       types.String `tfsdk:"rule_id"`
-	Id           types.String `tfsdk:"id"`
-	Name         types.String `tfsdk:"name"`
-	Description  types.String `tfsdk:"description"`
-	State        types.String `tfsdk:"state"`
-	CreationDate types.String `tfsdk:"creation_date"`
-	Default      types.Int64  `tfsdk:"default"`
-	Rules        types.List   `tfsdk:"rules"`
-	ServerIPs    types.List   `tfsdk:"server_ips"`
-	CloudPanelId types.String `tfsdk:"cloudpanel_id"`
+type FirewallPolicyRuleAddResourceModel struct {
+	Id              types.String `tfsdk:"id"`
+	Rules           types.List   `tfsdk:"rules"`
+	Name            types.String `tfsdk:"name"`
+	Description     types.String `tfsdk:"description"`
+	State           types.String `tfsdk:"state"`
+	CreationDate    types.String `tfsdk:"creation_date"`
+	Default         types.Int64  `tfsdk:"default"`
+	CloudPanelID    types.String `tfsdk:"cloudpanel_id"`
+	RulesDetail     types.List   `tfsdk:"rules_detail"`
+	ServerIPsDetail types.List   `tfsdk:"server_ips"`
 }
 
-func NewFirewallPolicyRuleRemoveResourceModel(_ context.Context, ruleId string, fp FirewallPolicyResponse) (*FirewallPolicyRuleRemoveResourceModel, diag.Diagnostics) {
+type FirewallPolicyAddRulesRequest struct {
+	Rules []firewallpolicy.FirewallRuleCreateRequest `json:"rules"`
+}
+
+func NewFirewallPolicyRuleResourceModel(_ context.Context, inputRules types.List, fp FirewallPolicyResponse) (*FirewallPolicyRuleAddResourceModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	rulesList, rulesDiags := firewallPolicies.NewFirewallRulesList(fp.Rules)
+	rulesList, rulesDiags := firewallpolicy.NewFirewallRulesList(fp.Rules)
 	diags.Append(rulesDiags...)
 
-	serverIPsList, serverIPsDiags := firewallPolicies.NewFirewallServerIPsList(fp.ServerIPs)
+	serverIPsList, serverIPsDiags := firewallpolicy.NewFirewallServerIPsList(fp.ServerIPs)
 	diags.Append(serverIPsDiags...)
 
 	var description types.String
@@ -46,23 +53,43 @@ func NewFirewallPolicyRuleRemoveResourceModel(_ context.Context, ruleId string, 
 		description = types.StringNull()
 	}
 
-	model := &FirewallPolicyRuleRemoveResourceModel{
-		RuleId:       types.StringValue(ruleId),
-		Id:           types.StringValue(fp.Id),
-		Name:         types.StringValue(fp.Name),
-		Description:  description,
-		State:        types.StringValue(fp.State),
-		CreationDate: types.StringValue(fp.CreationDate),
-		Default:      types.Int64Value(int64(fp.Default)),
-		Rules:        rulesList,
-		ServerIPs:    serverIPsList,
-		CloudPanelId: types.StringValue(fp.CloudPanelID),
+	model := &FirewallPolicyRuleAddResourceModel{
+		Id:              types.StringValue(fp.Id),
+		Rules:           inputRules,
+		Name:            types.StringValue(fp.Name),
+		Description:     description,
+		State:           types.StringValue(fp.State),
+		CreationDate:    types.StringValue(fp.CreationDate),
+		Default:         types.Int64Value(int64(fp.Default)),
+		CloudPanelID:    types.StringValue(fp.CloudPanelID),
+		RulesDetail:     rulesList,
+		ServerIPsDetail: serverIPsList,
 	}
 
 	return model, diags
 }
 
-func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
+func (m *FirewallPolicyRuleAddResourceModel) ToAddRequest(_ context.Context) (*FirewallPolicyAddRulesRequest, error) {
+	if m.Rules.IsNull() || m.Rules.IsUnknown() {
+		return nil, fmt.Errorf("rules field is required")
+	}
+
+	rules, err := firewallpolicy.ConvertRulesToCreateRequest(m.Rules)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert rules: %w", err)
+	}
+
+	if len(rules) == 0 {
+		return nil, fmt.Errorf("at least one rule is required")
+	}
+
+	request := &FirewallPolicyAddRulesRequest{
+		Rules: rules,
+	}
+
+	return request, nil
+}
+func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Assigns rules to an existing firewall policy",
 		Attributes: map[string]rschema.Attribute{
@@ -79,20 +106,20 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"rule_id": rschema.StringAttribute{
+
+			"rules": rschema.ListNestedAttribute{
 				Required:    true,
-				Description: "Rule identifier",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid Id",
-					),
+				Description: "List of firewall rules to add to the policy",
+				Validators: []validator.List{
+					listvalidator.SizeAtLeast(1),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+				NestedObject: rschema.NestedAttributeObject{
+					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
+				},
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
 				},
 			},
-
 			"name": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Firewall policy name",
@@ -135,14 +162,14 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"rules": rschema.ListNestedAttribute{
+			"rules_detail": rschema.ListNestedAttribute{
 				Computed:    true,
 				Description: "Complete list of rules in the firewall policy after assignment",
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallRuleResourceSchema(),
+					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
 			},
 			"server_ips": rschema.ListNestedAttribute{
@@ -152,7 +179,7 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallServerIPResourceSchema(),
+					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
 				},
 			},
 		},

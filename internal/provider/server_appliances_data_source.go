@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"terraform-provider-arsys-baremetal/internal/models"
-	service "terraform-provider-arsys-baremetal/internal/services/serverAppliance"
+	service "terraform-provider-arsys-baremetal/internal/services/server_appliance"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"

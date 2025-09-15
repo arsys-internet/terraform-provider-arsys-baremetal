@@ -1,4 +1,4 @@
-package firewallPolicy
+package firewallpolicy
 
 import (
 	"context"
@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -26,11 +27,11 @@ type ApiFirewallPolicyServiceInterface interface {
 	CreateFirewallPolicy(request *models.FirewallPolicyCreateRequest) (*models.FirewallPolicyResponse, error)
 	UpdateFirewallPolicy(id string, request *models.FirewallPolicyUpdateRequest) (*models.FirewallPolicyResponse, error)
 	DeleteFirewallPolicy(id string) error
-	GetFirewallPolicyServerIP(firewallId string, serverIp string) (*firewallPolicies.FirewallServerIPResponse, error)
-	GetFirewallPolicyServerIPs(id string) ([]firewallPolicies.FirewallServerIPResponse, error)
+	GetFirewallPolicyServerIP(firewallId string, serverIp string) (*firewallpolicy.FirewallServerIPResponse, error)
+	GetFirewallPolicyServerIPs(id string) ([]firewallpolicy.FirewallServerIPResponse, error)
 	AssignServerIPsToFirewallPolicy(id string, request *models.FirewallPolicyServerAssignRequest) (*models.FirewallPolicyResponse, error)
-	GetFirewallPolicyRules(id string) (*[]firewallPolicies.FirewallRuleResponse, error)
-	GetFirewallPolicyRule(firewallPolicyId, ruleId string) (*firewallPolicies.FirewallRuleResponse, error)
+	GetFirewallPolicyRules(id string) (*[]firewallpolicy.FirewallRuleResponse, error)
+	GetFirewallPolicyRule(firewallPolicyId, ruleId string) (*firewallpolicy.FirewallRuleResponse, error)
 	CreateFirewallPolicyRule(id string, request *models.FirewallPolicyAddRulesRequest) (*models.FirewallPolicyResponse, error)
 	DeleteFirewallPolicyRule(firewallPolicyId, ruleId string) (*models.FirewallPolicyResponse, error)
 	GetResource(id string) (util.ResourceModel, error)
@@ -205,7 +206,7 @@ func (s *ApiFirewallPolicyService) GetResource(id string) (util.ResourceModel, e
 	return model, nil
 }
 
-func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIPs(id string) ([]firewallPolicies.FirewallServerIPResponse, error) {
+func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIPs(id string) ([]firewallpolicy.FirewallServerIPResponse, error) {
 	resp, err := s.client.Get(fmt.Sprintf("/firewall_policies/%s/server_ips", id))
 
 	if err != nil {
@@ -225,7 +226,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIPs(id string) ([]fire
 		return nil, errorResponse
 	}
 
-	var responses []firewallPolicies.FirewallServerIPResponse
+	var responses []firewallpolicy.FirewallServerIPResponse
 	if err := json.NewDecoder(resp.Body).Decode(&responses); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
@@ -233,7 +234,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIPs(id string) ([]fire
 	return responses, nil
 }
 
-func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIP(firewallId string, serverIp string) (*firewallPolicies.FirewallServerIPResponse, error) {
+func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIP(firewallId string, serverIp string) (*firewallpolicy.FirewallServerIPResponse, error) {
 	resp, err := s.client.Get(fmt.Sprintf("/firewall_policies/%s/server_ips/%s", firewallId, serverIp))
 
 	if err != nil {
@@ -253,7 +254,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyServerIP(firewallId string, 
 		return nil, errorResponse
 	}
 
-	var response firewallPolicies.FirewallServerIPResponse
+	var response firewallpolicy.FirewallServerIPResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
@@ -289,7 +290,7 @@ func (s *ApiFirewallPolicyService) AssignServerIPsToFirewallPolicy(id string, re
 	return &response, nil
 }
 
-func (s *ApiFirewallPolicyService) GetFirewallPolicyRules(id string) (*[]firewallPolicies.FirewallRuleResponse, error) {
+func (s *ApiFirewallPolicyService) GetFirewallPolicyRules(id string) (*[]firewallpolicy.FirewallRuleResponse, error) {
 	resp, err := s.client.Get(fmt.Sprintf("/firewall_policies/%s/rules", id))
 
 	if err != nil {
@@ -309,7 +310,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyRules(id string) (*[]firewal
 		return nil, errorResponse
 	}
 
-	var firewallPolicyRules []firewallPolicies.FirewallRuleResponse
+	var firewallPolicyRules []firewallpolicy.FirewallRuleResponse
 	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicyRules); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}
@@ -317,7 +318,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyRules(id string) (*[]firewal
 	return &firewallPolicyRules, nil
 }
 
-func (s *ApiFirewallPolicyService) GetFirewallPolicyRule(firewallPolicyId, ruleId string) (*firewallPolicies.FirewallRuleResponse, error) {
+func (s *ApiFirewallPolicyService) GetFirewallPolicyRule(firewallPolicyId, ruleId string) (*firewallpolicy.FirewallRuleResponse, error) {
 	resp, err := s.client.Get(fmt.Sprintf("/firewall_policies/%s/rules/%s", firewallPolicyId, ruleId))
 
 	if err != nil {
@@ -337,7 +338,7 @@ func (s *ApiFirewallPolicyService) GetFirewallPolicyRule(firewallPolicyId, ruleI
 		return nil, errorResponse
 	}
 
-	var firewallPolicyRule firewallPolicies.FirewallRuleResponse
+	var firewallPolicyRule firewallpolicy.FirewallRuleResponse
 	if err := json.NewDecoder(resp.Body).Decode(&firewallPolicyRule); err != nil {
 		return nil, fmt.Errorf("error decoding response: %w", err)
 	}

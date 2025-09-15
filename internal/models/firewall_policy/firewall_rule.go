@@ -1,4 +1,4 @@
-package firewallPolicies
+package firewallpolicy
 
 import (
 	"context"

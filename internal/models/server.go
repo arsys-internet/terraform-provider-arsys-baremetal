@@ -64,7 +64,7 @@ type ServerResourceModel struct {
 	Password           types.String `tfsdk:"password"`
 	PowerOn            types.Bool   `tfsdk:"power_on"`
 	FirewallPolicyId   types.String `tfsdk:"firewall_policy_id"`
-	IPID               types.String `tfsdk:"ip_id"`
+	IPId               types.String `tfsdk:"ip_id"`
 	LoadBalancerId     types.String `tfsdk:"load_balancer_id"`
 	MonitoringPolicyId types.String `tfsdk:"monitoring_policy_id"`
 	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
@@ -396,10 +396,10 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.FirewallPolicyId = types.StringNull()
 	}
 
-	if !plan.IPID.IsUnknown() {
-		model.IPID = plan.IPID
+	if !plan.IPId.IsUnknown() {
+		model.IPId = plan.IPId
 	} else {
-		model.IPID = types.StringNull()
+		model.IPId = types.StringNull()
 	}
 
 	if !plan.LoadBalancerId.IsUnknown() {
@@ -528,7 +528,7 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 	model.Password = types.StringNull()
 	model.PowerOn = types.BoolValue(true)
 	model.FirewallPolicyId = types.StringNull()
-	model.IPID = types.StringNull()
+	model.IPId = types.StringNull()
 	model.LoadBalancerId = types.StringNull()
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolValue(false)
@@ -559,7 +559,7 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	helper.AssignStringPtr(&req.Description, s.Description)
 	helper.AssignStringPtr(&req.Password, s.Password)
 	helper.AssignStringPtr(&req.FirewallPolicyId, s.FirewallPolicyId)
-	helper.AssignStringPtr(&req.IPId, s.IPID)
+	helper.AssignStringPtr(&req.IPId, s.IPId)
 	helper.AssignStringPtr(&req.LoadBalancerId, s.LoadBalancerId)
 	helper.AssignStringPtr(&req.MonitoringPolicyId, s.MonitoringPolicyId)
 	helper.AssignStringPtr(&req.AvailabilityZoneId, s.AvailabilityZoneId)

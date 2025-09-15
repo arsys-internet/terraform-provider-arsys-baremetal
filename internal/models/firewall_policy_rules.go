@@ -3,7 +3,8 @@ package models
 import (
 	"context"
 	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -18,10 +19,10 @@ type FirewallPolicyRulesModel struct {
 	Rules types.List   `tfsdk:"rules"`
 }
 
-func NewFirewallPolicyRulesModel(_ context.Context, policyID string, rules []firewallPolicies.FirewallRuleResponse) (*FirewallPolicyRulesModel, diag.Diagnostics) {
+func NewFirewallPolicyRulesModel(_ context.Context, policyID string, rules []firewallpolicy.FirewallRuleResponse) (*FirewallPolicyRulesModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	rulesList, rulesDiags := firewallPolicies.NewFirewallRulesList(rules)
+	rulesList, rulesDiags := firewallpolicy.NewFirewallRulesList(rules)
 	diags.Append(rulesDiags...)
 
 	model := &FirewallPolicyRulesModel{
@@ -50,7 +51,7 @@ func FirewallPolicyRulesSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "Rules assigned to firewall policy",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallRuleDataSourceSchema(),
+					Attributes: firewallpolicy.FirewallRuleDataSourceSchema(),
 				},
 			},
 		},

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	service "terraform-provider-arsys-baremetal/internal/services/sshKey"
+	service "terraform-provider-arsys-baremetal/internal/services/ssh_key"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"testing"
 	"time"

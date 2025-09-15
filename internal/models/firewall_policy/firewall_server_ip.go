@@ -1,4 +1,4 @@
-package firewallPolicies
+package firewallpolicy
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"

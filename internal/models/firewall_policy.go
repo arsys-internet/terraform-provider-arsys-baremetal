@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -21,15 +21,15 @@ import (
 )
 
 type FirewallPolicyResponse struct {
-	Id           string                                      `json:"id"`
-	Name         string                                      `json:"name"`
-	Description  *string                                     `json:"description"`
-	State        string                                      `json:"state"`
-	CreationDate string                                      `json:"creation_date"`
-	Default      int                                         `json:"default"`
-	Rules        []firewallPolicies.FirewallRuleResponse     `json:"rules"`
-	ServerIPs    []firewallPolicies.FirewallServerIPResponse `json:"server_ips"`
-	CloudPanelID string                                      `json:"cloudpanel_id"`
+	Id           string                                    `json:"id"`
+	Name         string                                    `json:"name"`
+	Description  *string                                   `json:"description"`
+	State        string                                    `json:"state"`
+	CreationDate string                                    `json:"creation_date"`
+	Default      int                                       `json:"default"`
+	Rules        []firewallpolicy.FirewallRuleResponse     `json:"rules"`
+	ServerIPs    []firewallpolicy.FirewallServerIPResponse `json:"server_ips"`
+	CloudPanelID string                                    `json:"cloudpanel_id"`
 }
 
 type FirewallPolicyModel struct {
@@ -47,10 +47,10 @@ type FirewallPolicyModel struct {
 func NewFirewallPolicyModel(_ context.Context, fp FirewallPolicyResponse) (*FirewallPolicyModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	rulesList, rulesDiags := firewallPolicies.NewFirewallRulesList(fp.Rules)
+	rulesList, rulesDiags := firewallpolicy.NewFirewallRulesList(fp.Rules)
 	diags.Append(rulesDiags...)
 
-	serverIPsList, serverIPsDiags := firewallPolicies.NewFirewallServerIPsList(fp.ServerIPs)
+	serverIPsList, serverIPsDiags := firewallpolicy.NewFirewallServerIPsList(fp.ServerIPs)
 	diags.Append(serverIPsDiags...)
 
 	var description types.String
@@ -100,17 +100,17 @@ func FirewallPolicyObjectType() types.ObjectType {
 			"state":         types.StringType,
 			"creation_date": types.StringType,
 			"default":       types.Int64Type,
-			"rules":         types.ListType{ElemType: firewallPolicies.FirewallRuleObjectType()},
-			"server_ips":    types.ListType{ElemType: firewallPolicies.FirewallServerIPObjectType()},
+			"rules":         types.ListType{ElemType: firewallpolicy.FirewallRuleObjectType()},
+			"server_ips":    types.ListType{ElemType: firewallpolicy.FirewallServerIPObjectType()},
 			"cloudpanel_id": types.StringType,
 		},
 	}
 }
 
 type FirewallPolicyCreateRequest struct {
-	Name        string                                       `json:"name"`
-	Description *string                                      `json:"description,omitempty"`
-	Rules       []firewallPolicies.FirewallRuleCreateRequest `json:"rules"`
+	Name        string                                     `json:"name"`
+	Description *string                                    `json:"description,omitempty"`
+	Rules       []firewallpolicy.FirewallRuleCreateRequest `json:"rules"`
 }
 
 type FirewallPolicyUpdateRequest struct {
@@ -136,7 +136,7 @@ func (f *FirewallPolicyModel) ToCreateRequest() (FirewallPolicyCreateRequest, er
 		request.Description = &desc
 	}
 
-	rules, err := firewallPolicies.ConvertRulesToCreateRequest(f.Rules)
+	rules, err := firewallpolicy.ConvertRulesToCreateRequest(f.Rules)
 	if err != nil {
 		return request, fmt.Errorf("failed to convert rules: %w", err)
 	}
@@ -202,14 +202,14 @@ func FirewallPolicyDataSourceSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "Firewall policy rules",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallRuleDataSourceSchema(),
+					Attributes: firewallpolicy.FirewallRuleDataSourceSchema(),
 				},
 			},
 			"server_ips": schema.ListNestedAttribute{
 				Computed:    true,
 				Description: "Servers assigned to firewall policy",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallServerIPDataSourceSchema(),
+					Attributes: firewallpolicy.FirewallServerIPDataSourceSchema(),
 				},
 			},
 		},
@@ -253,7 +253,7 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallRuleResourceSchema(),
+					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
 			},
 			"id": rschema.StringAttribute{
@@ -304,7 +304,7 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallServerIPResourceSchema(),
+					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
 				},
 			},
 		},

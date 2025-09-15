@@ -1,4 +1,4 @@
-package serverAppliance
+package serverappliance
 
 import (
 	"context"

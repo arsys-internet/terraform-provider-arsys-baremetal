@@ -3,7 +3,8 @@ package models
 import (
 	"context"
 	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -39,7 +40,7 @@ type FirewallPolicyServerModel struct {
 func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) (*FirewallPolicyServerModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	rulesList, rulesDiags := firewallPolicies.NewFirewallRulesList(fp.Rules)
+	rulesList, rulesDiags := firewallpolicy.NewFirewallRulesList(fp.Rules)
 	diags.Append(rulesDiags...)
 
 	serverIPIds := make([]string, len(fp.ServerIPs))
@@ -48,7 +49,7 @@ func NewFirewallPolicyServerModel(_ context.Context, fp FirewallPolicyResponse) 
 	}
 	serverIPsSet, _ := types.SetValueFrom(context.Background(), types.StringType, serverIPIds)
 
-	serverIPsList, serverIPsDiags := firewallPolicies.NewFirewallServerIPsList(fp.ServerIPs)
+	serverIPsList, serverIPsDiags := firewallpolicy.NewFirewallServerIPsList(fp.ServerIPs)
 	diags.Append(serverIPsDiags...)
 
 	var description types.String
@@ -94,7 +95,7 @@ type FirewallPolicyServerIpModel struct {
 	ServerName       types.String `tfsdk:"server_name"`
 }
 
-func NewFirewallPolicyServerIpDataSourceModel(_ context.Context, firewallPolicyId string, response firewallPolicies.FirewallServerIPResponse) *FirewallPolicyServerIpModel {
+func NewFirewallPolicyServerIpDataSourceModel(_ context.Context, firewallPolicyId string, response firewallpolicy.FirewallServerIPResponse) *FirewallPolicyServerIpModel {
 	return &FirewallPolicyServerIpModel{
 		FirewallPolicyId: types.StringValue(firewallPolicyId),
 		ServerIpId:       types.StringValue(response.Id),
@@ -218,7 +219,7 @@ func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallRuleResourceSchema(),
+					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
 			},
 			"server_ips_detail": rschema.ListNestedAttribute{
@@ -228,7 +229,7 @@ func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallServerIPResourceSchema(),
+					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
 				},
 			},
 		},

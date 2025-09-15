@@ -1,4 +1,4 @@
-package publicIp
+package publicip
 
 import (
 	"context"
