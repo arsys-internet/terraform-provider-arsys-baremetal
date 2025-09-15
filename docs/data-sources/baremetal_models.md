@@ -48,8 +48,8 @@ The following attributes are returned by the datasource:
 
 * `id` - Identifier of the Baremetal Model
 * `name` - The name of the Baremetal Model
-* `state_id` - Numeric identifier representing the current state of the Baremetal Model
-* `state` - Current state description of the Baremetal Model (e.g., "ENABLED", "DISABLED")
+* `state_id` - Identifier representing the current state of the Baremetal Model
+* `state` - Current state of the Baremetal Model (e.g., "ENABLED", "DISABLED")
 * `hardware` attribute contains the following nested attributes:
     * `core` - Number of cores
     * `cores_per_processor` - Number of cores per processor
@@ -61,11 +61,11 @@ The following attributes are returned by the datasource:
         * `disk_type` - Type of disk (e.g., "HDD", "SSD")
         * `disk_raid` - RAID configuration (e.g., "Hardware RAID 1", "Software RAID 5")
         * `disk_raid_count` - Number of disks in RAID configuration
-        * `is_main` - Whether this is the main HDD (boolean)
+        * `is_main` - Whether this is the main HDD
 * `availability` - List of availability information per datacenter, including datacenter ID, availability status,
   connection speeds, and redundancy options
     * `datacenter_id` - Identifier of the datacenter where the baremetal model is available
-    * `available` - Whether the baremetal model is available in this datacenter (boolean)
-    * `available_connections_speeds` - List of available connection speeds (array of integers)
-    * `available_with_redundancy` - Whether the model is available with redundancy in this datacenter (boolean)
-    * `available_without_redundancy` - Whether the model is available without redundancy in this datacenter (boolean)
+    * `available` - Whether the baremetal model is available in this datacenter
+    * `available_connections_speeds` - List of available connection speeds
+    * `available_with_redundancy` - Whether the model is available with redundancy in this datacenter
+    * `available_without_redundancy` - Whether the model is available without redundancy in this datacenter
