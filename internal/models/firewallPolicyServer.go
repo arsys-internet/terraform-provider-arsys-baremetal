@@ -6,6 +6,7 @@ import (
 	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	"terraform-provider-arsys-baremetal/internal/util"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -113,7 +114,7 @@ func FirewallPolicyServerIpDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid firewall policy ID",
 					),
 				},
 			},
@@ -123,7 +124,7 @@ func FirewallPolicyServerIpDataSourceSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ID (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid server IP ID",
 					),
 				},
 			},
@@ -157,7 +158,7 @@ func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+						"must be a valid firewall policy ID",
 					),
 				},
 			},
@@ -166,6 +167,9 @@ func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 				Required:    true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
 				},
 				Description: "List of server IP Ids to assign to the firewall policy",
 			},

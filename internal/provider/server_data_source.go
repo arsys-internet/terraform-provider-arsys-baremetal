@@ -67,15 +67,7 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	id := data.Id.ValueString()
 
-	if id == "" {
-		resp.Diagnostics.AddError(
-			"Invalid Server Id",
-			"Server ID cannot be empty",
-		)
-		return
-	}
-
-	tflog.Info(ctx, fmt.Sprintf("Reading server data source with Id: %s", id))
+	tflog.Info(ctx, fmt.Sprintf("Reading server data source with ID: %s", id))
 
 	apiResponse, err := d.client.GetServer(id)
 	if err != nil {
@@ -88,8 +80,8 @@ func (d *ServerDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Server not found",
-			fmt.Sprintf("Server with Id %s not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving server. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

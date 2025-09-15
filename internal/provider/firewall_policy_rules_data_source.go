@@ -77,8 +77,8 @@ func (d *FirewallPolicyRulesDataSource) Read(ctx context.Context, req datasource
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Firewall policy not found",
-			fmt.Sprintf("Firewall policy with Id %s not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy rules. Please report this issue to the provider developers.",
 		)
 		return
 	}

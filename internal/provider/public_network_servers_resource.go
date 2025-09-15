@@ -69,7 +69,7 @@ func (r *PublicNetworkServersResource) Create(ctx context.Context, req resource.
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error assigning servers to public network",
-			fmt.Sprintf("Could not assign servers to public network: %s", err),
+			fmt.Sprintf("Error: %s", err.Error()),
 		)
 		return
 	}
@@ -155,6 +155,7 @@ func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.
 		Servers: servers,
 	}
 
+	//TODO: refactor this to return the public network
 	err := r.client.AssignServersToPublicNetwork(data.PublicNetworkId.ValueString(), request)
 	if err != nil {
 		resp.Diagnostics.AddError(

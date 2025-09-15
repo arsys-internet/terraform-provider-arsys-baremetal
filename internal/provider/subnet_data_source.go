@@ -25,7 +25,7 @@ func (d *SubnetDataSource) Metadata(_ context.Context, req datasource.MetadataRe
 }
 
 func (d *SubnetDataSource) Schema(ctx context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = models.PublicIpDataSourceSchema(ctx)
+	resp.Schema = models.SubnetDataSourceSchema(ctx)
 }
 
 func (d *SubnetDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -70,7 +70,7 @@ func (d *SubnetDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 		if strings.Contains(err.Error(), "not found") {
 			resp.Diagnostics.AddError(
 				"Subnet not found",
-				fmt.Sprintf("Subnet with Id %s was not found", id),
+				fmt.Sprintf("Subnet with ID %s was not found", id),
 			)
 			return
 		}
@@ -84,8 +84,8 @@ func (d *SubnetDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Subnet not found",
-			fmt.Sprintf("Subnet with Id %s was not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving subnet. Please try again or report this issue to the provider developers",
 		)
 		return
 	}

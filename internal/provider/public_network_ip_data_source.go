@@ -82,8 +82,8 @@ func (d *PublicNetworkIpDataSource) Read(ctx context.Context, req datasource.Rea
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"IP in the public network not found",
-			fmt.Sprintf("IP with ID %s in the public network %s not found", id, publicNetworkId),
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network IP. Please report this issue to the provider developers.",
 		)
 		return
 	}

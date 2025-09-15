@@ -77,19 +77,17 @@ func (d *FirewallPolicyServerIPsDataSource) Read(ctx context.Context, req dataso
 
 	if apiResponse == nil {
 		resp.Diagnostics.AddError(
-			"Firewall policy not found",
-			fmt.Sprintf("Firewall policy with ID %s not found", id),
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy server IPs. Please report this issue to the provider developers.",
 		)
 		return
 	}
 
-	model, err := models.NewFirewallPolicyServerIpsModel(ctx, id, apiResponse.ServerIPs)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error reading firewall policy server IPs",
-			fmt.Sprintf("Error: %s", err.Error()),
-		)
+	model, diags := models.NewFirewallPolicyServerIpsModel(ctx, id, apiResponse.ServerIPs)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, model)...)
 }

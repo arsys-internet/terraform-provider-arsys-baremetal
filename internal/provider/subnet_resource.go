@@ -76,6 +76,15 @@ func (r *SubnetResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 		return
 	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while creating subnet. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
 	finalModel, diags := models.NewSubnetModelFromResponse(ctx, apiResponse)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -92,7 +101,7 @@ func (r *SubnetResource) Read(_ context.Context, _ resource.ReadRequest, _ *reso
 func (r *SubnetResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"Subnet resources cannot be updated. Changes require resource recreation.",
+		"This resource does not support updates. Check the provider documentation for more details.",
 	)
 }
 

@@ -109,8 +109,8 @@ func (r *FirewallPolicyRemoveRuleResource) Create(ctx context.Context, req resou
 
 	if finalPolicy == nil {
 		resp.Diagnostics.AddError(
-			"Unexpected Firewall Policy State",
-			"API returned no firewall policy data after rule removal",
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy after rule removal. Please report this issue to the provider developers.",
 		)
 		return
 	}
@@ -148,7 +148,10 @@ func (r *FirewallPolicyRemoveRuleResource) Read(ctx context.Context, req resourc
 	}
 
 	if firewallPolicy == nil {
-		resp.State.RemoveResource(ctx)
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy rule. Please report this issue to the provider developers.",
+		)
 		return
 	}
 
@@ -168,7 +171,7 @@ func (r *FirewallPolicyRemoveRuleResource) Read(ctx context.Context, req resourc
 func (r *FirewallPolicyRemoveRuleResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update not supported",
-		"This resource cannot be updated. Please check your Terraform configuration.",
+		"This resource does not support updates. Changes will trigger resource replacement.",
 	)
 }
 

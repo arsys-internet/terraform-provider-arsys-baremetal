@@ -2,13 +2,13 @@ package models
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -18,16 +18,19 @@ type FirewallPolicyServerIpsModel struct {
 	ServerIPs types.List   `tfsdk:"server_ips"`
 }
 
-func NewFirewallPolicyServerIpsModel(_ context.Context, id string, servers []firewallPolicies.FirewallServerIPResponse) (*FirewallPolicyServerIpsModel, error) {
-	serverIPsList, diags := firewallPolicies.NewFirewallServerIPsList(servers)
+func NewFirewallPolicyServerIpsModel(_ context.Context, id string, servers []firewallPolicies.FirewallServerIPResponse) (*FirewallPolicyServerIpsModel, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	serverIPsList, listDiags := firewallPolicies.NewFirewallServerIPsList(servers)
+	diags.Append(listDiags...)
 	if diags.HasError() {
-		return nil, fmt.Errorf("failed to create server IPs list: %v", diags)
+		return nil, diags
 	}
 
 	return &FirewallPolicyServerIpsModel{
 		Id:        types.StringValue(id),
 		ServerIPs: serverIPsList,
-	}, nil
+	}, diags
 }
 
 func FirewallPolicyServerIPsSchema(_ context.Context) schema.Schema {
@@ -40,7 +43,7 @@ func FirewallPolicyServerIPsSchema(_ context.Context) schema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid Id",
+						"must be a valid firewall policy ID",
 					),
 				},
 			},

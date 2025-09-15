@@ -98,7 +98,7 @@ func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid Id",
+						"must be a valid firewall policy ID",
 					),
 				},
 				PlanModifiers: []planmodifier.String{
