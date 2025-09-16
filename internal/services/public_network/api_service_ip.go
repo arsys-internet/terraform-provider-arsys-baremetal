@@ -1,4 +1,4 @@
-package publicNetwork
+package publicnetwork
 
 import (
 	"context"

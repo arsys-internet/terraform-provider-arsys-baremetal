@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -23,7 +23,7 @@ type FirewallPolicyRuleModel struct {
 	Action           types.String `tfsdk:"action"`
 }
 
-func NewFirewallPolicyRuleModel(_ context.Context, firewallPolicyId string, rule firewallPolicies.FirewallRuleResponse) *FirewallPolicyRuleModel {
+func NewFirewallPolicyRuleModel(_ context.Context, firewallPolicyId string, rule firewallpolicy.FirewallRuleResponse) *FirewallPolicyRuleModel {
 	var description types.String
 	if rule.Description != nil {
 		description = types.StringValue(*rule.Description)
@@ -46,7 +46,7 @@ func NewFirewallPolicyRuleModel(_ context.Context, firewallPolicyId string, rule
 }
 
 func FirewallPolicyRuleDataSourceSchema(_ context.Context) schema.Schema {
-	baseAttributes := firewallPolicies.FirewallRuleDataSourceSchema()
+	baseAttributes := firewallpolicy.FirewallRuleDataSourceSchema()
 
 	baseAttributes["id"] = schema.StringAttribute{
 		Required:    true,

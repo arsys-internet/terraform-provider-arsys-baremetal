@@ -1,4 +1,4 @@
-package sshKey
+package sshkey
 
 import (
 	"context"

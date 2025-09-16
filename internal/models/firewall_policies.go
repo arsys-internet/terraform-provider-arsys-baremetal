@@ -10,7 +10,7 @@ import (
 )
 
 type FirewallPoliciesModel struct {
-	ID               types.String `tfsdk:"id"`
+	Id               types.String `tfsdk:"id"`
 	FirewallPolicies types.List   `tfsdk:"firewall_policies"`
 }
 
@@ -42,7 +42,7 @@ func NewFirewallPolicies(ctx context.Context, fpResponse []FirewallPolicyRespons
 	diags := diag.Diagnostics{}
 
 	model := &FirewallPoliciesModel{}
-	model.ID = types.StringValue("firewall_policies")
+	model.Id = types.StringValue("firewall_policies")
 
 	firewallPolicies, listDiags := NewFirewallPoliciesFromList(ctx, fpResponse)
 	diags.Append(listDiags...)

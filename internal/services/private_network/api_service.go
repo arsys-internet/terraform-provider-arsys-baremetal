@@ -1,4 +1,4 @@
-package privateNetwork
+package privatenetwork
 
 import (
 	"context"

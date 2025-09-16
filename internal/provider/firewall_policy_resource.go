@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
-	service "terraform-provider-arsys-baremetal/internal/services/firewallPolicy"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+
+	service "terraform-provider-arsys-baremetal/internal/services/firewall_policy"
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -85,7 +86,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 			"'rules' field is required when creating a firewall policy",
 		)
 	} else {
-		rulesDiags := firewallPolicies.ValidateFirewallRules(data.Rules, path.Root("rules"))
+		rulesDiags := firewallpolicy.ValidateFirewallRules(data.Rules, path.Root("rules"))
 		resp.Diagnostics.Append(rulesDiags...)
 	}
 

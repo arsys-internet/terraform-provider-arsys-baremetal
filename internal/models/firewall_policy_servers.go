@@ -3,7 +3,8 @@ package models
 import (
 	"context"
 	"regexp"
-	"terraform-provider-arsys-baremetal/internal/models/firewallPolicies"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -18,10 +19,10 @@ type FirewallPolicyServerIpsModel struct {
 	ServerIPs types.List   `tfsdk:"server_ips"`
 }
 
-func NewFirewallPolicyServerIpsModel(_ context.Context, id string, servers []firewallPolicies.FirewallServerIPResponse) (*FirewallPolicyServerIpsModel, diag.Diagnostics) {
+func NewFirewallPolicyServerIpsModel(_ context.Context, id string, servers []firewallpolicy.FirewallServerIPResponse) (*FirewallPolicyServerIpsModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	serverIPsList, listDiags := firewallPolicies.NewFirewallServerIPsList(servers)
+	serverIPsList, listDiags := firewallpolicy.NewFirewallServerIPsList(servers)
 	diags.Append(listDiags...)
 	if diags.HasError() {
 		return nil, diags
@@ -51,7 +52,7 @@ func FirewallPolicyServerIPsSchema(_ context.Context) schema.Schema {
 				Computed:    true,
 				Description: "ServerIPs assigned to firewall policy",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: firewallPolicies.FirewallServerIPDataSourceSchema(),
+					Attributes: firewallpolicy.FirewallServerIPDataSourceSchema(),
 				},
 			},
 		},

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
-	helper "terraform-provider-arsys-baremetal/internal/util/helper"
+	"terraform-provider-arsys-baremetal/internal/util/helper"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"

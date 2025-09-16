@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	service "terraform-provider-arsys-baremetal/internal/services/privateNetwork"
+	service "terraform-provider-arsys-baremetal/internal/services/private_network"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"testing"
 	"time"
@@ -64,7 +64,6 @@ func TestAccPrivateNetworkResource(t *testing.T) {
 						tfjsonpath.New("datacenter_id"),
 						knownvalue.StringExact("81DEF28500FBC2A973FC0C620DF5B721"),
 					),
-					// Verificar atributos computados
 					statecheck.ExpectKnownValue(
 						"arsys-baremetal_private_network.test",
 						tfjsonpath.New("id"),

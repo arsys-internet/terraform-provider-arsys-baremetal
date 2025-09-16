@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	service "terraform-provider-arsys-baremetal/internal/services/publicNetwork"
+	service "terraform-provider-arsys-baremetal/internal/services/public_network"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"testing"
 	"time"
