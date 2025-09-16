@@ -9,7 +9,6 @@ import (
 	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &PublicNetworkServersResource{}
@@ -84,7 +83,7 @@ func (r *PublicNetworkServersResource) Create(ctx context.Context, req resource.
 		[]string{util.StatePoweredOn, util.StatePoweredOff},
 	)
 
-	waitResult, diags := util.WaitForResourceState(
+	_, diags := util.WaitForResourceState(
 		ctx,
 		data.PublicNetworkId.ValueString(),
 		r.client,
@@ -96,17 +95,35 @@ func (r *PublicNetworkServersResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	if waitResult == nil {
+	finalPublicNetwork, fwErr := r.client.GetPublicNetwork(data.PublicNetworkId.ValueString())
+	if fwErr != nil {
 		resp.Diagnostics.AddError(
-			"Resource state timeout",
-			"Public network did not reach active state within timeout period",
+			"Error getting final public network state",
+			fmt.Sprintf("Error: %s", fwErr.Error()),
 		)
 		return
 	}
 
-	data.Id = types.StringValue(fmt.Sprintf("%s-%s", data.PublicNetworkId.ValueString(), strings.Join(servers, "-")))
+	if finalPublicNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network after assign servers. Please report this issue to the provider developers.",
+		)
+		return
+	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	finalModel, diags := models.NewPublicNetworkServerResourceModel(
+		ctx,
+		data.PublicNetworkId.ValueString(),
+		servers,
+		finalPublicNetwork,
+	)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
 func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -155,7 +172,6 @@ func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.
 		Servers: servers,
 	}
 
-	//TODO: refactor this to return the public network
 	err := r.client.AssignServersToPublicNetwork(data.PublicNetworkId.ValueString(), request)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -175,29 +191,42 @@ func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.
 		[]string{util.StatePoweredOn, util.StatePoweredOff},
 	)
 
-	waitResult, diags := util.WaitForResourceState(
+	_, diags := util.WaitForResourceState(
 		ctx,
 		data.PublicNetworkId.ValueString(),
 		r.client,
 		waitOptions,
 	)
 
+	finalPublicNetwork, fwErr := r.client.GetPublicNetwork(data.PublicNetworkId.ValueString())
+	if fwErr != nil {
+		resp.Diagnostics.AddError(
+			"Error getting final public network state",
+			fmt.Sprintf("Error: %s", fwErr.Error()),
+		)
+		return
+	}
+
+	if finalPublicNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network after assign servers. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
+	finalModel, diags := models.NewPublicNetworkServerResourceModel(
+		ctx,
+		data.PublicNetworkId.ValueString(),
+		servers,
+		finalPublicNetwork,
+	)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if waitResult == nil {
-		resp.Diagnostics.AddError(
-			"Resource state timeout",
-			"Public network did not reach active state within timeout period",
-		)
-		return
-	}
-
-	data.Id = types.StringValue(fmt.Sprintf("%s-%s", data.PublicNetworkId.ValueString(), strings.Join(servers, "-")))
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
 func (r *PublicNetworkServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -231,7 +260,7 @@ func (r *PublicNetworkServersResource) Delete(ctx context.Context, req resource.
 		[]string{util.StatePoweredOn, util.StatePoweredOff},
 	)
 
-	waitResult, diags := util.WaitForResourceState(
+	_, diags := util.WaitForResourceState(
 		ctx,
 		data.PublicNetworkId.ValueString(),
 		r.client,
@@ -243,11 +272,34 @@ func (r *PublicNetworkServersResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	if waitResult == nil {
+	finalPublicNetwork, fwErr := r.client.GetPublicNetwork(data.PublicNetworkId.ValueString())
+	if fwErr != nil {
 		resp.Diagnostics.AddError(
-			"Resource state timeout",
-			"Public network did not reach active state within timeout period",
+			"Error getting final public network state",
+			fmt.Sprintf("Error: %s", fwErr.Error()),
 		)
 		return
 	}
+
+	if finalPublicNetwork == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network after assign servers. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
+	servers := make([]string, 0)
+	finalModel, diags := models.NewPublicNetworkServerResourceModel(
+		ctx,
+		data.PublicNetworkId.ValueString(),
+		servers,
+		finalPublicNetwork,
+	)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
