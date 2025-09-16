@@ -289,7 +289,7 @@ func (r *PublicNetworkServersResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	servers := make([]string, 0)
+	var servers []string
 	finalModel, diags := models.NewPublicNetworkServerResourceModel(
 		ctx,
 		data.PublicNetworkId.ValueString(),
