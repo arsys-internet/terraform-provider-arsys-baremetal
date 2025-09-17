@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -263,10 +262,16 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 						"must be a valid IP address",
 					),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"mask": rschema.Int64Attribute{
 				Required:    true,
 				Description: "Subnet mask",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"datacenter_id": rschema.StringAttribute{
 				Required:    true,
@@ -274,7 +279,7 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid datacenter_id",
+						"must be a valid datacenter ID",
 					),
 				},
 				PlanModifiers: []planmodifier.String{
@@ -285,9 +290,6 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Subnet description",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
 				},
@@ -452,9 +454,6 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 							Description: "Log type",
 						},
 					},
-				},
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},

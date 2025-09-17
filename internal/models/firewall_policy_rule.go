@@ -65,7 +65,7 @@ func FirewallPolicyRuleDataSourceSchema(_ context.Context) schema.Schema {
 		Validators: []validator.String{
 			stringvalidator.RegexMatches(
 				regexp.MustCompile(util.HexID32Pattern),
-				"must be a valid firewall_policy_id",
+				"must be a valid firewall policy ID",
 			),
 		},
 	}

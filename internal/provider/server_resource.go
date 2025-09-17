@@ -8,6 +8,7 @@ import (
 	service "terraform-provider-arsys-baremetal/internal/services/server"
 	"terraform-provider-arsys-baremetal/internal/util"
 
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -222,12 +223,23 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	readModel, diags := models.NewServerResourceModelFromRead(ctx, apiResponse, &data)
+	isImport := data.Name.IsNull() && data.CreationDate.IsNull() && data.ServerType.IsNull()
+
+	var readModel *models.ServerResourceModel
+	var diags diag.Diagnostics
+
+	if isImport {
+		tflog.Info(ctx, "Using NewServerResourceModelFromImport")
+		readModel, diags = models.NewServerResourceModelFromImport(ctx, apiResponse)
+	} else {
+		tflog.Info(ctx, "Using NewServerResourceModelFromRead")
+		readModel, diags = models.NewServerResourceModelFromRead(ctx, apiResponse, &data)
+	}
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
 }
 

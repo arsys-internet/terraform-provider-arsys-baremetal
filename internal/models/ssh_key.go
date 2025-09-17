@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -225,17 +224,11 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Current state of the SSH key",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"servers": rschema.ListNestedAttribute{
 				Computed:     true,
 				Description:  "List of servers associated with the SSH key",
 				NestedObject: IdentifierResourceNestedObject(),
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"md5": rschema.StringAttribute{
 				Computed:    true,
@@ -256,9 +249,6 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 				Description: "SSH public key content",
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
-				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"creation_date": rschema.StringAttribute{

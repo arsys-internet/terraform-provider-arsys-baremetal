@@ -19,14 +19,14 @@ type FirewallPolicyRulesModel struct {
 	Rules types.List   `tfsdk:"rules"`
 }
 
-func NewFirewallPolicyRulesModel(_ context.Context, policyID string, rules []firewallpolicy.FirewallRuleResponse) (*FirewallPolicyRulesModel, diag.Diagnostics) {
+func NewFirewallPolicyRulesModel(_ context.Context, policyId string, rules []firewallpolicy.FirewallRuleResponse) (*FirewallPolicyRulesModel, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
 	rulesList, rulesDiags := firewallpolicy.NewFirewallRulesList(rules)
 	diags.Append(rulesDiags...)
 
 	model := &FirewallPolicyRulesModel{
-		Id:    types.StringValue(policyID),
+		Id:    types.StringValue(policyId),
 		Rules: rulesList,
 	}
 

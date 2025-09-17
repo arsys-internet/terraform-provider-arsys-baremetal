@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -56,7 +55,7 @@ func NewFirewallPolicyRuleRemoveResourceModel(_ context.Context, ruleId string, 
 		Default:      types.Int64Value(int64(fp.Default)),
 		Rules:        rulesList,
 		ServerIPs:    serverIPsList,
-		CloudPanelId: types.StringValue(fp.CloudPanelID),
+		CloudPanelId: types.StringValue(fp.CloudPanelId),
 	}
 
 	return model, diags
@@ -110,9 +109,6 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Firewall policy state",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
@@ -138,9 +134,6 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 			"rules": rschema.ListNestedAttribute{
 				Computed:    true,
 				Description: "Complete list of rules in the firewall policy after assignment",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
@@ -148,9 +141,6 @@ func FirewallPolicyRuleRemoveResourceSchema(_ context.Context) rschema.Schema {
 			"server_ips": rschema.ListNestedAttribute{
 				Computed:    true,
 				Description: "Servers assigned to firewall policy",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
 				},

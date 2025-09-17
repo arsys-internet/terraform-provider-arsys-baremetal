@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -314,9 +313,6 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
 					),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"description": rschema.StringAttribute{
 				Optional:    true,
@@ -324,9 +320,6 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 				Description: "Private network description",
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
-				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"datacenter_id": rschema.StringAttribute{
@@ -339,9 +332,6 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						"must be a valid datacenter ID",
 					),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"network_address": rschema.StringAttribute{
 				Optional:    true,
@@ -352,9 +342,6 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						regexp.MustCompile(util.IPv4Pattern),
 						"must be a valid IPv4 address (e.g., 192.168.1.0)",
 					),
-				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"subnet_mask": rschema.StringAttribute{
@@ -367,16 +354,10 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 						"must be a valid subnet mask (e.g., 255.255.255.0)",
 					),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Private network state",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"datacenter": rschema.SingleNestedAttribute{
 				Computed:    true,
@@ -404,9 +385,6 @@ func PrivateNetworkResourceSchema(_ context.Context) rschema.Schema {
 				Computed:     true,
 				Description:  "List of servers in the private network",
 				NestedObject: IdentifierResourceNestedObject(),
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}

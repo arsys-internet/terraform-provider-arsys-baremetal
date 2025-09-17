@@ -11,6 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -488,6 +492,9 @@ func PublicNetworkResourceSchema(_ context.Context) rschema.Schema {
 			"id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Public network identifier",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"public_name": rschema.StringAttribute{
 				Required:    true,
@@ -523,14 +530,23 @@ func PublicNetworkResourceSchema(_ context.Context) rschema.Schema {
 			"start_date": rschema.Int64Attribute{
 				Computed:    true,
 				Description: "Start date timestamp in milliseconds",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"same_vlan": rschema.BoolAttribute{
 				Computed:    true,
 				Description: "Whether the network uses the same VLAN",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"type": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Network type",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"state": rschema.StringAttribute{
 				Computed:    true,

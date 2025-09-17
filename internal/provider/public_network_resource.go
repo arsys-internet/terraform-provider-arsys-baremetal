@@ -118,7 +118,7 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
-			"Either 'datacenter_id' field is required when creating a public network",
+			"'datacenter_id' field is required when creating a public network",
 		)
 	}
 

@@ -22,7 +22,7 @@ import (
 type HardwareResponse struct {
 	RAM                 int           `json:"ram"`
 	HDDs                []HDDResponse `json:"hdds"`
-	FixedInstanceSizeID *string       `json:"fixed_instance_size_id"`
+	FixedInstanceSizeId *string       `json:"fixed_instance_size_id"`
 	BaremetalModelId    string        `json:"baremetal_model_id"`
 	VCore               int           `json:"vcore"`
 	CoresPerProcessor   int           `json:"cores_per_processor"`
@@ -38,14 +38,14 @@ type HDDResponse struct {
 }
 
 type HardwareCreateRequest struct {
-	BaremetalModelID string `json:"baremetal_model_id"`
+	BaremetalModelId string `json:"baremetal_model_id"`
 }
 
 func HardwareCreateRequestFromModel(hardwareObj types.Object) HardwareCreateRequest {
 	hardwareAttrs := hardwareObj.Attributes()
 
 	return HardwareCreateRequest{
-		BaremetalModelID: hardwareAttrs["baremetal_model_id"].(types.String).ValueString(),
+		BaremetalModelId: hardwareAttrs["baremetal_model_id"].(types.String).ValueString(),
 	}
 }
 
@@ -65,18 +65,18 @@ func NewHardwareObject(hardware HardwareResponse) (types.Object, diag.Diagnostic
 	hddsList, listDiags := types.ListValue(HDDObjectType(), elements)
 	diags.Append(listDiags...)
 
-	var fixedInstanceSizeID types.String
-	if hardware.FixedInstanceSizeID != nil {
-		fixedInstanceSizeID = types.StringValue(*hardware.FixedInstanceSizeID)
+	var fixedInstanceSizeId types.String
+	if hardware.FixedInstanceSizeId != nil {
+		fixedInstanceSizeId = types.StringValue(*hardware.FixedInstanceSizeId)
 	} else {
-		fixedInstanceSizeID = types.StringNull()
+		fixedInstanceSizeId = types.StringNull()
 	}
 
 	hardwareObj, objDiags := types.ObjectValue(HardwareObjectType().AttrTypes,
 		map[string]attr.Value{
 			"ram":                    types.Int64Value(int64(hardware.RAM)),
 			"hdds":                   hddsList,
-			"fixed_instance_size_id": fixedInstanceSizeID,
+			"fixed_instance_size_id": fixedInstanceSizeId,
 			"baremetal_model_id":     types.StringValue(hardware.BaremetalModelId),
 			"vcore":                  types.Int64Value(int64(hardware.VCore)),
 			"cores_per_processor":    types.Int64Value(int64(hardware.CoresPerProcessor)),
@@ -87,14 +87,14 @@ func NewHardwareObject(hardware HardwareResponse) (types.Object, diag.Diagnostic
 }
 
 func NeedsHardwareUpdate(hardwareAttrs map[string]attr.Value, apiHardware HardwareResponse) bool {
-	if fixedID, exists := hardwareAttrs["fixed_instance_size_id"]; exists {
-		if helper.GetStringValue(fixedID) != helper.GetStringPtr(apiHardware.FixedInstanceSizeID) {
+	if fixedId, exists := hardwareAttrs["fixed_instance_size_id"]; exists {
+		if helper.GetStringValue(fixedId) != helper.GetStringPtr(apiHardware.FixedInstanceSizeId) {
 			return true
 		}
 	}
 
-	if modelID, exists := hardwareAttrs["baremetal_model_id"]; exists {
-		if helper.GetStringValue(modelID) != apiHardware.BaremetalModelId {
+	if modelId, exists := hardwareAttrs["baremetal_model_id"]; exists {
+		if helper.GetStringValue(modelId) != apiHardware.BaremetalModelId {
 			return true
 		}
 	}
@@ -222,13 +222,10 @@ func HardwareResourceSchema() map[string]rschema.Attribute {
 		"baremetal_model_id": rschema.StringAttribute{
 			Optional: true,
 			Computed: true,
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 			Validators: []validator.String{
 				stringvalidator.RegexMatches(
 					regexp.MustCompile(util.HexID32Pattern),
-					"must be a valid baremetal_model_id"),
+					"must be a valid baremetal model ID"),
 			},
 			Description: "Baremetal model identifier",
 		},
