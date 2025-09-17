@@ -588,8 +588,6 @@ func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailRespo
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolNull()
 	model.AvailabilityZoneId = types.StringNull()
-	model.PowerOn = types.BoolNull()
-	model.InstallBackupAgent = types.BoolNull()
 
 	return model, diags
 }
