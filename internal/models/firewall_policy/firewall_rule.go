@@ -246,7 +246,6 @@ func FirewallRuleResourceSchemaWithoutId() map[string]rschema.Attribute {
 	attributes := make(map[string]rschema.Attribute)
 	for name, attribute := range existingSchema {
 		if name == "id" {
-			// No incluir el id - eliminarlo
 		} else {
 			attributes[name] = attribute
 		}
