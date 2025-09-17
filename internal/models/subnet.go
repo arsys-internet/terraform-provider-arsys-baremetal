@@ -269,9 +269,6 @@ func SubnetResourceSchema(_ context.Context) rschema.Schema {
 			"mask": rschema.Int64Attribute{
 				Required:    true,
 				Description: "Subnet mask",
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
-				},
 			},
 			"datacenter_id": rschema.StringAttribute{
 				Required:    true,
