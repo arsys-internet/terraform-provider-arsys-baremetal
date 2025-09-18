@@ -145,6 +145,7 @@ func FirewallPolicyServerIpDataSourceSchema(_ context.Context) schema.Schema {
 		},
 	}
 }
+
 func FirewallPolicyAssignmentResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Assigns server IPs to an existing firewall policy. Changes to firewall_policy_id or server_ips will force resource replacement (destroy + create).",

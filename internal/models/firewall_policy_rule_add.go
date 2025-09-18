@@ -28,7 +28,7 @@ type FirewallPolicyRuleAddResourceModel struct {
 	State           types.String `tfsdk:"state"`
 	CreationDate    types.String `tfsdk:"creation_date"`
 	Default         types.Int64  `tfsdk:"default"`
-	CloudPanelID    types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId    types.String `tfsdk:"cloudpanel_id"`
 	RulesDetail     types.List   `tfsdk:"rules_detail"`
 	ServerIPsDetail types.List   `tfsdk:"server_ips"`
 }
@@ -61,7 +61,7 @@ func NewFirewallPolicyRuleResourceModel(_ context.Context, inputRules types.List
 		State:           types.StringValue(fp.State),
 		CreationDate:    types.StringValue(fp.CreationDate),
 		Default:         types.Int64Value(int64(fp.Default)),
-		CloudPanelID:    types.StringValue(fp.CloudPanelId),
+		CloudPanelId:    types.StringValue(fp.CloudPanelId),
 		RulesDetail:     rulesList,
 		ServerIPsDetail: serverIPsList,
 	}
@@ -89,6 +89,7 @@ func (m *FirewallPolicyRuleAddResourceModel) ToAddRequest(_ context.Context) (*F
 
 	return request, nil
 }
+
 func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Assigns rules to an existing firewall policy",

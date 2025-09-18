@@ -482,7 +482,7 @@ func (m *PublicNetworkModel) ToCreateRequest() PublicNetworkCreateRequest {
 type PublicNetworkCreateResponse struct {
 	Sync   bool                  `json:"sync"`
 	Data   PublicNetworkResponse `json:"data"`
-	TaskID string                `json:"task_id"`
+	TaskId string                `json:"task_id"`
 }
 
 func PublicNetworkResourceSchema(_ context.Context) rschema.Schema {
