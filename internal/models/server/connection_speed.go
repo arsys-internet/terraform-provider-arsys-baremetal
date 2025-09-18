@@ -7,7 +7,6 @@ import (
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -119,9 +118,6 @@ func ConnectionSpeedResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"private": rschema.SingleNestedAttribute{
 			Computed: true,
-			PlanModifiers: []planmodifier.Object{
-				objectplanmodifier.UseStateForUnknown(),
-			},
 			Attributes: map[string]rschema.Attribute{
 				"available": rschema.ListAttribute{
 					ElementType: types.Float64Type,
@@ -143,9 +139,6 @@ func ConnectionSpeedResourceSchema() map[string]rschema.Attribute {
 		},
 		"public": rschema.SingleNestedAttribute{
 			Computed: true,
-			PlanModifiers: []planmodifier.Object{
-				objectplanmodifier.UseStateForUnknown(),
-			},
 			Attributes: map[string]rschema.Attribute{
 				"available": rschema.ListAttribute{
 					ElementType: types.Float64Type,

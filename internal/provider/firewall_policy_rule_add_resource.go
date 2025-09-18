@@ -205,8 +205,8 @@ func (r *FirewallPolicyRuleResource) Delete(ctx context.Context, req resource.De
 		return
 	}
 
-	firewallPolicyID := data.Id.ValueString()
+	firewallPolicyId := data.Id.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("Removing firewall policy assignment from Terraform state only: %s", firewallPolicyID))
+	tflog.Info(ctx, fmt.Sprintf("Removing firewall policy assignment from Terraform state only: %s", firewallPolicyId))
 	tflog.Info(ctx, "Note: Server IPs remain assigned to the firewall policy - only removing from Terraform management")
 }

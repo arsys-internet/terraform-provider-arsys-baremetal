@@ -13,8 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -363,7 +361,7 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		if cores, exists := hardwareAttrs["cores_per_processor"]; exists && cores.IsUnknown() {
 			allHardwareFieldsKnown = false
 		}
-		if fixedInstanceSizeID, exists := hardwareAttrs["fixed_instance_size_id"]; exists && fixedInstanceSizeID.IsUnknown() {
+		if fixedInstanceSizeId, exists := hardwareAttrs["fixed_instance_size_id"]; exists && fixedInstanceSizeId.IsUnknown() {
 			allHardwareFieldsKnown = false
 		}
 
@@ -567,6 +565,33 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	return req
 }
 
+func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailResponse) (*ServerResourceModel, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
+
+	detailModel, baseDiags := newServerDetailModelFromResponse(ctx, sr)
+	if baseDiags.HasError() {
+		diags.Append(baseDiags...)
+		return nil, diags
+	}
+
+	model := &ServerResourceModel{
+		ServerDetailModel: *detailModel,
+	}
+
+	model.ApplianceId = types.StringNull()
+	model.DatacenterId = types.StringNull()
+	model.Password = types.StringNull()
+	model.PowerOn = types.BoolNull()
+	model.FirewallPolicyId = types.StringNull()
+	model.IPId = types.StringNull()
+	model.LoadBalancerId = types.StringNull()
+	model.MonitoringPolicyId = types.StringNull()
+	model.InstallBackupAgent = types.BoolNull()
+	model.AvailabilityZoneId = types.StringNull()
+
+	return model, diags
+}
+
 func (s *ServerResourceModel) ToUpdateRequest() ServerUpdateRequest {
 	req := ServerUpdateRequest{}
 
@@ -754,9 +779,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Server name",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.NamePattern),
@@ -768,9 +790,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Server description",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(256),
 				},
@@ -779,9 +798,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Description: "Server datacenter",
 				Attributes:  BaseDatacenterResourceAttributes(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
@@ -794,9 +810,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Sensitive:   true,
 				Description: "First password generated",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"managed": rschema.BoolAttribute{
 				Computed:    true,
@@ -811,58 +824,37 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: server.ServersIPResourceSchema(),
 				},
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"ssh_password": rschema.BoolAttribute{
-				Computed: true,
-				Optional: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
+				Computed:    true,
+				Optional:    true,
 				Description: "Whether SSH password authentication is enabled",
 			},
 			"image": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "Server image",
 				Attributes:  BaseIdentifierResourceAttributes(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"hardware": rschema.SingleNestedAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Server hardware configuration",
 				Attributes:  server.HardwareResourceSchema(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"dvd": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "DVD image",
 				Attributes:  BaseIdentifierResourceAttributes(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"alerts": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "Server alerts",
 				Attributes:  server.AlertsResourceSchema(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"monitoring_policy": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "Monitoring policy",
 				Attributes:  BaseIdentifierResourceAttributes(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"cloudpanel_id": rschema.StringAttribute{
 				Computed:    true,
@@ -889,33 +881,21 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Computed:    true,
 				Description: "Connection speed configuration",
 				Attributes:  server.ConnectionSpeedResourceSchema(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"redundancy": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "Redundancy configuration",
 				Attributes:  server.RedundancyResourceSchema(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"rsa_key": rschema.BoolAttribute{
 				Computed:    true,
 				Optional:    true,
 				Description: "Whether RSA key authentication is enabled",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"snapshot": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "Snapshot configuration",
 				Attributes:  server.SnapshotResourceSchema(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"private_networks": rschema.ListNestedAttribute{
 				Computed:    true,
@@ -923,17 +903,11 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: server.ServersPrivateNetworksResourceSchema(),
 				},
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"status": rschema.SingleNestedAttribute{
 				Computed:    true,
 				Description: "Server status",
 				Attributes:  server.StatusDetailResourceSchema(),
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"recovery_mode": rschema.BoolAttribute{
 				Computed:    true,
@@ -967,13 +941,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Appliance identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid appliance_id",
+						"must be a valid appliance ID",
 					),
 				},
 			},
@@ -981,13 +952,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Datacenter identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid datacenter_id",
+						"must be a valid datacenter ID",
 					),
 				},
 			},
@@ -995,9 +963,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Server password",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(8),
 					stringvalidator.LengthAtMost(64),
@@ -1007,21 +972,15 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Whether to power on the server after creation",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"firewall_policy_id": rschema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Firewall policy identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid firewall_policy_id",
+						"must be a valid firewall policy ID",
 					),
 				},
 			},
@@ -1029,13 +988,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "IP identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid ip_id",
+						"must be a valid IP ID",
 					),
 				},
 			},
@@ -1043,13 +999,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Load balancer identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid load_balancer_id",
+						"must be a valid load balancer ID",
 					),
 				},
 			},
@@ -1057,13 +1010,10 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Monitoring policy identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid monitoring_policy_id",
+						"must be a valid monitoring policy ID",
 					),
 				},
 			},
@@ -1071,17 +1021,11 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Whether to install backup agent",
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"availability_zone_id": rschema.StringAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Availability zone identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}

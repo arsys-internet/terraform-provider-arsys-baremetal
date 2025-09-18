@@ -28,7 +28,7 @@ type FirewallPolicyRuleAddResourceModel struct {
 	State           types.String `tfsdk:"state"`
 	CreationDate    types.String `tfsdk:"creation_date"`
 	Default         types.Int64  `tfsdk:"default"`
-	CloudPanelID    types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId    types.String `tfsdk:"cloudpanel_id"`
 	RulesDetail     types.List   `tfsdk:"rules_detail"`
 	ServerIPsDetail types.List   `tfsdk:"server_ips"`
 }
@@ -61,7 +61,7 @@ func NewFirewallPolicyRuleResourceModel(_ context.Context, inputRules types.List
 		State:           types.StringValue(fp.State),
 		CreationDate:    types.StringValue(fp.CreationDate),
 		Default:         types.Int64Value(int64(fp.Default)),
-		CloudPanelID:    types.StringValue(fp.CloudPanelID),
+		CloudPanelId:    types.StringValue(fp.CloudPanelId),
 		RulesDetail:     rulesList,
 		ServerIPsDetail: serverIPsList,
 	}
@@ -89,6 +89,7 @@ func (m *FirewallPolicyRuleAddResourceModel) ToAddRequest(_ context.Context) (*F
 
 	return request, nil
 }
+
 func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 	return rschema.Schema{
 		Description: "Assigns rules to an existing firewall policy",
@@ -106,7 +107,6 @@ func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-
 			"rules": rschema.ListNestedAttribute{
 				Required:    true,
 				Description: "List of firewall rules to add to the policy",
@@ -114,7 +114,7 @@ func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 					listvalidator.SizeAtLeast(1),
 				},
 				NestedObject: rschema.NestedAttributeObject{
-					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
+					Attributes: firewallpolicy.FirewallRuleResourceSchemaWithoutId(),
 				},
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.RequiresReplace(),
@@ -137,9 +137,6 @@ func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Firewall policy state",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
@@ -165,9 +162,6 @@ func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 			"rules_detail": rschema.ListNestedAttribute{
 				Computed:    true,
 				Description: "Complete list of rules in the firewall policy after assignment",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
@@ -175,9 +169,6 @@ func FirewallPolicyRuleAddResourceSchema(_ context.Context) rschema.Schema {
 			"server_ips": rschema.ListNestedAttribute{
 				Computed:    true,
 				Description: "Servers assigned to firewall policy",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
 				},

@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -141,10 +140,7 @@ func AlertsDataSourceSchema() map[string]schema.Attribute {
 func AlertsResourceSchema() map[string]rschema.Attribute {
 	return map[string]rschema.Attribute{
 		"critical": rschema.ListNestedAttribute{
-			Computed: true,
-			PlanModifiers: []planmodifier.List{
-				listplanmodifier.UseStateForUnknown(),
-			},
+			Computed:    true,
 			Description: "List of critical alerts",
 			NestedObject: rschema.NestedAttributeObject{
 				Attributes: map[string]rschema.Attribute{
@@ -173,10 +169,7 @@ func AlertsResourceSchema() map[string]rschema.Attribute {
 			},
 		},
 		"warning": rschema.ListNestedAttribute{
-			Computed: true,
-			PlanModifiers: []planmodifier.List{
-				listplanmodifier.UseStateForUnknown(),
-			},
+			Computed:    true,
 			Description: "List of warning alerts",
 			NestedObject: rschema.NestedAttributeObject{
 				Attributes: map[string]rschema.Attribute{

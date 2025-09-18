@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -29,7 +28,7 @@ type FirewallPolicyResponse struct {
 	Default      int                                       `json:"default"`
 	Rules        []firewallpolicy.FirewallRuleResponse     `json:"rules"`
 	ServerIPs    []firewallpolicy.FirewallServerIPResponse `json:"server_ips"`
-	CloudPanelID string                                    `json:"cloudpanel_id"`
+	CloudPanelId string                                    `json:"cloudpanel_id"`
 }
 
 type FirewallPolicyModel struct {
@@ -41,7 +40,7 @@ type FirewallPolicyModel struct {
 	Default      types.Int64  `tfsdk:"default"`
 	Rules        types.List   `tfsdk:"rules"`
 	ServerIPs    types.List   `tfsdk:"server_ips"`
-	CloudPanelID types.String `tfsdk:"cloudpanel_id"`
+	CloudPanelId types.String `tfsdk:"cloudpanel_id"`
 }
 
 func NewFirewallPolicyModel(_ context.Context, fp FirewallPolicyResponse) (*FirewallPolicyModel, diag.Diagnostics) {
@@ -69,7 +68,7 @@ func NewFirewallPolicyModel(_ context.Context, fp FirewallPolicyResponse) (*Fire
 		Default:      types.Int64Value(int64(fp.Default)),
 		Rules:        rulesList,
 		ServerIPs:    serverIPsList,
-		CloudPanelID: types.StringValue(fp.CloudPanelID),
+		CloudPanelId: types.StringValue(fp.CloudPanelId),
 	}
 
 	return model, diags
@@ -230,9 +229,6 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 						"must contain only alphanumeric characters, spaces, hyphens, underscores, and dots",
 					),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"description": rschema.StringAttribute{
 				Optional:    true,
@@ -241,17 +237,11 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.LengthAtMost(util.MaxDescriptionLength),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"rules": rschema.ListNestedAttribute{
 				Optional:    true,
 				Computed:    true,
 				Description: "Firewall policy rules",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
@@ -262,19 +252,10 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
-					),
-				},
 			},
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Firewall policy state",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
@@ -300,9 +281,6 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 			"server_ips": rschema.ListNestedAttribute{
 				Computed:    true,
 				Description: "ServerIPs assigned to firewall policy",
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
 				},
