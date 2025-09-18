@@ -11,10 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -203,9 +200,6 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 			Validators: []validator.String{
 				stringvalidator.OneOf("TCP", "UDP", "ICMP", "AH", "ESP", "GRE"),
 			},
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 		},
 		"port_from": rschema.Int64Attribute{
 			Optional:    true,
@@ -213,9 +207,6 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 			Description: "First port in range. Required for UDP and TCP protocols",
 			Validators: []validator.Int64{
 				int64validator.Between(1, 65535),
-			},
-			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
 			},
 		},
 		"port_to": rschema.Int64Attribute{
@@ -225,43 +216,41 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 			Validators: []validator.Int64{
 				int64validator.AtMost(65535),
 			},
-			PlanModifiers: []planmodifier.Int64{
-				int64planmodifier.UseStateForUnknown(),
-			},
 		},
 		"source": rschema.StringAttribute{
 			Optional:    true,
 			Computed:    true,
 			Default:     stringdefault.StaticString("0.0.0.0"),
 			Description: "IPs from which access is available. Setting 0.0.0.0 all IPs are allowed",
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 		},
 		"description": rschema.StringAttribute{
 			Optional:    true,
 			Computed:    true,
 			Description: "Rule description",
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 		},
 		"action": rschema.StringAttribute{
 			Computed:    true,
 			Optional:    true,
 			Description: "Rule action (allow/deny)",
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 		},
 		"id": rschema.StringAttribute{
 			Computed:    true,
 			Description: "Rule identifier",
-			PlanModifiers: []planmodifier.String{
-				stringplanmodifier.UseStateForUnknown(),
-			},
 		},
 	}
+}
+
+func FirewallRuleResourceSchemaWithoutId() map[string]rschema.Attribute {
+	existingSchema := FirewallRuleResourceSchema()
+
+	attributes := make(map[string]rschema.Attribute)
+	for name, attribute := range existingSchema {
+		if name != "id" {
+			attributes[name] = attribute
+		}
+	}
+
+	return attributes
 }
 
 func ValidateFirewallRules(rules types.List, basePath path.Path) diag.Diagnostics {

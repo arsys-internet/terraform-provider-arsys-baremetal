@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -22,7 +23,7 @@ type PublicIpModel struct {
 	IP           types.String `tfsdk:"ip"`
 	Type         types.String `tfsdk:"type"`
 	AssignedTo   types.Object `tfsdk:"assigned_to"`
-	SubnetID     types.String `tfsdk:"subnet_id"`
+	SubnetId     types.String `tfsdk:"subnet_id"`
 	ReverseDNS   types.String `tfsdk:"reverse_dns"`
 	IsDHCP       types.Bool   `tfsdk:"is_dhcp"`
 	State        types.String `tfsdk:"state"`
@@ -40,7 +41,7 @@ type PublicIpResponse struct {
 	IP           string                 `json:"ip"`
 	Type         string                 `json:"type"`
 	AssignedTo   *AssignedToResponse    `json:"assigned_to"`
-	SubnetID     *string                `json:"subnet_id"`
+	SubnetId     *string                `json:"subnet_id"`
 	ReverseDNS   *string                `json:"reverse_dns"`
 	IsDHCP       bool                   `json:"is_dhcp"`
 	State        string                 `json:"state"`
@@ -96,10 +97,10 @@ func newPublicIpFromResponse(_ context.Context, ip *PublicIpResponse) (*PublicIp
 	model.State = types.StringValue(ip.State)
 	model.CreationDate = types.StringValue(ip.CreationDate)
 
-	if ip.SubnetID != nil {
-		model.SubnetID = types.StringValue(*ip.SubnetID)
+	if ip.SubnetId != nil {
+		model.SubnetId = types.StringValue(*ip.SubnetId)
 	} else {
-		model.SubnetID = types.StringNull()
+		model.SubnetId = types.StringNull()
 	}
 
 	if ip.ReverseDNS != nil {
@@ -179,7 +180,7 @@ func assignedToAttributes() map[string]schema.Attribute {
 			Validators: []validator.String{
 				stringvalidator.RegexMatches(
 					regexp.MustCompile(util.HexID32Pattern),
-					"must be a valid Id (e.g., 4EFAD5836CE43ACA502FD5B99BEE44EF)",
+					"must be a valid ID",
 				),
 			},
 		},
@@ -309,7 +310,7 @@ func PublicIpResourceSchema(_ context.Context) rschema.Schema {
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid datacenter_id (e.g., 4EEAD5836CF43ACA502FD5B99BFF44EF)",
+						"must be a valid datacenter ID",
 					),
 				},
 			},
@@ -327,16 +328,25 @@ func PublicIpResourceSchema(_ context.Context) rschema.Schema {
 			"ip": rschema.StringAttribute{
 				Computed:    true,
 				Description: "IP address",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"datacenter":  BaseDatacenterNestedAttribute(),
 			"assigned_to": AssignedToNestedAttribute(),
 			"subnet_id": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Id of the subnet to which the IP belongs",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"is_dhcp": rschema.BoolAttribute{
 				Computed:    true,
 				Description: "IP use DHCP",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"state": rschema.StringAttribute{
 				Computed:    true,

@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -141,9 +140,6 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Private network state",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"datacenter": rschema.SingleNestedAttribute{
 				Computed:    true,
@@ -171,9 +167,6 @@ func PrivateNetworkServerAssignResourceSchema(_ context.Context) rschema.Schema 
 				Computed:     true,
 				Description:  "List of servers in the private network",
 				NestedObject: IdentifierResourceNestedObject(),
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
