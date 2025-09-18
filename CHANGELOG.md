@@ -36,3 +36,9 @@
 
 - Added Public network IPs assign/unassign
 - Added Private network Servers assign/unassign
+
+## [0.6.0] - 2025-09-18
+
+- Added Baremetal Models documentation and examples
+- Fixed Schema and error messages
+- Fixed Public network servers where public network was not returned after servers were assigned
