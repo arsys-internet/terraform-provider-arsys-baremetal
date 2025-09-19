@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewallpolicy"
 
 	"terraform-provider-arsys-baremetal/internal/util"
 

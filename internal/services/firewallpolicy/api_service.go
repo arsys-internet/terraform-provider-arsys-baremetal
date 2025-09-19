@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"terraform-provider-arsys-baremetal/internal/client"
 	"terraform-provider-arsys-baremetal/internal/models"
-	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewall_policy"
+	"terraform-provider-arsys-baremetal/internal/models/firewallpolicy"
 
 	"terraform-provider-arsys-baremetal/internal/util"
 

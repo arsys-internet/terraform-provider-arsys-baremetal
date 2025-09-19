@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
-	service "terraform-provider-arsys-baremetal/internal/services/private_network"
+	service "terraform-provider-arsys-baremetal/internal/services/privatenetwork"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
