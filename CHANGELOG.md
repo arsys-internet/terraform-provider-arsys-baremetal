@@ -42,3 +42,7 @@
 - Added Baremetal Models documentation and examples
 - Fixed Schema and error messages
 - Fixed Public network servers where public network was not returned after servers were assigned
+
+## [0.6.1] - 2025-09-18
+
+- Fix server appliance type schema validation
