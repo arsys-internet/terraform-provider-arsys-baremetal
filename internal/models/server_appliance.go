@@ -232,10 +232,7 @@ func ServerApplianceDataSourceSchema(_ context.Context) schema.Schema {
 			},
 			"type": schema.StringAttribute{
 				Computed:    true,
-				Description: "Server appliance type (IMAGE, MY_IMAGE, APPLICATION, ISO)",
-				Validators: []validator.String{
-					stringvalidator.OneOf("IMAGE", "MY_IMAGE", "APPLICATION", "ISO"),
-				},
+				Description: "Server appliance type",
 			},
 			"server_type_compatibility": schema.ListAttribute{
 				Computed:    true,
