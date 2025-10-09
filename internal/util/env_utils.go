@@ -31,26 +31,6 @@ func LoadEnv() error {
 	return nil
 }
 
-func GetTimeoutFromEnv(envVar string, unit time.Duration) time.Duration {
-	err := LoadEnv()
-
-	if err != nil {
-		log.Printf("Error loading .env file: %v", err)
-	}
-
-	value := os.Getenv(envVar)
-	if value == "" {
-		log.Printf("Searching in %s/.env the variable", envVar)
-	}
-
-	converted, err := strconv.Atoi(value)
-	if err != nil {
-		return 0
-	}
-
-	return time.Duration(converted) * unit
-}
-
 func GetEnvTimeValues(envVar string, unit time.Duration) (time.Duration, error) {
 	err := LoadEnv()
 
