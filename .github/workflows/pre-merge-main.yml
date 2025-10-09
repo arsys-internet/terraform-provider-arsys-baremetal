@@ -12,9 +12,7 @@ jobs:
   test:
     name: Run All Tests Before Merge
     runs-on: ubuntu-latest
-    if: |
-      github.event.review.state == 'approved' || 
-      github.event_name == 'pull_request'
+    if: github.event.review.state == 'approved'
 
     steps:
       - name: Checkout code
@@ -47,6 +45,7 @@ jobs:
         run: |
           echo "BAREMETAL_API_TOKEN=${{ secrets.CB_API_URL }}" >> $GITHUB_ENV
           echo "BAREMETAL_HOST=${{ secrets.BAREMETAL_HOST }}" >> $GITHUB_ENV
+          echo "TF_ACC=0" >> $GITHUB_ENV
 
       - name: Run all tests
         run: go test -v ./...
