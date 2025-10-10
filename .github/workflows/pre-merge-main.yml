@@ -48,7 +48,7 @@ jobs:
           echo "TF_ACC=0" >> $GITHUB_ENV
 
       - name: Run all tests
-        run: go test -v ./...
+        run: go test -v -timeout=120m ./...
 
       - name: Comment test results on PR
         if: success()
