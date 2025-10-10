@@ -6,13 +6,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type APIClient struct {
 	HTTPClient *http.Client
 	BaseURL    string
+	MaxRetries int
+	BaseDelay  time.Duration
+	MaxDelay   time.Duration
 }
 
 func NewAPIClient(apiToken string, url string) *APIClient {
@@ -40,29 +45,90 @@ func NewAPIClient(apiToken string, url string) *APIClient {
 	return &APIClient{
 		HTTPClient: client,
 		BaseURL:    url,
+		MaxRetries: 3,
+		BaseDelay:  time.Second * 2,
+		MaxDelay:   time.Second * 30,
 	}
 }
 
+func (c *APIClient) calculateDelay(attempt int, rateLimitReset string) time.Duration {
+	if rateLimitReset != "" {
+		if resetTime, err := strconv.ParseInt(rateLimitReset, 10, 64); err == nil {
+			resetTimestamp := time.Unix(resetTime, 0)
+			now := time.Now()
+			delay := resetTimestamp.Sub(now)
+
+			if delay > 0 && delay <= c.MaxDelay {
+				return delay
+			}
+		}
+	}
+
+	delay := time.Duration(float64(c.BaseDelay) * math.Pow(2, float64(attempt)))
+	if delay > c.MaxDelay {
+		delay = c.MaxDelay
+	}
+
+	return delay
+}
 func (c *APIClient) sendRequest(method, path string, body interface{}) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.BaseURL, path)
 
-	var bodyReader io.Reader
+	var bodyBytes []byte
 	if body != nil {
-		jsonBody, err := json.Marshal(body)
+		var err error
+		bodyBytes, err = json.Marshal(body)
 		if err != nil {
 			return nil, err
 		}
-		bodyReader = bytes.NewBuffer(jsonBody)
 	}
 
-	req, err := http.NewRequest(method, url, bodyReader)
-	if err != nil {
-		return nil, err
+	for attempt := 0; attempt <= c.MaxRetries; attempt++ {
+		var bodyReader io.Reader
+		if bodyBytes != nil {
+			bodyReader = bytes.NewBuffer(bodyBytes)
+		}
+
+		req, err := http.NewRequest(method, url, bodyReader)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := c.HTTPClient.Do(req)
+		if err != nil {
+			if attempt < c.MaxRetries {
+				delay := c.calculateDelay(attempt, "")
+				time.Sleep(delay)
+				continue
+			}
+			return nil, err
+		}
+
+		if resp.StatusCode != http.StatusTooManyRequests {
+			return resp, nil
+		}
+
+		bodyError := resp.Body.Close()
+		if bodyError != nil {
+			return nil, bodyError
+		}
+
+		if attempt >= c.MaxRetries {
+			return resp, nil
+		}
+
+		rateLimitReset := resp.Header.Get("X-Rate-Limit-Reset")
+		delay := c.calculateDelay(attempt, rateLimitReset)
+
+		fmt.Printf("Rate limited (429), retrying in %v... (attempt %d/%d)\n",
+			delay, attempt+1, c.MaxRetries)
+
+		time.Sleep(delay)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-
-	return c.HTTPClient.Do(req)
+	return nil, fmt.Errorf("unexpected error in retry logic")
 }
 
 func (c *APIClient) Get(path string) (*http.Response, error) {
