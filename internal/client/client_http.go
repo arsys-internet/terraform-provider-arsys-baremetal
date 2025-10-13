@@ -112,7 +112,7 @@ func (c *APIClient) sendRequest(method, path string, body interface{}) (*http.Re
 		_ = resp.Body.Close()
 
 		if attempt >= c.MaxRetries {
-			return nil, err
+			return resp, nil
 		}
 
 		delay := c.calculateDelay(attempt, resp.Header.Get("X-Rate-Limit-Reset"))
@@ -124,7 +124,7 @@ func (c *APIClient) sendRequest(method, path string, body interface{}) (*http.Re
 		time.Sleep(delay)
 	}
 
-	return nil, fmt.Errorf("unexpected error in retry logic")
+	return nil, fmt.Errorf("exceeded maximum retries")
 }
 
 func (c *APIClient) Get(path string) (*http.Response, error) {
