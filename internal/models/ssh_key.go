@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"terraform-provider-arsys-baremetal/internal/util"
+	"terraform-provider-arsys-baremetal/internal/util/helper"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -276,15 +277,18 @@ func SshKeyResourceSchema(_ context.Context) rschema.Schema {
 }
 
 type SshKeyUpdateRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
 }
 
 func (m *SshKeyModel) ToUpdateRequest() SshKeyUpdateRequest {
-	return SshKeyUpdateRequest{
-		Name:        m.Name.ValueString(),
-		Description: m.Description.ValueString(),
+	request := SshKeyUpdateRequest{
+		Name: m.Name.ValueString(),
 	}
+
+	helper.ToStringPtrAllowEmpty(&request.Description, m.Description)
+
+	return request
 }
 
 func (m *SshKeyModel) GetState() string {
