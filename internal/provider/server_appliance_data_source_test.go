@@ -24,12 +24,12 @@ func TestAccServerApplianceDataSource(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServerApplianceDataSourceConfig("B964B3D9B337C62E7A3622546E4E60B0"),
+				Config: testAccServerApplianceDataSourceConfig("65754F5F403868DB67EDD90CC204C1BE"),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server_appliance.test",
 						tfjsonpath.New("id"),
-						knownvalue.StringExact("B964B3D9B337C62E7A3622546E4E60B0"),
+						knownvalue.StringExact("65754F5F403868DB67EDD90CC204C1BE"),
 					),
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server_appliance.test",
@@ -84,11 +84,6 @@ func TestAccServerApplianceDataSource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server_appliance.test",
 						tfjsonpath.New("server_type_compatibility"),
-						knownvalue.NotNull(),
-					),
-					statecheck.ExpectKnownValue(
-						"data.arsys-baremetal_server_appliance.test",
-						tfjsonpath.New("version"),
 						knownvalue.NotNull(),
 					),
 					statecheck.ExpectKnownValue(

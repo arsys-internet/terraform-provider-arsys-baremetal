@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
-	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewallpolicy"
+	"terraform-provider-arsys-baremetal/internal/models/firewallpolicy"
 
 	service "terraform-provider-arsys-baremetal/internal/services/firewallpolicy"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -272,14 +272,27 @@ func (r *FirewallPolicyResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	finalModel := state
-
-	if !plan.Name.Equal(state.Name) {
-		finalModel.Name = plan.Name
+	finalFirewallPolicy, err := r.client.GetFirewallPolicy(id)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error getting final firewall policy state",
+			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
 	}
 
-	if !plan.Description.Equal(state.Description) {
-		finalModel.Description = plan.Description
+	if finalFirewallPolicy == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving firewall policy after update. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
+	finalModel, diags := models.NewFirewallPolicyModelFromRead(ctx, finalFirewallPolicy, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	tflog.Info(ctx, fmt.Sprintf("Successfully updated firewall policy with ID: %s", id))
