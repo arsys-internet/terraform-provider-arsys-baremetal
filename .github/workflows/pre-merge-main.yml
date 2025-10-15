@@ -1,0 +1,75 @@
+name: Pre-Merge Tests
+
+on:
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test:
+    name: Run All Tests Before Merge
+    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Set up environment variables
+        run: |
+          echo "BAREMETAL_API_TOKEN=${{ secrets.BAREMETAL_API_TOKEN }}" >> $GITHUB_ENV
+          echo "BAREMETAL_HOST=${{ secrets.BAREMETAL_HOST }}" >> $GITHUB_ENV
+          echo "TF_ACC=0" >> $GITHUB_ENV
+
+      - name: Run all tests
+        run: go test -v -timeout=120m ./...
+
+      - name: Comment test results on PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## ✅ Tests Passed\n\nAll tests executed successfully! Ready to merge.'
+            });
+
+      - name: Comment test failure on PR
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## ❌ Tests Failed\n\nSome tests failed. Please review the logs and fix the issues before merging.'
+            });
