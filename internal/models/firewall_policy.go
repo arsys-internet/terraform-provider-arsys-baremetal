@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	rschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -83,9 +84,31 @@ func NewFirewallPolicyModelFromRead(_ context.Context, fp *FirewallPolicyRespons
 
 	model := *currentState
 
+	if fp.Name != currentState.Name.ValueString() {
+		model.Name = types.StringValue(fp.Name)
+	}
+
+	var description types.String
+	if fp.Description != nil {
+		description = types.StringValue(*fp.Description)
+	} else {
+		description = types.StringNull()
+	}
+	if !description.Equal(currentState.Description) {
+		model.Description = description
+	}
+
 	if fp.State != currentState.State.ValueString() {
 		model.State = types.StringValue(fp.State)
 	}
+
+	rulesList, rulesDiags := firewallpolicy.NewFirewallRulesList(fp.Rules)
+	diags.Append(rulesDiags...)
+	model.Rules = rulesList
+
+	serverIPsList, serverIPsDiags := firewallpolicy.NewFirewallServerIPsList(fp.ServerIPs)
+	diags.Append(serverIPsDiags...)
+	model.ServerIPs = serverIPsList
 
 	return &model, diags
 }
@@ -245,6 +268,9 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"id": rschema.StringAttribute{
 				Computed:    true,
@@ -256,6 +282,9 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 			"state": rschema.StringAttribute{
 				Computed:    true,
 				Description: "Firewall policy state",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"creation_date": rschema.StringAttribute{
 				Computed:    true,
@@ -283,6 +312,9 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 				Description: "ServerIPs assigned to firewall policy",
 				NestedObject: rschema.NestedAttributeObject{
 					Attributes: firewallpolicy.FirewallServerIPResourceSchema(),
+				},
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 			},
 		},

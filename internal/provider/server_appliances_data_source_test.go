@@ -103,11 +103,6 @@ func validateFirstServerApplianceEssentials(attributes map[string]string) error 
 		return fmt.Errorf("first server appliance missing min_hdd_size")
 	}
 
-	versionKey := "server_appliances.0.version"
-	if _, exists := attributes[versionKey]; !exists {
-		return fmt.Errorf("first server appliance missing version")
-	}
-
 	dcCountKey := "server_appliances.0.available_datacenters.#"
 	if dcCount, exists := attributes[dcCountKey]; !exists || dcCount == "0" {
 		return fmt.Errorf("first server appliance must have at least one available datacenter")
@@ -116,11 +111,6 @@ func validateFirstServerApplianceEssentials(attributes map[string]string) error 
 	compatCountKey := "server_appliances.0.server_type_compatibility.#"
 	if compatCount, exists := attributes[compatCountKey]; !exists || compatCount == "0" {
 		return fmt.Errorf("first server appliance must have at least one server type compatibility")
-	}
-
-	categoriesCountKey := "server_appliances.0.categories.#"
-	if categoriesCount, exists := attributes[categoriesCountKey]; !exists || categoriesCount == "0" {
-		return fmt.Errorf("first server appliance must have at least one category")
 	}
 
 	return nil
