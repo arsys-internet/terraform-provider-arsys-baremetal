@@ -46,3 +46,10 @@
 ## [0.6.1] - 2025-09-18
 
 - Fix server appliance type schema validation
+
+## [0.7.0] - 2025-10-16
+
+- Fix tests
+- Fix remove description when update a SSH key
+- Retry request when 429 error is returned
+- Remove unnecessary functions
