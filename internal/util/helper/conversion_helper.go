@@ -56,3 +56,10 @@ func GetStringPtr(ptr *string) string {
 	}
 	return *ptr
 }
+
+func ToStringPtrAllowEmpty(target **string, source types.String) {
+	if !source.IsNull() {
+		value := source.ValueString()
+		*target = &value
+	}
+}
