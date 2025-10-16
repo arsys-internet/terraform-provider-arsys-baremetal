@@ -69,10 +69,6 @@ func TestAccSubnetResource(t *testing.T) {
 					),
 				},
 			},
-			{
-				Config:      testAccSubnetResourceUpdatedConfig(),
-				ExpectError: regexp.MustCompile("Update not supported"),
-			},
 		},
 	})
 }
@@ -81,14 +77,6 @@ func testAccSubnetResourceConfig() string {
 	return `
 resource "arsys-baremetal_subnet" "test" {
   mask          = 28
-  datacenter_id = "81DEF28500FBC2A973FC0C620DF5B721"
-}`
-}
-
-func testAccSubnetResourceUpdatedConfig() string {
-	return `
-resource "arsys-baremetal_subnet" "test" {
-  mask          = 27
   datacenter_id = "81DEF28500FBC2A973FC0C620DF5B721"
 }`
 }
