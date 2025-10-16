@@ -50,6 +50,6 @@
 ## [0.7.0] - 2025-10-16
 
 - Fix tests
-- Fix remove description when update a SSH key
+- Fix remove description when updating an SSH key
 - Retry request when 429 error is returned
 - Remove unnecessary functions
