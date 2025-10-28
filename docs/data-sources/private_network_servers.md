@@ -62,6 +62,7 @@ Both `private_network_id` and `id` must be provided. If none, the datasource wil
 ## Attributes Reference
 
 The following attributes are returned by the datasource:
+* `private_network_id` - Identifier of private network.
 * `id` - Identifier of the server
 * `name` - Name of the server
 * `lock` - Status of the server lock (integer)
