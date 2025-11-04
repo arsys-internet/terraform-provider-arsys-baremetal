@@ -61,7 +61,7 @@ func TestAccServerDataSource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server.test",
 						tfjsonpath.New("image").AtMapKey("id"),
-						knownvalue.StringExact("6EE23B88AB3CBA9944334C06E9075061"),
+						knownvalue.StringExact("F20696B00D3B30F8E4874F0973323381"),
 					),
 					statecheck.ExpectKnownValue(
 						"data.arsys-baremetal_server.test",
@@ -117,7 +117,7 @@ var testServerConfig = testAccServerResourceConfig(
 	"server-datasource-test",
 	"Baremetal server created with Terraform for testing",
 	"81DEF28500FBC2A973FC0C620DF5B721",
-	"6EE23B88AB3CBA9944334C06E9075061",
+	"F20696B00D3B30F8E4874F0973323381",
 	"650D003D3FC8A8FE554330E869B39FC0")
 
 func testAccServerDataSourceConfig() string {
