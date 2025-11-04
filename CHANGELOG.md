@@ -56,4 +56,4 @@
 
 ## [0.7.1] - 2025-11-03
 
-- Fix replacement in servers assignation to public network
+- Fix replacement in servers assignation to private network
