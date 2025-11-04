@@ -201,24 +201,24 @@ func (r *PrivateNetworkServersResource) Delete(ctx context.Context, req resource
 	}
 
 	if len(serverIds) == 0 {
-		tflog.Info(ctx, fmt.Sprintf("No servers to detach from private network %s; removing from state only", privateNetworkId))
+		tflog.Info(ctx, fmt.Sprintf("No servers to remove from private network %s; removing from state only", privateNetworkId))
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Detaching %d servers from private network %s", len(serverIds), privateNetworkId))
+	tflog.Info(ctx, fmt.Sprintf("Removing %d servers from private network %s", len(serverIds), privateNetworkId))
 
 	for _, serverId := range serverIds {
-		tflog.Info(ctx, fmt.Sprintf("Detaching server %s from private network %s", serverId, privateNetworkId))
+		tflog.Info(ctx, fmt.Sprintf("Removing server %s from private network %s", serverId, privateNetworkId))
 
 		_, err := r.client.DeletePrivateNetworkServer(privateNetworkId, serverId)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
-				tflog.Info(ctx, fmt.Sprintf("Server %s or private network %s not found - may already be detached", serverId, privateNetworkId))
+				tflog.Info(ctx, fmt.Sprintf("Server %s or private network %s not found - may already be removed", serverId, privateNetworkId))
 				continue
 			}
 
 			resp.Diagnostics.AddError(
-				"Error detaching server from private network",
+				"Error removing server from private network",
 				fmt.Sprintf("Private network %s, server %s: %s", privateNetworkId, serverId, err.Error()),
 			)
 			return
@@ -236,10 +236,10 @@ func (r *PrivateNetworkServersResource) Delete(ctx context.Context, req resource
 		_, waitDiags := util.WaitForResourceState(ctx, privateNetworkId, r.client, waitOptions)
 		resp.Diagnostics.Append(waitDiags...)
 		if resp.Diagnostics.HasError() {
-			tflog.Error(ctx, "Wait for private network state after detach failed")
+			tflog.Error(ctx, "Wait for private network state after remove failed")
 			return
 		}
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("Successfully detached %d servers from private network %s", len(serverIds), privateNetworkId))
+	tflog.Info(ctx, fmt.Sprintf("Successfully removed %d servers from private network %s", len(serverIds), privateNetworkId))
 }
