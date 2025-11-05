@@ -53,3 +53,7 @@
 - Fix remove description when updating an SSH key
 - Retry request when 429 error is returned
 - Remove unnecessary functions
+
+## [0.7.1] - 2025-11-03
+
+- Fix replacement in servers assignation to private network

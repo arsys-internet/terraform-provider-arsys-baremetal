@@ -40,7 +40,7 @@ func TestAccServerResource(t *testing.T) {
 					statecheck.ExpectKnownValue(
 						"arsys-baremetal_server.test",
 						tfjsonpath.New("appliance_id"),
-						knownvalue.StringExact("6EE23B88AB3CBA9944334C06E9075061"),
+						knownvalue.StringExact("F20696B00D3B30F8E4874F0973323381"),
 					),
 					statecheck.ExpectKnownValue(
 						"arsys-baremetal_server.test",
@@ -140,7 +140,7 @@ func testAccServerResourceUpdatedConfig() string {
 resource "arsys-baremetal_server" "test" {
  name           = "test-baremetal-updated"
  description    = "Updated description for baremetal server"
- appliance_id   = "6EE23B88AB3CBA9944334C06E9075061"
+ appliance_id   = "F20696B00D3B30F8E4874F0973323381"
  datacenter_id  = "81DEF28500FBC2A973FC0C620DF5B721"
  power_on                = false
  install_backup_agent    = false
@@ -157,7 +157,7 @@ func testAccServerResourceFullConfig() string {
 resource "arsys-baremetal_server" "test" {
  name           = "test-baremetal-full"
  description    = "Full configuration baremetal server"
- appliance_id   = "6EE23B88AB3CBA9944334C06E9075061"
+ appliance_id   = "F20696B00D3B30F8E4874F0973323381"
  datacenter_id  = "81DEF28500FBC2A973FC0C620DF5B721"
 
  # Optional configuration fields

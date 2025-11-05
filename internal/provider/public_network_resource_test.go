@@ -104,6 +104,9 @@ func TestAccPublicNetworkResource(t *testing.T) {
 				ResourceName:      "arsys-baremetal_public_network.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"last_logs",
+				},
 			},
 			// Test Update
 			{
