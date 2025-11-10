@@ -227,11 +227,13 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 			Optional:    true,
 			Computed:    true,
 			Description: "Rule description",
+			Default:     stringdefault.StaticString(""),
 		},
 		"action": rschema.StringAttribute{
 			Computed:    true,
 			Optional:    true,
 			Description: "Rule action (allow/deny)",
+			Default:     stringdefault.StaticString("allow"),
 		},
 		"id": rschema.StringAttribute{
 			Computed:    true,
