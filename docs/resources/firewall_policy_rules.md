@@ -25,7 +25,7 @@ resource "arsys-baremetal_firewall_policy_rule_add" "example" {
       port_to   = 80
       source    = "0.0.0.0/0"
       action    = "allow"
-      description = "Allow HTTP traffic"   
+      description = "Allow HTTP traffic"
     },
     {
       protocol  = "TCP"
@@ -33,7 +33,7 @@ resource "arsys-baremetal_firewall_policy_rule_add" "example" {
       port_to   = 443
       source    = "0.0.0.0/0"
       action    = "allow"
-      description = "Allow HTTPS traffic" 
+      description = "Allow HTTPS traffic"
     }
   ]
 }
