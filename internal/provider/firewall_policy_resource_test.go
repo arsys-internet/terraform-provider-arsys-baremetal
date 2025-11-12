@@ -96,7 +96,7 @@ resource "arsys-baremetal_firewall_policy" "test" {
       port_from = 22
       port_to   = 22
       source    = "192.168.1.0/24"
-      action    = "ALLOW"
+      action    = "allow"
     },
     {
 	  protocol  = "TCP"
@@ -104,7 +104,7 @@ resource "arsys-baremetal_firewall_policy" "test" {
 	  port_to   = 80
 	  source    = "0.0.0.0"
 	  description = "access"
-      action      = "ALLOW"
+      action      = "allow"
     }
   ]
 }

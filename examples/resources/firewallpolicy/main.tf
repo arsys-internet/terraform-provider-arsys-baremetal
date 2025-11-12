@@ -34,7 +34,7 @@ resource "arsys-baremetal_firewall_policy_rule_add" "allow_udp" {
       port_from = 85
       port_to   = 85
       source    = "8.8.8.8"
-      action    = "ALLOW"
+      action    = "allow"
       description = "Allow DNS queries from Public DNS"
     }
     # Additional rules can be added here

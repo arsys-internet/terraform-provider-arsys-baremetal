@@ -24,12 +24,16 @@ resource "arsys-baremetal_firewall_policy_rule_add" "example" {
       port_from = 80
       port_to   = 80
       source    = "0.0.0.0/0"
+      action    = "allow"
+      description = "Allow HTTP traffic"
     },
     {
       protocol  = "TCP"
       port_from = 443
       port_to   = 443
       source    = "0.0.0.0/0"
+      action    = "allow"
+      description = "Allow HTTPS traffic"
     }
   ]
 }
@@ -45,7 +49,7 @@ The following arguments are supported:
     * `port_from` - (Required) The starting port of the rule.
     * `port_to` - (Required) The ending port of the rule.
     * `source` - (Optional) The source IP or CIDR of the rule.
-    * `action` - (Optional) The action to take when the rule is matched (e.g., ALLOW, DENY)
+    * `action` - (Optional) The action to take when the rule is matched (e.g., allow, deny)
     * `description` - (Optional) A description of the rule.
 
 ## Attributes Reference

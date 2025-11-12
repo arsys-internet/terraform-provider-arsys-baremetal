@@ -43,7 +43,7 @@ The following attributes are returned by the datasource:
     * `port_to` - Ending port of the rule
     * `source` - Source IP or CIDR of the rule
     * `description` - Description of the rule
-    * `action` - Action of the rule (ALLOW, DENY)
+    * `action` - Action of the rule (allow, deny)
 
 ### Get Specific Rule by ID
 
@@ -74,4 +74,4 @@ The following attributes are returned by the datasource:
 * `port_to` - Ending port number
 * `source` - Source IP address or CIDR range
 * `description` - Description of the rule
-* `action` - Action performed by the rule (ALLOW, DENY)
+* `action` - Action performed by the rule (allow, deny)

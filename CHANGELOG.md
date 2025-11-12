@@ -57,3 +57,7 @@
 ## [0.7.1] - 2025-11-03
 
 - Fix replacement in servers assignation to private network
+
+## [0.7.2] - 2025-11-10
+
+- Fix assign rules to firewall policy
