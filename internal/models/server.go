@@ -67,6 +67,7 @@ type ServerResourceModel struct {
 	MonitoringPolicyId types.String `tfsdk:"monitoring_policy_id"`
 	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
 	AvailabilityZoneId types.String `tfsdk:"availability_zone_id"`
+	PublicKey          types.List   `tfsdk:"public_key"`
 }
 
 type ServerBaseResponse struct {
@@ -115,13 +116,14 @@ type ServerCreateRequest struct {
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
-	Description        *string `json:"description,omitempty"`
-	Password           *string `json:"password,omitempty"`
-	FirewallPolicyId   *string `json:"firewall_policy_id,omitempty"`
-	IPId               *string `json:"ip_id,omitempty"`
-	LoadBalancerId     *string `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyId *string `json:"monitoring_policy_id,omitempty"`
-	AvailabilityZoneId *string `json:"availability_zone_id,omitempty"`
+	Description        *string  `json:"description,omitempty"`
+	Password           *string  `json:"password,omitempty"`
+	FirewallPolicyId   *string  `json:"firewall_policy_id,omitempty"`
+	IPId               *string  `json:"ip_id,omitempty"`
+	LoadBalancerId     *string  `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyId *string  `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneId *string  `json:"availability_zone_id,omitempty"`
+	PublicKey          []string `json:"public_key,omitempty"`
 }
 
 type ServerUpdateRequest struct {
@@ -418,6 +420,12 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.AvailabilityZoneId = types.StringNull()
 	}
 
+	if !plan.PublicKey.IsUnknown() {
+		model.PublicKey = plan.PublicKey
+	} else {
+		model.PublicKey = types.ListNull(types.StringType)
+	}
+
 	return model, diags
 }
 
@@ -562,6 +570,12 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	helper.AssignStringPtr(&req.MonitoringPolicyId, s.MonitoringPolicyId)
 	helper.AssignStringPtr(&req.AvailabilityZoneId, s.AvailabilityZoneId)
 
+	if !s.PublicKey.IsNull() && !s.PublicKey.IsUnknown() {
+		var keys []string
+		s.PublicKey.ElementsAs(context.Background(), &keys, false)
+		req.PublicKey = keys
+	}
+
 	return req
 }
 
@@ -588,6 +602,7 @@ func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailRespo
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolNull()
 	model.AvailabilityZoneId = types.StringNull()
+	model.PublicKey = types.ListNull(types.StringType)
 
 	return model, diags
 }
@@ -1026,6 +1041,11 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Availability zone identifier",
+			},
+			"public_key": rschema.ListAttribute{
+				Optional:    true,
+				Description: "List of SSH Key IDs to be copied in the server. Then you will be able to access to the server using your SSH keys.",
+				ElementType: types.StringType,
 			},
 		},
 	}
