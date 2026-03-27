@@ -26,7 +26,6 @@ resource "arsys-baremetal_server" "complete_server" {
 
   # Network and security configuration
   firewall_policy_id   = "A1B2C3D4E5F6789012345678901234AB"
-  ip_id                = "B2C3D4E5F6789012345678901234ABCD"
   load_balancer_id     = "C3D4E5F6789012345678901234ABCDEF"
   monitoring_policy_id = "D4E5F6789012345678901234ABCDEF12"
   availability_zone_id = "E5F6789012345678901234ABCDEF1234"

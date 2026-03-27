@@ -62,7 +62,6 @@ type ServerResourceModel struct {
 	Password           types.String `tfsdk:"password"`
 	PowerOn            types.Bool   `tfsdk:"power_on"`
 	FirewallPolicyId   types.String `tfsdk:"firewall_policy_id"`
-	IPId               types.String `tfsdk:"ip_id"`
 	LoadBalancerId     types.String `tfsdk:"load_balancer_id"`
 	MonitoringPolicyId types.String `tfsdk:"monitoring_policy_id"`
 	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
@@ -116,13 +115,12 @@ type ServerCreateRequest struct {
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
-	Description        *string  `json:"description,omitempty"`
-	Password           *string  `json:"password,omitempty"`
-	FirewallPolicyId   *string  `json:"firewall_policy_id,omitempty"`
-	IPId               *string  `json:"ip_id,omitempty"`
-	LoadBalancerId     *string  `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyId *string  `json:"monitoring_policy_id,omitempty"`
-	AvailabilityZoneId *string  `json:"availability_zone_id,omitempty"`
+	Description        *string `json:"description,omitempty"`
+	Password           *string `json:"password,omitempty"`
+	FirewallPolicyId   *string `json:"firewall_policy_id,omitempty"`
+	LoadBalancerId     *string `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyId *string `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneId *string `json:"availability_zone_id,omitempty"`
 	PublicKey          []string `json:"public_key,omitempty"`
 }
 
@@ -396,12 +394,6 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.FirewallPolicyId = types.StringNull()
 	}
 
-	if !plan.IPId.IsUnknown() {
-		model.IPId = plan.IPId
-	} else {
-		model.IPId = types.StringNull()
-	}
-
 	if !plan.LoadBalancerId.IsUnknown() {
 		model.LoadBalancerId = plan.LoadBalancerId
 	} else {
@@ -534,7 +526,6 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 	model.Password = types.StringNull()
 	model.PowerOn = types.BoolValue(true)
 	model.FirewallPolicyId = types.StringNull()
-	model.IPId = types.StringNull()
 	model.LoadBalancerId = types.StringNull()
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolValue(false)
@@ -565,7 +556,6 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	helper.AssignStringPtr(&req.Description, s.Description)
 	helper.AssignStringPtr(&req.Password, s.Password)
 	helper.AssignStringPtr(&req.FirewallPolicyId, s.FirewallPolicyId)
-	helper.AssignStringPtr(&req.IPId, s.IPId)
 	helper.AssignStringPtr(&req.LoadBalancerId, s.LoadBalancerId)
 	helper.AssignStringPtr(&req.MonitoringPolicyId, s.MonitoringPolicyId)
 	helper.AssignStringPtr(&req.AvailabilityZoneId, s.AvailabilityZoneId)
@@ -597,7 +587,6 @@ func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailRespo
 	model.Password = types.StringNull()
 	model.PowerOn = types.BoolNull()
 	model.FirewallPolicyId = types.StringNull()
-	model.IPId = types.StringNull()
 	model.LoadBalancerId = types.StringNull()
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolNull()
@@ -996,17 +985,6 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(util.HexID32Pattern),
 						"must be a valid firewall policy ID",
-					),
-				},
-			},
-			"ip_id": rschema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
-				Description: "IP identifier",
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(util.HexID32Pattern),
-						"must be a valid IP ID",
 					),
 				},
 			},
