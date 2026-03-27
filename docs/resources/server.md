@@ -43,9 +43,8 @@ resource "arsys-baremetal_server" "complete_server" {
   power_on = true
   install_backup_agent = true
 
-  # Network and security configuration  
+  # Network and security configuration
   firewall_policy_id   = "A1B2C3D4E5F6789012345678901234AB"
-  ip_id                = "B2C3D4E5F6789012345678901234ABCD"
   load_balancer_id     = "C3D4E5F6789012345678901234ABCDEF"
   monitoring_policy_id = "D4E5F6789012345678901234ABCDEF12"
   availability_zone_id = "E5F6789012345678901234ABCDEF1234"
@@ -79,7 +78,6 @@ For the creation of a baremetal server, the following arguments are supported:
 * `password` - Password for the server. If not provided, a random password will be generated
 * `power_on` - (Boolean) Whether to power on the server after creation. Defaults to `true`
 * `firewall_policy_id` - ID of the firewall policy to associate with the server
-* `ip_id` - ID of an existing IP to assign to the server
 * `load_balancer_id` - ID of a load balancer to associate with the server
 * `monitoring_policy_id` - ID of a monitoring policy to associate with the server
 * `install_backup_agent` - (Boolean) Whether to install the backup agent. Defaults to `false`
