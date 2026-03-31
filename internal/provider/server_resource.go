@@ -116,7 +116,11 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	createRequest := data.ToCreateRequest()
+	createRequest, createReqDiags := data.ToCreateRequest()
+	resp.Diagnostics.Append(createReqDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	apiResponse, err := r.client.CreateServer(&createRequest)
 

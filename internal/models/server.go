@@ -7,6 +7,7 @@ import (
 	"terraform-provider-arsys-baremetal/internal/util"
 	"terraform-provider-arsys-baremetal/internal/util/helper"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,6 +67,7 @@ type ServerResourceModel struct {
 	MonitoringPolicyId types.String `tfsdk:"monitoring_policy_id"`
 	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
 	AvailabilityZoneId types.String `tfsdk:"availability_zone_id"`
+	PublicKey          types.List   `tfsdk:"public_key"`
 }
 
 type ServerBaseResponse struct {
@@ -114,12 +116,13 @@ type ServerCreateRequest struct {
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
-	Description        *string `json:"description,omitempty"`
-	Password           *string `json:"password,omitempty"`
-	FirewallPolicyId   *string `json:"firewall_policy_id,omitempty"`
-	LoadBalancerId     *string `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyId *string `json:"monitoring_policy_id,omitempty"`
-	AvailabilityZoneId *string `json:"availability_zone_id,omitempty"`
+	Description        *string  `json:"description,omitempty"`
+	Password           *string  `json:"password,omitempty"`
+	FirewallPolicyId   *string  `json:"firewall_policy_id,omitempty"`
+	LoadBalancerId     *string  `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyId *string  `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneId *string  `json:"availability_zone_id,omitempty"`
+	PublicKey          []string `json:"public_key,omitempty"`
 }
 
 type ServerUpdateRequest struct {
@@ -410,6 +413,12 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.AvailabilityZoneId = types.StringNull()
 	}
 
+	if !plan.PublicKey.IsUnknown() {
+		model.PublicKey = plan.PublicKey
+	} else {
+		model.PublicKey = types.ListNull(types.StringType)
+	}
+
 	return model, diags
 }
 
@@ -526,7 +535,8 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 	return model, diags
 }
 
-func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
+func (s *ServerResourceModel) ToCreateRequest() (ServerCreateRequest, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
 	req := ServerCreateRequest{
 		Name:         s.Name.ValueString(),
 		ServerType:   "baremetal",
@@ -552,7 +562,16 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 	helper.AssignStringPtr(&req.MonitoringPolicyId, s.MonitoringPolicyId)
 	helper.AssignStringPtr(&req.AvailabilityZoneId, s.AvailabilityZoneId)
 
-	return req
+	if !s.PublicKey.IsNull() && !s.PublicKey.IsUnknown() {
+		var keys []string
+		if keyDiags := s.PublicKey.ElementsAs(context.Background(), &keys, false); keyDiags.HasError() {
+			diags.Append(keyDiags...)
+			return req, diags
+		}
+		req.PublicKey = keys
+	}
+
+	return req, diags
 }
 
 func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailResponse) (*ServerResourceModel, diag.Diagnostics) {
@@ -577,6 +596,7 @@ func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailRespo
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolNull()
 	model.AvailabilityZoneId = types.StringNull()
+	model.PublicKey = types.ListNull(types.StringType)
 
 	return model, diags
 }
@@ -1004,6 +1024,19 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Computed:    true,
 				Description: "Availability zone identifier",
+			},
+			"public_key": rschema.ListAttribute{
+				Optional:    true,
+				Description: "List of SSH Key IDs to be copied in the server. Then you will be able to access to the server using your SSH keys.",
+				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(util.HexID32Pattern),
+							"must be a valid SSH Key ID",
+						),
+					),
+				},
 			},
 		},
 	}
