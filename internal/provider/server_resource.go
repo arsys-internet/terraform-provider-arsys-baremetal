@@ -116,7 +116,11 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	createRequest := data.ToCreateRequest()
+	createRequest, createReqDiags := data.ToCreateRequest()
+	resp.Diagnostics.Append(createReqDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	apiResponse, err := r.client.CreateServer(&createRequest)
 
@@ -259,60 +263,6 @@ func (r *ServerResource) Update(ctx context.Context, req resource.UpdateRequest,
 
 	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating server with ID: %s", id))
-
-	if !plan.DatacenterId.Equal(state.DatacenterId) {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("datacenter_id"),
-			"Field cannot be modified after creation",
-			fmt.Sprintf(
-				"The 'datacenter_id' field cannot be changed from %q to %q after the server has been created. "+
-					"To move the server to a different datacenter you must recreate the resource: "+
-					"remove it from your configuration, run 'terraform apply', then re-add it with the desired datacenter.",
-				state.DatacenterId.ValueString(),
-				plan.DatacenterId.ValueString(),
-			),
-		)
-	}
-
-	if !plan.ApplianceId.Equal(state.ApplianceId) {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("appliance_id"),
-			"Field cannot be modified after creation",
-			fmt.Sprintf(
-				"The 'appliance_id' field cannot be changed from %q to %q after the server has been created. "+
-					"To change the appliance you must recreate the resource: "+
-					"remove it from your configuration, run 'terraform apply', then re-add it with the desired appliance.",
-				state.ApplianceId.ValueString(),
-				plan.ApplianceId.ValueString(),
-			),
-		)
-	}
-
-	if !plan.Hardware.IsNull() && !state.Hardware.IsNull() {
-		planHardwareAttrs := plan.Hardware.Attributes()
-		stateHardwareAttrs := state.Hardware.Attributes()
-		planModelId, planOk := planHardwareAttrs["baremetal_model_id"].(types.String)
-		stateModelId, stateOk := stateHardwareAttrs["baremetal_model_id"].(types.String)
-		if planOk && stateOk && !planModelId.Equal(stateModelId) {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("hardware").AtName("baremetal_model_id"),
-				"Field cannot be modified after creation",
-				fmt.Sprintf(
-					"The 'hardware.baremetal_model_id' field cannot be changed from %q to %q after the server has been created. "+
-						"The baremetal model is fixed at provisioning time. "+
-						"To use a different model you must recreate the resource: "+
-						"remove it from your configuration, run 'terraform apply', then re-add it with the desired model.",
-					stateModelId.ValueString(),
-					planModelId.ValueString(),
-				),
-			)
-		}
-	}
-
-	if resp.Diagnostics.HasError() {
-		resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
-		return
-	}
 
 	hasChanges := false
 	if !plan.Name.Equal(state.Name) {

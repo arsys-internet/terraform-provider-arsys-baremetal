@@ -7,6 +7,7 @@ import (
 	"terraform-provider-arsys-baremetal/internal/util"
 	"terraform-provider-arsys-baremetal/internal/util/helper"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -115,12 +116,12 @@ type ServerCreateRequest struct {
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
-	Description        *string `json:"description,omitempty"`
-	Password           *string `json:"password,omitempty"`
-	FirewallPolicyId   *string `json:"firewall_policy_id,omitempty"`
-	LoadBalancerId     *string `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyId *string `json:"monitoring_policy_id,omitempty"`
-	AvailabilityZoneId *string `json:"availability_zone_id,omitempty"`
+	Description        *string  `json:"description,omitempty"`
+	Password           *string  `json:"password,omitempty"`
+	FirewallPolicyId   *string  `json:"firewall_policy_id,omitempty"`
+	LoadBalancerId     *string  `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyId *string  `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneId *string  `json:"availability_zone_id,omitempty"`
 	PublicKey          []string `json:"public_key,omitempty"`
 }
 
@@ -534,7 +535,8 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 	return model, diags
 }
 
-func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
+func (s *ServerResourceModel) ToCreateRequest() (ServerCreateRequest, diag.Diagnostics) {
+	diags := diag.Diagnostics{}
 	req := ServerCreateRequest{
 		Name:         s.Name.ValueString(),
 		ServerType:   "baremetal",
@@ -562,11 +564,14 @@ func (s *ServerResourceModel) ToCreateRequest() ServerCreateRequest {
 
 	if !s.PublicKey.IsNull() && !s.PublicKey.IsUnknown() {
 		var keys []string
-		s.PublicKey.ElementsAs(context.Background(), &keys, false)
+		if keyDiags := s.PublicKey.ElementsAs(context.Background(), &keys, false); keyDiags.HasError() {
+			diags.Append(keyDiags...)
+			return req, diags
+		}
 		req.PublicKey = keys
 	}
 
-	return req
+	return req, diags
 }
 
 func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailResponse) (*ServerResourceModel, diag.Diagnostics) {
@@ -1024,6 +1029,14 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 				Optional:    true,
 				Description: "List of SSH Key IDs to be copied in the server. Then you will be able to access to the server using your SSH keys.",
 				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(
+						stringvalidator.RegexMatches(
+							regexp.MustCompile(util.HexID32Pattern),
+							"must be a valid SSH Key ID",
+						),
+					),
+				},
 			},
 		},
 	}
