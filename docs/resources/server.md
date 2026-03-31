@@ -39,7 +39,8 @@ resource "arsys-baremetal_server" "complete_server" {
   hardware = {
     baremetal_model_id = "650D003D3FC8A8FE554330E869B39FC0"
   }
-  password = "MySecurePassword123!"
+  password   = "MySecurePassword123!"
+  public_key = ["A1B2C3D4E5F6789012345678901298KM"]
   power_on = true
   install_backup_agent = true
 
@@ -76,6 +77,7 @@ For the creation of a baremetal server, the following arguments are supported:
 
 * `description` - The description of the server
 * `password` - Password for the server. If not provided, a random password will be generated
+* `public_key` - (List of strings) List of SSH Key IDs to be copied in the server. Allows SSH access using the associated keys
 * `power_on` - (Boolean) Whether to power on the server after creation. Defaults to `true`
 * `firewall_policy_id` - ID of the firewall policy to associate with the server
 * `load_balancer_id` - ID of a load balancer to associate with the server

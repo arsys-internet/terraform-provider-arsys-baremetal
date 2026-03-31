@@ -21,6 +21,7 @@ resource "arsys-baremetal_server" "complete_server" {
   }
 
   password             = "MySecurePassword123!"
+  public_key           = ["F3F89D7F8SD7987FSD987987SFD4S5F"]
   power_on             = true
   install_backup_agent = true
 
