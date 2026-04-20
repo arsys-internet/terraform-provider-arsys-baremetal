@@ -44,6 +44,10 @@ resource "arsys-baremetal_server" "complete_server" {
   power_on = true
   install_backup_agent = true
 
+  # Cloud-init configuration
+  user_data              = "#!/bin/bash\napt-get update && apt-get install -y nginx"
+  user_data_content_type = "sh"
+
   # Network and security configuration
   firewall_policy_id   = "A1B2C3D4E5F6789012345678901234AB"
   load_balancer_id     = "C3D4E5F6789012345678901234ABCDEF"
@@ -84,6 +88,8 @@ For the creation of a baremetal server, the following arguments are supported:
 * `monitoring_policy_id` - ID of a monitoring policy to associate with the server
 * `install_backup_agent` - (Boolean) Whether to install the backup agent. Defaults to `false`
 * `availability_zone_id` - The ID of the availability zone
+* `user_data` - Cloud-init user data commands to be executed on server creation. Changing this forces a new resource to be created
+* `user_data_content_type` - Content type format of the user data. Allowed values: `yaml`, `cmd`, `ps1`, `txt`, `sh`. Changing this forces a new resource to be created
 
 ## Import
 

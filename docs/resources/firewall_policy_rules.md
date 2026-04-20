@@ -45,7 +45,7 @@ The following arguments are supported:
 
 * `id` - (Required) ID of the existing Firewall Policy to add rules to.
 * `rules` - (Required) A list of rules to be added to the Firewall Policy. Each rule should contain:
-    * `protocol` - (Required) The protocol of the rule (e.g., TCP, UDP).
+    * `protocol` - (Required) The protocol of the rule. Accepted values: `TCP`, `UDP`, `ICMP`, `AH`, `ESP`, `GRE`, `ANY`.
     * `port_from` - (Required) The starting port of the rule.
     * `port_to` - (Required) The ending port of the rule.
     * `source` - (Optional) The source IP or CIDR of the rule.
