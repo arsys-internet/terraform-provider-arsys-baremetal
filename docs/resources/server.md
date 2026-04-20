@@ -88,8 +88,8 @@ For the creation of a baremetal server, the following arguments are supported:
 * `monitoring_policy_id` - ID of a monitoring policy to associate with the server
 * `install_backup_agent` - (Boolean) Whether to install the backup agent. Defaults to `false`
 * `availability_zone_id` - The ID of the availability zone
-* `user_data` - Cloud-init user data commands to be executed on server creation. Changing this forces a new resource to be created
-* `user_data_content_type` - Content type format of the user data. Allowed values: `yaml`, `cmd`, `ps1`, `txt`, `sh`. Changing this forces a new resource to be created
+* `user_data` - Cloud-init user data commands to be executed on server creation
+* `user_data_content_type` - Content type format of the user data. Allowed values: `yaml`, `cmd`, `ps1`, `txt`, `sh`
 
 ## Import
 
