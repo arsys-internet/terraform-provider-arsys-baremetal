@@ -58,16 +58,18 @@ type ServerDetailModel struct {
 type ServerResourceModel struct {
 	ServerDetailModel
 
-	ApplianceId        types.String `tfsdk:"appliance_id"`
-	DatacenterId       types.String `tfsdk:"datacenter_id"`
-	Password           types.String `tfsdk:"password"`
-	PowerOn            types.Bool   `tfsdk:"power_on"`
-	FirewallPolicyId   types.String `tfsdk:"firewall_policy_id"`
-	LoadBalancerId     types.String `tfsdk:"load_balancer_id"`
-	MonitoringPolicyId types.String `tfsdk:"monitoring_policy_id"`
-	InstallBackupAgent types.Bool   `tfsdk:"install_backup_agent"`
-	AvailabilityZoneId types.String `tfsdk:"availability_zone_id"`
-	PublicKey          types.List   `tfsdk:"public_key"`
+	ApplianceId         types.String `tfsdk:"appliance_id"`
+	DatacenterId        types.String `tfsdk:"datacenter_id"`
+	Password            types.String `tfsdk:"password"`
+	PowerOn             types.Bool   `tfsdk:"power_on"`
+	FirewallPolicyId    types.String `tfsdk:"firewall_policy_id"`
+	LoadBalancerId      types.String `tfsdk:"load_balancer_id"`
+	MonitoringPolicyId  types.String `tfsdk:"monitoring_policy_id"`
+	InstallBackupAgent  types.Bool   `tfsdk:"install_backup_agent"`
+	AvailabilityZoneId  types.String `tfsdk:"availability_zone_id"`
+	PublicKey           types.List   `tfsdk:"public_key"`
+	UserData            types.String `tfsdk:"user_data"`
+	UserDataContentType types.String `tfsdk:"user_data_content_type"`
 }
 
 type ServerBaseResponse struct {
@@ -116,13 +118,15 @@ type ServerCreateRequest struct {
 	RSAKey             bool `json:"rsa_key"`
 	InstallBackupAgent bool `json:"install_backup_agent"`
 
-	Description        *string  `json:"description,omitempty"`
-	Password           *string  `json:"password,omitempty"`
-	FirewallPolicyId   *string  `json:"firewall_policy_id,omitempty"`
-	LoadBalancerId     *string  `json:"load_balancer_id,omitempty"`
-	MonitoringPolicyId *string  `json:"monitoring_policy_id,omitempty"`
-	AvailabilityZoneId *string  `json:"availability_zone_id,omitempty"`
-	PublicKey          []string `json:"public_key,omitempty"`
+	Description         *string  `json:"description,omitempty"`
+	Password            *string  `json:"password,omitempty"`
+	FirewallPolicyId    *string  `json:"firewall_policy_id,omitempty"`
+	LoadBalancerId      *string  `json:"load_balancer_id,omitempty"`
+	MonitoringPolicyId  *string  `json:"monitoring_policy_id,omitempty"`
+	AvailabilityZoneId  *string  `json:"availability_zone_id,omitempty"`
+	PublicKey           []string `json:"public_key,omitempty"`
+	UserData            *string  `json:"user_data,omitempty"`
+	UserDataContentType *string  `json:"user_data_content_type,omitempty"`
 }
 
 type ServerUpdateRequest struct {
@@ -419,6 +423,18 @@ func NewServerResourceModelFromCreate(ctx context.Context, sr *ServerDetailRespo
 		model.PublicKey = types.ListNull(types.StringType)
 	}
 
+	if !plan.UserData.IsUnknown() {
+		model.UserData = plan.UserData
+	} else {
+		model.UserData = types.StringNull()
+	}
+
+	if !plan.UserDataContentType.IsUnknown() {
+		model.UserDataContentType = plan.UserDataContentType
+	} else {
+		model.UserDataContentType = types.StringNull()
+	}
+
 	return model, diags
 }
 
@@ -531,6 +547,8 @@ func NewServerResourceModelFromAPI(ctx context.Context, sr *ServerDetailResponse
 	model.MonitoringPolicyId = types.StringNull()
 	model.InstallBackupAgent = types.BoolValue(false)
 	model.AvailabilityZoneId = types.StringNull()
+	model.UserData = types.StringNull()
+	model.UserDataContentType = types.StringNull()
 
 	return model, diags
 }
@@ -561,6 +579,8 @@ func (s *ServerResourceModel) ToCreateRequest() (ServerCreateRequest, diag.Diagn
 	helper.AssignStringPtr(&req.LoadBalancerId, s.LoadBalancerId)
 	helper.AssignStringPtr(&req.MonitoringPolicyId, s.MonitoringPolicyId)
 	helper.AssignStringPtr(&req.AvailabilityZoneId, s.AvailabilityZoneId)
+	helper.AssignStringPtr(&req.UserData, s.UserData)
+	helper.AssignStringPtr(&req.UserDataContentType, s.UserDataContentType)
 
 	if !s.PublicKey.IsNull() && !s.PublicKey.IsUnknown() {
 		var keys []string
@@ -597,6 +617,8 @@ func NewServerResourceModelFromImport(ctx context.Context, sr *ServerDetailRespo
 	model.InstallBackupAgent = types.BoolNull()
 	model.AvailabilityZoneId = types.StringNull()
 	model.PublicKey = types.ListNull(types.StringType)
+	model.UserData = types.StringNull()
+	model.UserDataContentType = types.StringNull()
 
 	return model, diags
 }
@@ -1036,6 +1058,17 @@ func ServerResourceSchema(_ context.Context) rschema.Schema {
 							"must be a valid SSH Key ID",
 						),
 					),
+				},
+			},
+			"user_data": rschema.StringAttribute{
+				Optional:    true,
+				Description: "Cloud-init user data commands to be executed on server creation",
+			},
+			"user_data_content_type": rschema.StringAttribute{
+				Optional:    true,
+				Description: "Content type format of the user data. Allowed values: yaml, cmd, ps1, txt, sh",
+				Validators: []validator.String{
+					stringvalidator.OneOf("yaml", "cmd", "ps1", "txt", "sh"),
 				},
 			},
 		},

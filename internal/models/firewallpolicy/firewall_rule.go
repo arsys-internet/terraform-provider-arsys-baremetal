@@ -166,7 +166,7 @@ func FirewallRuleDataSourceSchema() map[string]schema.Attribute {
 		},
 		"protocol": schema.StringAttribute{
 			Computed:    true,
-			Description: "Internet protocol (TCP, UDP, ICMP, TCP/UDP, IPSEC, GRE)",
+			Description: "Internet protocol (TCP, UDP, ICMP, TCP/UDP, IPSEC, GRE, ANY)",
 		},
 		"port_from": schema.Int64Attribute{
 			Computed:    true,
@@ -198,7 +198,7 @@ func FirewallRuleResourceSchema() map[string]rschema.Attribute {
 			Computed:    true,
 			Description: "Internet protocol",
 			Validators: []validator.String{
-				stringvalidator.OneOf("TCP", "UDP", "ICMP", "AH", "ESP", "GRE"),
+				stringvalidator.OneOf("TCP", "UDP", "ICMP", "AH", "ESP", "GRE", "ANY"),
 			},
 		},
 		"port_from": rschema.Int64Attribute{

@@ -25,6 +25,10 @@ resource "arsys-baremetal_server" "complete_server" {
   power_on             = true
   install_backup_agent = true
 
+  # Cloud-init configuration
+  user_data              = "#!/bin/bash\napt-get update && apt-get install -y nginx"
+  user_data_content_type = "sh"
+
   # Network and security configuration
   firewall_policy_id   = "A1B2C3D4E5F6789012345678901234AB"
   load_balancer_id     = "C3D4E5F6789012345678901234ABCDEF"
