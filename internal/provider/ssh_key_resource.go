@@ -113,7 +113,7 @@ func (r *SshKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	if data.Name.IsNull() || data.Name.ValueString() == "" {
+	if data.Name.IsNull() || data.Name.IsUnknown() || data.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
@@ -168,7 +168,7 @@ func (r *SshKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating SSH key with ID: %s", id))
 
-	if plan.Name.IsNull() || plan.Name.ValueString() == "" {
+	if plan.Name.IsNull() || plan.Name.IsUnknown() || plan.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",

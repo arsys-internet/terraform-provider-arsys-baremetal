@@ -71,7 +71,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	if data.Name.IsNull() || data.Name.ValueString() == "" {
+	if data.Name.IsNull() || data.Name.IsUnknown() || data.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
@@ -79,7 +79,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	if data.ApplianceId.IsNull() || data.ApplianceId.ValueString() == "" {
+	if data.ApplianceId.IsNull() || data.ApplianceId.IsUnknown() || data.ApplianceId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("appliance_id"),
 			"Missing required field",
@@ -87,7 +87,7 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	if data.DatacenterId.IsNull() || data.DatacenterId.ValueString() == "" {
+	if data.DatacenterId.IsNull() || data.DatacenterId.IsUnknown() || data.DatacenterId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
@@ -95,21 +95,21 @@ func (r *ServerResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
-	if data.Hardware.IsNull() {
+	if data.Hardware.IsNull() || data.Hardware.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("hardware"),
 			"Missing required field",
 			"'hardware' field is required when creating a server",
 		)
-	}
-
-	hardwareAttrs := data.Hardware.Attributes()
-	if baremetalModelId, ok := hardwareAttrs["baremetal_model_id"].(types.String); !ok || baremetalModelId.IsNull() || baremetalModelId.ValueString() == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("hardware").AtName("baremetal_model_id"),
-			"Missing required field",
-			"'baremetal_model_id' is required when creating a server",
-		)
+	} else {
+		hardwareAttrs := data.Hardware.Attributes()
+		if baremetalModelId, ok := hardwareAttrs["baremetal_model_id"].(types.String); !ok || baremetalModelId.IsNull() || baremetalModelId.IsUnknown() || baremetalModelId.ValueString() == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("hardware").AtName("baremetal_model_id"),
+				"Missing required field",
+				"'baremetal_model_id' is required when creating a server",
+			)
+		}
 	}
 
 	if resp.Diagnostics.HasError() {

@@ -114,7 +114,7 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	if data.DatacenterId.IsNull() || data.DatacenterId.ValueString() == "" {
+	if data.DatacenterId.IsNull() || data.DatacenterId.IsUnknown() || data.DatacenterId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",

@@ -71,7 +71,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	if data.Name.IsNull() || data.Name.ValueString() == "" {
+	if data.Name.IsNull() || data.Name.IsUnknown() || data.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
@@ -79,7 +79,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		)
 	}
 
-	if data.Rules.IsNull() {
+	if data.Rules.IsNull() || data.Rules.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("rules"),
 			"Missing required field",
