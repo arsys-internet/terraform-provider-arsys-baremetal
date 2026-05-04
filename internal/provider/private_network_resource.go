@@ -84,6 +84,25 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		)
 	}
 
+	networkAddressSet := !data.NetworkAddress.IsNull() && !data.NetworkAddress.IsUnknown() && data.NetworkAddress.ValueString() != ""
+	subnetMaskSet := !data.SubnetMask.IsNull() && !data.SubnetMask.IsUnknown() && data.SubnetMask.ValueString() != ""
+
+	if networkAddressSet && !subnetMaskSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("subnet_mask"),
+			"Missing required field",
+			"'subnet_mask' is required when 'network_address' is provided",
+		)
+	}
+
+	if subnetMaskSet && !networkAddressSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("network_address"),
+			"Missing required field",
+			"'network_address' is required when 'subnet_mask' is provided",
+		)
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}

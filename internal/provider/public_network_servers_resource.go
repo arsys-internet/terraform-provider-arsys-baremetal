@@ -152,7 +152,23 @@ func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	servers := make([]string, len(publicNetwork.Servers))
+	for i, server := range publicNetwork.Servers {
+		servers[i] = server.Id
+	}
+
+	finalModel, diags := models.NewPublicNetworkServerResourceModel(
+		ctx,
+		data.PublicNetworkId.ValueString(),
+		servers,
+		publicNetwork,
+	)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
 func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

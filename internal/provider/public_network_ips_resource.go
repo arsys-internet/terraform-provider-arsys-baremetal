@@ -70,46 +70,57 @@ func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	ips := data.Ips
-
 	publicNetworkId := data.PublicNetworkId.ValueString()
-
-	for _, ipId := range ips {
-		id := ipId.ValueString()
-
-		tflog.Info(ctx, fmt.Sprintf("Reading IP %s in the public network with ID: %s", id, publicNetworkId))
-
-		apiResponse, err := r.client.GetPublicNetworkIps(publicNetworkId)
-		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				tflog.Info(ctx, fmt.Sprintf("IP %s not found in the Public network with ID %s, removing from state", id, publicNetworkId))
-				resp.State.RemoveResource(ctx)
-				return
-			}
-
-			resp.Diagnostics.AddError(
-				"Error reading public network",
-				fmt.Sprintf("Error: %s", err.Error()),
-			)
-			return
-		}
-
-		if apiResponse == nil {
-			resp.Diagnostics.AddError(
-				"Internal Error",
-				"An unexpected error occurred while retrieving public network IPs. Please try again or report this issue to the provider developers",
-			)
-			return
-		}
-
-		readModel, diags := models.NewPublicNetworkIpResourceModel(ctx, &data, apiResponse)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
+	if publicNetworkId == "" {
+		// Import scenario: ImportStatePassthroughID only populates id
+		publicNetworkId = data.Id.ValueString()
 	}
+
+	tflog.Info(ctx, fmt.Sprintf("Reading IPs for public network with ID: %s", publicNetworkId))
+
+	apiResponse, err := r.client.GetPublicNetworkIps(publicNetworkId)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			tflog.Info(ctx, fmt.Sprintf("Public network %s not found, removing from state", publicNetworkId))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
+		resp.Diagnostics.AddError(
+			"Error reading public network IPs",
+			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving public network IPs. Please try again or report this issue to the provider developers",
+		)
+		return
+	}
+
+	data.PublicNetworkId = types.StringValue(publicNetworkId)
+	data.Id = types.StringValue(publicNetworkId)
+
+	// During import, ips and action are empty — populate from API
+	if len(data.Ips) == 0 {
+		ipIds := make([]types.String, len(apiResponse))
+		for i, ip := range apiResponse {
+			ipIds[i] = types.StringValue(ip.Id)
+		}
+		data.Ips = ipIds
+		data.Action = types.BoolValue(true)
+	}
+
+	readModel, diags := models.NewPublicNetworkIpResourceModel(ctx, &data, apiResponse)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
 }
 
 func (r *PublicNetworkIpsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

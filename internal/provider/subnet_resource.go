@@ -95,7 +95,48 @@ func (r *SubnetResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
-func (r *SubnetResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
+func (r *SubnetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data models.SubnetModel
+
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	id := data.Id.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("Reading subnet with ID: %s", id))
+
+	apiResponse, err := r.client.GetSubnet(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			tflog.Info(ctx, fmt.Sprintf("Subnet %s not found, removing from state", id))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
+		resp.Diagnostics.AddError(
+			"Error reading subnet",
+			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	if apiResponse == nil {
+		resp.Diagnostics.AddError(
+			"Internal Error",
+			"An unexpected error occurred while retrieving subnet. Please report this issue to the provider developers.",
+		)
+		return
+	}
+
+	readModel, diags := models.NewSubnetModelFromResponse(ctx, apiResponse)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
 }
 
 func (r *SubnetResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
