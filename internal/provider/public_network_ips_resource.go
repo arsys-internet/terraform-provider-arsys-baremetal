@@ -76,6 +76,14 @@ func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRe
 		publicNetworkId = data.Id.ValueString()
 	}
 
+	if publicNetworkId == "" {
+		resp.Diagnostics.AddError(
+			"Missing Public Network ID",
+			"Could not determine the public network ID from state. Please re-import the resource with a valid ID.",
+		)
+		return
+	}
+
 	tflog.Info(ctx, fmt.Sprintf("Reading IPs for public network with ID: %s", publicNetworkId))
 
 	apiResponse, err := r.client.GetPublicNetworkIps(publicNetworkId)

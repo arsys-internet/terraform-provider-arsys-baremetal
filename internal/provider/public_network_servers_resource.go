@@ -152,9 +152,28 @@ func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	servers := make([]string, len(publicNetwork.Servers))
-	for i, server := range publicNetwork.Servers {
-		servers[i] = server.Id
+	// Build a set of server IDs from the API response for O(1) lookup.
+	apiServerSet := make(map[string]struct{}, len(publicNetwork.Servers))
+	for _, s := range publicNetwork.Servers {
+		apiServerSet[s.Id] = struct{}{}
+	}
+
+	// Preserve the state order for servers that still exist (avoids spurious
+	// order-only diffs on a List attribute), then append servers added externally.
+	var servers []string
+	for _, s := range data.Servers {
+		if _, ok := apiServerSet[s.ValueString()]; ok {
+			servers = append(servers, s.ValueString())
+		}
+	}
+	stateServerSet := make(map[string]struct{}, len(servers))
+	for _, s := range servers {
+		stateServerSet[s] = struct{}{}
+	}
+	for _, s := range publicNetwork.Servers {
+		if _, ok := stateServerSet[s.Id]; !ok {
+			servers = append(servers, s.Id)
+		}
 	}
 
 	finalModel, diags := models.NewPublicNetworkServerResourceModel(

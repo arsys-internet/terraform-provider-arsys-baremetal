@@ -29,7 +29,10 @@ func (m rulesWriteOnceModifier) MarkdownDescription(_ context.Context) string {
 
 func (m rulesWriteOnceModifier) PlanModifyList(ctx context.Context, req planmodifier.ListRequest, resp *planmodifier.ListResponse) {
 	var id types.String
-	req.State.GetAttribute(ctx, path.Root("id"), &id)
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("id"), &id)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// During creation the resource has no id yet: use the config/plan value.
 	if id.IsNull() || id.IsUnknown() || id.ValueString() == "" {
