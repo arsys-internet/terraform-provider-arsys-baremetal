@@ -122,6 +122,10 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		)
 	}
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createRequest := data.ToCreateRequest()
 
 	apiResponse, err := r.client.CreatePublicNetwork(&createRequest)
