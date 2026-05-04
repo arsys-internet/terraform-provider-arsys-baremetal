@@ -28,13 +28,18 @@ func (m rulesWriteOnceModifier) MarkdownDescription(_ context.Context) string {
 }
 
 func (m rulesWriteOnceModifier) PlanModifyList(ctx context.Context, req planmodifier.ListRequest, resp *planmodifier.ListResponse) {
+	// During creation req.State.Raw is a null tftypes.Value; calling GetAttribute
+	// on it would fail. Return early so the config/plan value is used.
+	if req.State.Raw.IsNull() || !req.State.Raw.IsKnown() {
+		return
+	}
+
 	var id types.String
 	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("id"), &id)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// During creation the resource has no id yet: use the config/plan value.
 	if id.IsNull() || id.IsUnknown() || id.ValueString() == "" {
 		return
 	}
