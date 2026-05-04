@@ -121,6 +121,10 @@ func (r *SshKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		)
 	}
 
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	createRequest := data.ToCreateRequest()
 
 	apiResponse, err := r.client.CreateSshKey(&createRequest)
@@ -174,6 +178,10 @@ func (r *SshKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 			"Missing required field",
 			"Either 'name' field is required when updating a SSH key",
 		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	updateRequest := plan.ToUpdateRequest()
