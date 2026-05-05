@@ -107,7 +107,7 @@ func (r *SubnetResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	tflog.Info(ctx, fmt.Sprintf("Reading subnet with ID: %s", id))
 
-	apiResponse, err := r.client.GetSubnet(id)
+	_, err := r.client.GetSubnet(id)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			tflog.Info(ctx, fmt.Sprintf("Subnet %s not found, removing from state", id))
@@ -122,21 +122,7 @@ func (r *SubnetResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-	if apiResponse == nil {
-		resp.Diagnostics.AddError(
-			"Internal Error",
-			"An unexpected error occurred while retrieving subnet. Please report this issue to the provider developers.",
-		)
-		return
-	}
-
-	readModel, diags := models.NewSubnetModelFromResponse(ctx, apiResponse)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(resp.State.Set(ctx, readModel)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *SubnetResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {

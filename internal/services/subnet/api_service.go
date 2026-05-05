@@ -42,7 +42,7 @@ func GetSubnetService(m interface{}) ApiSubnetServiceInterface {
 }
 
 func (s *ApiSubnetService) GetSubnet(id string) (*models.SubnetResponse, error) {
-	resp, err := s.client.Get(fmt.Sprintf("/subnets/%s", id))
+	resp, err := s.client.Get(fmt.Sprintf("/public_ips/%s", id))
 	if err != nil {
 		return nil, fmt.Errorf("error making request: %w", err)
 	}
