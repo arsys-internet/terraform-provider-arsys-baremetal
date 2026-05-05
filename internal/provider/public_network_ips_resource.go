@@ -72,7 +72,6 @@ func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRe
 
 	publicNetworkId := data.PublicNetworkId.ValueString()
 	if publicNetworkId == "" {
-		// Import scenario: ImportStatePassthroughID only populates id
 		publicNetworkId = data.Id.ValueString()
 	}
 
@@ -112,7 +111,6 @@ func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRe
 	data.PublicNetworkId = types.StringValue(publicNetworkId)
 	data.Id = types.StringValue(publicNetworkId)
 
-	// During import, ips and action are empty — populate from API
 	if len(data.Ips) == 0 {
 		ipIds := make([]types.String, len(apiResponse))
 		for i, ip := range apiResponse {

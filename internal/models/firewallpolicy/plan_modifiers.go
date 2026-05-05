@@ -10,11 +10,6 @@ import (
 
 type rulesWriteOnceModifier struct{}
 
-// RulesWriteOnce uses the config value at creation time and the state value
-// on subsequent updates. This prevents drift when rules are managed externally
-// via firewall_policy_rule_add / firewall_policy_rule_remove resources, and
-// avoids "Provider produced inconsistent result" errors caused by the provider
-// returning the real API rule count instead of the planned one.
 func RulesWriteOnce() planmodifier.List {
 	return rulesWriteOnceModifier{}
 }
@@ -28,8 +23,6 @@ func (m rulesWriteOnceModifier) MarkdownDescription(_ context.Context) string {
 }
 
 func (m rulesWriteOnceModifier) PlanModifyList(ctx context.Context, req planmodifier.ListRequest, resp *planmodifier.ListResponse) {
-	// During creation req.State.Raw is a null tftypes.Value; calling GetAttribute
-	// on it would fail. Return early so the config/plan value is used.
 	if req.State.Raw.IsNull() || !req.State.Raw.IsKnown() {
 		return
 	}
@@ -44,8 +37,5 @@ func (m rulesWriteOnceModifier) PlanModifyList(ctx context.Context, req planmodi
 		return
 	}
 
-	// During updates: keep the current state value so Terraform does not plan
-	// rule changes through this resource, and the post-apply result matches
-	// what the plan promised.
 	resp.PlanValue = req.StateValue
 }

@@ -29,7 +29,6 @@ func TestAccPublicIpResource(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckPublicIpDestroy,
 		Steps: []resource.TestStep{
-			// Test Create
 			{
 				Config: testAccPublicIpResourceConfig(
 					"81DEF28500FBC2A973FC0C620DF5B721",
@@ -94,7 +93,6 @@ func TestAccPublicIpResource(t *testing.T) {
 					),
 				},
 			},
-			// Test Import
 			{
 				ResourceName:      "arsys-baremetal_public_ip.test",
 				ImportState:       true,
@@ -103,7 +101,6 @@ func TestAccPublicIpResource(t *testing.T) {
 					"reverse_dns",
 				},
 			},
-			// Test Update
 			{
 				Config: testAccPublicIpResourceConfig(
 					"81DEF28500FBC2A973FC0C620DF5B721",

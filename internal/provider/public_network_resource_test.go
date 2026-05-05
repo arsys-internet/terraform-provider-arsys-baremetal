@@ -29,7 +29,6 @@ func TestAccPublicNetworkResource(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckPublicNetworkDestroy,
 		Steps: []resource.TestStep{
-			// Test Create
 			{
 				Config: testAccPublicNetworkResourceConfig(
 					"test-public-network",
@@ -99,7 +98,6 @@ func TestAccPublicNetworkResource(t *testing.T) {
 					),
 				},
 			},
-			// Test Import
 			{
 				ResourceName:      "arsys-baremetal_public_network.test",
 				ImportState:       true,
@@ -108,7 +106,6 @@ func TestAccPublicNetworkResource(t *testing.T) {
 					"last_logs",
 				},
 			},
-			// Test Update
 			{
 				Config: testAccPublicNetworkResourceConfig(
 					"updated-public-network",
