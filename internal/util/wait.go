@@ -176,6 +176,14 @@ func checkResourceState(ctx context.Context, resourceID string, service Resource
 		return nil, true, diag.Diagnostics{}
 	}
 
+	if err != nil && isTransientNetworkError(err) {
+		tflog.Warn(ctx, "Transient network error, will retry", map[string]interface{}{
+			"retry_count": retryCount,
+			"error":       err.Error(),
+		})
+		return nil, true, diag.Diagnostics{}
+	}
+
 	if isDeleting {
 		return handleDeletionState(ctx, resourceID, currentResource, err, options)
 	}
@@ -286,6 +294,19 @@ func isDeletionOperation(pendingStates, targetStates []string) bool {
 
 func isRateLimitingError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), RateLimitErrorSubstring)
+}
+
+func isTransientNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "TLS handshake timeout") ||
+		strings.Contains(msg, "connection refused") ||
+		strings.Contains(msg, "connection reset") ||
+		strings.Contains(msg, "i/o timeout") ||
+		strings.Contains(msg, "EOF") ||
+		strings.Contains(msg, "no such host")
 }
 
 func isRateLimitError(diags diag.Diagnostics) bool {
