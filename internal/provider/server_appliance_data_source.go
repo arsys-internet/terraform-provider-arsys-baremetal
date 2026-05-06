@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/serverappliance"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -70,7 +71,7 @@ func (d *ServerApplianceDataSource) Read(ctx context.Context, req datasource.Rea
 
 	apiResponse, err := d.client.GetServerAppliance(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Error reading the server appliance",
 				fmt.Sprintf("Server appliance with ID %s was not found", id),

@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/privatenetwork"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -70,7 +71,7 @@ func (d *PrivateNetworkDataSource) Read(ctx context.Context, req datasource.Read
 
 	apiResponse, err := d.client.GetPrivateNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Private network Not Found",
 				fmt.Sprintf("Private network with ID %s not found", id),

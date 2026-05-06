@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -75,7 +75,7 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiResponse, err := r.client.GetPublicNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public network with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -248,7 +248,7 @@ func (r *PublicNetworkResource) Delete(ctx context.Context, req resource.DeleteR
 
 	err := r.client.DeletePublicNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public network %s was already deleted", id))
 			return
 		}

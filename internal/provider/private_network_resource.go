@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/privatenetwork"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -154,7 +155,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiResponse, err := r.client.GetPrivateNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Private network Not Found",
 				fmt.Sprintf("Private network with ID %s not found", id),
@@ -250,7 +251,7 @@ func (r *PrivateNetworkResource) Delete(ctx context.Context, req resource.Delete
 
 	err := r.client.DeletePrivateNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Private network %s was already deleted", id))
 			return
 		}

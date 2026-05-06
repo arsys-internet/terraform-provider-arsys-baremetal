@@ -46,7 +46,7 @@ func HandleErrorResponse(resp *http.Response, expectedStatus int, operation stri
 	case http.StatusInternalServerError:
 		return fmt.Errorf("internal server error during %s", operation)
 	case http.StatusNotFound:
-		return fmt.Errorf("%w", ErrNotFound)
+		return fmt.Errorf("%s: %d - %w", operation, resp.StatusCode, ErrNotFound)
 	case http.StatusUnauthorized:
 		return fmt.Errorf("unauthorized access during %s - please check your credentials", operation)
 	case expectedStatus:

@@ -1,9 +1,9 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
-	"strings"
 	service "terraform-provider-arsys-baremetal/internal/services/privatenetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"testing"
@@ -187,7 +187,7 @@ func testAccCheckPrivateNetworkDestroy(s *terraform.State) error {
 			return fmt.Errorf("private network %s still exists", id)
 		}
 
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			continue
 		}
 

@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -136,7 +136,7 @@ func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.Re
 
 	publicNetwork, err := r.client.GetPublicNetwork(data.PublicNetworkId.ValueString())
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.State.RemoveResource(ctx)
 			return
 		}

@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/sshkey"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -74,7 +75,7 @@ func (r *SshKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	apiResponse, err := r.client.GetSshKey(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("SSH key with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -229,7 +230,7 @@ func (r *SshKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := r.client.DeleteSshKey(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("SSH key %s was already deleted", id))
 			return
 		}

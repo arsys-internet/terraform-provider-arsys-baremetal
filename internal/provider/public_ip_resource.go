@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicip"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -75,7 +75,7 @@ func (r *PublicIpResource) Read(ctx context.Context, req resource.ReadRequest, r
 
 	apiResponse, err := r.client.GetPublicIp(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public IP with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -206,7 +206,7 @@ func (r *PublicIpResource) Delete(ctx context.Context, req resource.DeleteReques
 
 	err := r.client.DeletePublicIp(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public IP %s was already deleted", id))
 			return
 		}

@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/server"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -206,7 +206,7 @@ func (r *ServerResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	apiResponse, err := r.client.GetServer(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Server with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -321,7 +321,7 @@ func (r *ServerResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := r.client.DeleteServer(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Server %s was already deleted", id))
 			return
 		}

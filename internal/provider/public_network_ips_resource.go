@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -87,7 +87,7 @@ func (r *PublicNetworkIpsResource) Read(ctx context.Context, req resource.ReadRe
 
 	apiResponse, err := r.client.GetPublicNetworkIps(publicNetworkId)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public network %s not found, removing from state", publicNetworkId))
 			resp.State.RemoveResource(ctx)
 			return
