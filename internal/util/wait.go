@@ -194,7 +194,24 @@ func checkResourceState(ctx context.Context, resourceID string, service Resource
 func handleDeletionState(ctx context.Context, resourceID string, resource ResourceModel, err error, options WaitOptions) (*WaitResult, bool, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	if err != nil || resource == nil {
+	if err != nil {
+		if isNotFoundError(err) {
+			tflog.Info(ctx, "Resource deleted successfully", map[string]interface{}{
+				"resource_id": resourceID,
+			})
+			return &WaitResult{
+				Resource:   nil,
+				FinalState: StateDeleted,
+			}, false, diags
+		}
+		diags.AddError(
+			"Error checking resource deletion",
+			fmt.Sprintf("Failed to check resource %s: %s", resourceID, err.Error()),
+		)
+		return nil, false, diags
+	}
+
+	if resource == nil {
 		tflog.Info(ctx, "Resource deleted successfully", map[string]interface{}{
 			"resource_id": resourceID,
 		})
@@ -294,6 +311,10 @@ func isDeletionOperation(pendingStates, targetStates []string) bool {
 
 func isRateLimitingError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), RateLimitErrorSubstring)
+}
+
+func isNotFoundError(err error) bool {
+	return err != nil && strings.Contains(strings.ToLower(err.Error()), "not found")
 }
 
 func isTransientNetworkError(err error) bool {
