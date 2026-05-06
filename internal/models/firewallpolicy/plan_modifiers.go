@@ -27,13 +27,23 @@ func (m rulesWriteOnceModifier) PlanModifyList(ctx context.Context, req planmodi
 		return
 	}
 
-	var id types.String
-	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("id"), &id)...)
+	var stateID types.String
+	resp.Diagnostics.Append(req.State.GetAttribute(ctx, path.Root("id"), &stateID)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if id.IsNull() || id.IsUnknown() || id.ValueString() == "" {
+	if stateID.IsNull() || stateID.IsUnknown() || stateID.ValueString() == "" {
+		return
+	}
+
+	var planID types.String
+	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("id"), &planID)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if planID.IsNull() || planID.IsUnknown() || planID.ValueString() == "" {
 		return
 	}
 

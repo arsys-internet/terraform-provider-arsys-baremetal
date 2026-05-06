@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -314,7 +315,7 @@ func isRateLimitingError(err error) bool {
 }
 
 func isNotFoundError(err error) bool {
-	return err != nil && strings.Contains(strings.ToLower(err.Error()), "not found")
+	return errors.Is(err, ErrNotFound)
 }
 
 func isTransientNetworkError(err error) bool {

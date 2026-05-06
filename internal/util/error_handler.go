@@ -3,10 +3,13 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 )
+
+var ErrNotFound = errors.New("resource not found")
 
 func GetErrorDescription(body []byte) (*string, error) {
 	type errorResponse struct {
@@ -43,7 +46,7 @@ func HandleErrorResponse(resp *http.Response, expectedStatus int, operation stri
 	case http.StatusInternalServerError:
 		return fmt.Errorf("internal server error during %s", operation)
 	case http.StatusNotFound:
-		return fmt.Errorf("resource not found")
+		return fmt.Errorf("%w", ErrNotFound)
 	case http.StatusUnauthorized:
 		return fmt.Errorf("unauthorized access during %s - please check your credentials", operation)
 	case expectedStatus:
