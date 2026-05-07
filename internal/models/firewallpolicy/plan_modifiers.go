@@ -37,15 +37,5 @@ func (m rulesWriteOnceModifier) PlanModifyList(ctx context.Context, req planmodi
 		return
 	}
 
-	var planID types.String
-	resp.Diagnostics.Append(req.Plan.GetAttribute(ctx, path.Root("id"), &planID)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if planID.IsNull() || planID.IsUnknown() || planID.ValueString() == "" {
-		return
-	}
-
 	resp.PlanValue = req.StateValue
 }
