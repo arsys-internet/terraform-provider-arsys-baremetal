@@ -24,25 +24,27 @@ type APIClient struct {
 }
 
 func NewAPIClient(apiToken string, url string) *APIClient {
-	client := &http.Client{
-		Timeout: time.Second * 30,
-
-		Transport: &http.Transport{
-			TLSHandshakeTimeout: 30 * time.Second,
-			IdleConnTimeout:     90 * time.Second,
-			MaxIdleConns:        100,
-			MaxIdleConnsPerHost: 25,
-
-			TLSClientConfig: &tls.Config{
-				MinVersion:         tls.VersionTLS12,
-				InsecureSkipVerify: false,
-			},
-		},
+	var baseTransport *http.Transport
+	if defaultTransport, ok := http.DefaultTransport.(*http.Transport); ok {
+		baseTransport = defaultTransport.Clone()
+	} else {
+		baseTransport = &http.Transport{}
+	}
+	baseTransport.TLSHandshakeTimeout = 30 * time.Second
+	baseTransport.IdleConnTimeout = 90 * time.Second
+	baseTransport.MaxIdleConns = 100
+	baseTransport.MaxIdleConnsPerHost = 25
+	baseTransport.TLSClientConfig = &tls.Config{
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: false,
 	}
 
-	client.Transport = &TokenTransport{
-		Token: apiToken,
-		Base:  http.DefaultTransport,
+	client := &http.Client{
+		Timeout: time.Second * 30,
+		Transport: &TokenTransport{
+			Token: apiToken,
+			Base:  baseTransport,
+		},
 	}
 
 	return &APIClient{

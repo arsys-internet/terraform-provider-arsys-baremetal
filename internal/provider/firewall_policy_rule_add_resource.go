@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	firewallpolicy "terraform-provider-arsys-baremetal/internal/models/firewallpolicy"
 
@@ -160,7 +160,7 @@ func (r *FirewallPolicyRuleResource) Read(ctx context.Context, req resource.Read
 
 	apiResponse, err := r.client.GetFirewallPolicy(firewallPolicyId)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", firewallPolicyId))
 			resp.State.RemoveResource(ctx)
 			return

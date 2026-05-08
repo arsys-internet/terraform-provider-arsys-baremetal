@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/sshkey"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -74,7 +75,7 @@ func (r *SshKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 
 	apiResponse, err := r.client.GetSshKey(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("SSH key with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -113,12 +114,16 @@ func (r *SshKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	if data.Name.IsNull() || data.Name.ValueString() == "" {
+	if data.Name.IsNull() || data.Name.IsUnknown() || data.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
 			"Either 'name' field is required when creating a SSH key",
 		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	createRequest := data.ToCreateRequest()
@@ -168,12 +173,16 @@ func (r *SshKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 	id := state.Id.ValueString()
 	tflog.Info(ctx, fmt.Sprintf("Updating SSH key with ID: %s", id))
 
-	if plan.Name.IsNull() || plan.Name.ValueString() == "" {
+	if plan.Name.IsNull() || plan.Name.IsUnknown() || plan.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
 			"Either 'name' field is required when updating a SSH key",
 		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	updateRequest := plan.ToUpdateRequest()
@@ -221,7 +230,7 @@ func (r *SshKeyResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := r.client.DeleteSshKey(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("SSH key %s was already deleted", id))
 			return
 		}

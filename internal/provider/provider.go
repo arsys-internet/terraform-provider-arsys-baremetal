@@ -18,18 +18,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
-// Ensure BaremetalProvider satisfies various provider interfaces.
 var _ provider.Provider = &BaremetalProvider{}
 
-// BaremetalProvider defines the provider implementation.
 type BaremetalProvider struct {
-	// version is set to the provider version on release, "dev" when the
-	// provider is built and ran locally, and "test" when running acceptance
-	// testing.
 	version string
 }
 
-// BaremetalProviderModel describes the provider data model.
 type BaremetalProviderModel struct {
 	Host  types.String `tfsdk:"host"`
 	Token types.String `tfsdk:"token"`

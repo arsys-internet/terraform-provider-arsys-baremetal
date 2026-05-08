@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -176,6 +177,14 @@ func checkResourceState(ctx context.Context, resourceID string, service Resource
 		return nil, true, diag.Diagnostics{}
 	}
 
+	if err != nil && isTransientNetworkError(err) {
+		tflog.Warn(ctx, "Transient network error, will retry", map[string]interface{}{
+			"retry_count": retryCount,
+			"error":       err.Error(),
+		})
+		return nil, true, diag.Diagnostics{}
+	}
+
 	if isDeleting {
 		return handleDeletionState(ctx, resourceID, currentResource, err, options)
 	}
@@ -186,7 +195,24 @@ func checkResourceState(ctx context.Context, resourceID string, service Resource
 func handleDeletionState(ctx context.Context, resourceID string, resource ResourceModel, err error, options WaitOptions) (*WaitResult, bool, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 
-	if err != nil || resource == nil {
+	if err != nil {
+		if isNotFoundError(err) {
+			tflog.Info(ctx, "Resource deleted successfully", map[string]interface{}{
+				"resource_id": resourceID,
+			})
+			return &WaitResult{
+				Resource:   nil,
+				FinalState: StateDeleted,
+			}, false, diags
+		}
+		diags.AddError(
+			"Error checking resource deletion",
+			fmt.Sprintf("Failed to check resource %s: %s", resourceID, err.Error()),
+		)
+		return nil, false, diags
+	}
+
+	if resource == nil {
 		tflog.Info(ctx, "Resource deleted successfully", map[string]interface{}{
 			"resource_id": resourceID,
 		})
@@ -286,6 +312,23 @@ func isDeletionOperation(pendingStates, targetStates []string) bool {
 
 func isRateLimitingError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), RateLimitErrorSubstring)
+}
+
+func isNotFoundError(err error) bool {
+	return errors.Is(err, ErrNotFound)
+}
+
+func isTransientNetworkError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "TLS handshake timeout") ||
+		strings.Contains(msg, "connection refused") ||
+		strings.Contains(msg, "connection reset") ||
+		strings.Contains(msg, "i/o timeout") ||
+		strings.Contains(msg, "EOF") ||
+		strings.Contains(msg, "no such host")
 }
 
 func isRateLimitError(diags diag.Diagnostics) bool {

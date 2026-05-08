@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallpolicy"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
@@ -70,7 +71,7 @@ func (d *FirewallPolicyRuleDataSource) Read(ctx context.Context, req datasource.
 
 	apiResponse, err := d.client.GetFirewallPolicyRule(firewallPolicyId, firewallPolicyRuleId)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Firewall Policy Rule Not Found",
 				fmt.Sprintf("Firewall policy rule with ID %s not found in policy %s", firewallPolicyRuleId, firewallPolicyId),

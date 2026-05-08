@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/privatenetwork"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -68,7 +69,7 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	if data.Name.IsNull() || data.Name.ValueString() == "" {
+	if data.Name.IsNull() || data.Name.IsUnknown() || data.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
@@ -76,11 +77,30 @@ func (r *PrivateNetworkResource) Create(ctx context.Context, req resource.Create
 		)
 	}
 
-	if data.DatacenterId.IsNull() || data.DatacenterId.ValueString() == "" {
+	if data.DatacenterId.IsNull() || data.DatacenterId.IsUnknown() || data.DatacenterId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
 			"'datacenter_id' field is required when creating a private network",
+		)
+	}
+
+	networkAddressSet := !data.NetworkAddress.IsNull() && !data.NetworkAddress.IsUnknown() && data.NetworkAddress.ValueString() != ""
+	subnetMaskSet := !data.SubnetMask.IsNull() && !data.SubnetMask.IsUnknown() && data.SubnetMask.ValueString() != ""
+
+	if networkAddressSet && !subnetMaskSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("subnet_mask"),
+			"Missing required field",
+			"'subnet_mask' is required when 'network_address' is provided",
+		)
+	}
+
+	if subnetMaskSet && !networkAddressSet {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("network_address"),
+			"Missing required field",
+			"'network_address' is required when 'subnet_mask' is provided",
 		)
 	}
 
@@ -135,7 +155,7 @@ func (r *PrivateNetworkResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiResponse, err := r.client.GetPrivateNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Private network Not Found",
 				fmt.Sprintf("Private network with ID %s not found", id),
@@ -231,7 +251,7 @@ func (r *PrivateNetworkResource) Delete(ctx context.Context, req resource.Delete
 
 	err := r.client.DeletePrivateNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Private network %s was already deleted", id))
 			return
 		}

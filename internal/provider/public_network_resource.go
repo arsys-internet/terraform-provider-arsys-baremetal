@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -75,7 +75,7 @@ func (r *PublicNetworkResource) Read(ctx context.Context, req resource.ReadReque
 
 	apiResponse, err := r.client.GetPublicNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public network with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -114,12 +114,16 @@ func (r *PublicNetworkResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	if data.DatacenterId.IsNull() || data.DatacenterId.ValueString() == "" {
+	if data.DatacenterId.IsNull() || data.DatacenterId.IsUnknown() || data.DatacenterId.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("datacenter_id"),
 			"Missing required field",
 			"'datacenter_id' field is required when creating a public network",
 		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	createRequest := data.ToCreateRequest()
@@ -244,7 +248,7 @@ func (r *PublicNetworkResource) Delete(ctx context.Context, req resource.DeleteR
 
 	err := r.client.DeletePublicNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Public network %s was already deleted", id))
 			return
 		}

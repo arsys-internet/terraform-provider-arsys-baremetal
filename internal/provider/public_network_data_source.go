@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
@@ -67,7 +68,7 @@ func (d *PublicNetworkDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	apiResponse, err := d.client.GetPublicNetwork(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Public network not found",
 				fmt.Sprintf("Public network with ID %s was not found", id),

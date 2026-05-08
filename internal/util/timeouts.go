@@ -62,7 +62,6 @@ func getDefaultsForResource(resourcePrefix string) resourceDefaults {
 	case "SUBNET":
 		return resourceDefaults{15 * time.Minute, 15 * time.Second, 15 * time.Second}
 	default:
-		// Generic default fallback
 		return resourceDefaults{20 * time.Minute, 20 * time.Second, 5 * time.Second}
 	}
 }

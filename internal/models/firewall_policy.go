@@ -269,7 +269,7 @@ func FirewallPolicyResourceSchema(_ context.Context) rschema.Schema {
 					Attributes: firewallpolicy.FirewallRuleResourceSchema(),
 				},
 				PlanModifiers: []planmodifier.List{
-					listplanmodifier.UseStateForUnknown(),
+					firewallpolicy.RulesWriteOnce(),
 				},
 			},
 			"id": rschema.StringAttribute{

@@ -1,9 +1,9 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
-	"strings"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"testing"
@@ -29,7 +29,6 @@ func TestAccPublicNetworkResource(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckPublicNetworkDestroy,
 		Steps: []resource.TestStep{
-			// Test Create
 			{
 				Config: testAccPublicNetworkResourceConfig(
 					"test-public-network",
@@ -99,7 +98,6 @@ func TestAccPublicNetworkResource(t *testing.T) {
 					),
 				},
 			},
-			// Test Import
 			{
 				ResourceName:      "arsys-baremetal_public_network.test",
 				ImportState:       true,
@@ -108,7 +106,6 @@ func TestAccPublicNetworkResource(t *testing.T) {
 					"last_logs",
 				},
 			},
-			// Test Update
 			{
 				Config: testAccPublicNetworkResourceConfig(
 					"updated-public-network",
@@ -161,7 +158,7 @@ func testAccCheckPublicNetworkDestroy(s *terraform.State) error {
 			return fmt.Errorf("public network %s still exists", id)
 		}
 
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			continue
 		}
 

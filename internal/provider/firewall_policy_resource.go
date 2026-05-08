@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	"terraform-provider-arsys-baremetal/internal/models/firewallpolicy"
 
@@ -71,7 +71,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	if data.Name.IsNull() || data.Name.ValueString() == "" {
+	if data.Name.IsNull() || data.Name.IsUnknown() || data.Name.ValueString() == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("name"),
 			"Missing required field",
@@ -79,7 +79,7 @@ func (r *FirewallPolicyResource) Create(ctx context.Context, req resource.Create
 		)
 	}
 
-	if data.Rules.IsNull() {
+	if data.Rules.IsNull() || data.Rules.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("rules"),
 			"Missing required field",
@@ -189,7 +189,7 @@ func (r *FirewallPolicyResource) Read(ctx context.Context, req resource.ReadRequ
 
 	apiResponse, err := r.client.GetFirewallPolicy(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Firewall policy with ID %s not found, removing from state", id))
 			resp.State.RemoveResource(ctx)
 			return
@@ -313,7 +313,7 @@ func (r *FirewallPolicyResource) Delete(ctx context.Context, req resource.Delete
 
 	err := r.client.DeleteFirewallPolicy(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Firewall Policy %s was already deleted", id))
 			return
 		}

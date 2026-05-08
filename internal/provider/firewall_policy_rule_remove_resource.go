@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/firewallpolicy"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -71,7 +71,7 @@ func (r *FirewallPolicyRemoveRuleResource) Create(ctx context.Context, req resou
 
 	_, err := r.client.DeleteFirewallPolicyRule(firewallPolicyId, ruleId)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Rule %s or policy %s not found - may already be deleted", ruleId, firewallPolicyId))
 		} else {
 			resp.Diagnostics.AddError(
@@ -136,7 +136,7 @@ func (r *FirewallPolicyRemoveRuleResource) Read(ctx context.Context, req resourc
 
 	firewallPolicy, err := r.client.GetFirewallPolicy(data.Id.ValueString())
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.State.RemoveResource(ctx)
 			return
 		}

@@ -1,9 +1,9 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
-	"strings"
 	service "terraform-provider-arsys-baremetal/internal/services/publicip"
 	"terraform-provider-arsys-baremetal/internal/util"
 	"testing"
@@ -29,7 +29,6 @@ func TestAccPublicIpResource(t *testing.T) {
 		},
 		CheckDestroy: testAccCheckPublicIpDestroy,
 		Steps: []resource.TestStep{
-			// Test Create
 			{
 				Config: testAccPublicIpResourceConfig(
 					"81DEF28500FBC2A973FC0C620DF5B721",
@@ -94,7 +93,6 @@ func TestAccPublicIpResource(t *testing.T) {
 					),
 				},
 			},
-			// Test Import
 			{
 				ResourceName:      "arsys-baremetal_public_ip.test",
 				ImportState:       true,
@@ -103,7 +101,6 @@ func TestAccPublicIpResource(t *testing.T) {
 					"reverse_dns",
 				},
 			},
-			// Test Update
 			{
 				Config: testAccPublicIpResourceConfig(
 					"81DEF28500FBC2A973FC0C620DF5B721",
@@ -176,7 +173,7 @@ func testAccCheckPublicIpDestroy(s *terraform.State) error {
 			return fmt.Errorf("public ip %s still exists", id)
 		}
 
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			continue
 		}
 

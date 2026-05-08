@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/subnet"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -95,7 +96,34 @@ func (r *SubnetResource) Create(ctx context.Context, req resource.CreateRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
-func (r *SubnetResource) Read(_ context.Context, _ resource.ReadRequest, _ *resource.ReadResponse) {
+func (r *SubnetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data models.SubnetModel
+
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	id := data.Id.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("Reading subnet with ID: %s", id))
+
+	_, err := r.client.GetSubnet(id)
+	if err != nil {
+		if errors.Is(err, util.ErrNotFound) {
+			tflog.Info(ctx, fmt.Sprintf("Subnet %s not found, removing from state", id))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
+		resp.Diagnostics.AddError(
+			"Error reading subnet",
+			fmt.Sprintf("Error: %s", err.Error()),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *SubnetResource) Update(_ context.Context, _ resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -117,7 +145,7 @@ func (r *SubnetResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := r.client.DeleteSubnet(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			tflog.Info(ctx, fmt.Sprintf("Subnet %s was already deleted", id))
 			return
 		}

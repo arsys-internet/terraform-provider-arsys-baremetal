@@ -20,6 +20,7 @@ type ApiSubnetService struct {
 }
 
 type ApiSubnetServiceInterface interface {
+	GetSubnet(id string) (*models.SubnetResponse, error)
 	CreateSubnet(request *models.CreateSubnetRequest) (*models.SubnetResponse, error)
 	DeleteSubnet(id string) error
 }
@@ -38,6 +39,33 @@ func GetSubnetService(m interface{}) ApiSubnetServiceInterface {
 	}
 
 	return nil
+}
+
+func (s *ApiSubnetService) GetSubnet(id string) (*models.SubnetResponse, error) {
+	resp, err := s.client.Get(fmt.Sprintf("/public_ips/%s", id))
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %w", err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			tflog.Warn(context.Background(), "Failed to close response body", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+	}(resp.Body)
+
+	errorResponse := util.HandleErrorResponse(resp, http.StatusOK, "get subnet")
+	if errorResponse != nil {
+		return nil, errorResponse
+	}
+
+	var subnet models.SubnetResponse
+	if err := json.NewDecoder(resp.Body).Decode(&subnet); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	return &subnet, nil
 }
 
 func (s *ApiSubnetService) CreateSubnet(request *models.CreateSubnetRequest) (*models.SubnetResponse, error) {

@@ -2,8 +2,8 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicnetwork"
 	"terraform-provider-arsys-baremetal/internal/util"
@@ -136,7 +136,7 @@ func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.Re
 
 	publicNetwork, err := r.client.GetPublicNetwork(data.PublicNetworkId.ValueString())
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.State.RemoveResource(ctx)
 			return
 		}
@@ -152,7 +152,39 @@ func (r *PublicNetworkServersResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	apiServerSet := make(map[string]struct{}, len(publicNetwork.Servers))
+	for _, s := range publicNetwork.Servers {
+		apiServerSet[s.Id] = struct{}{}
+	}
+
+	var servers []string
+	for _, s := range data.Servers {
+		if _, ok := apiServerSet[s.ValueString()]; ok {
+			servers = append(servers, s.ValueString())
+		}
+	}
+	stateServerSet := make(map[string]struct{}, len(servers))
+	for _, s := range servers {
+		stateServerSet[s] = struct{}{}
+	}
+	for _, s := range publicNetwork.Servers {
+		if _, ok := stateServerSet[s.Id]; !ok {
+			servers = append(servers, s.Id)
+		}
+	}
+
+	finalModel, diags := models.NewPublicNetworkServerResourceModel(
+		ctx,
+		data.PublicNetworkId.ValueString(),
+		servers,
+		publicNetwork,
+	)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, finalModel)...)
 }
 
 func (r *PublicNetworkServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

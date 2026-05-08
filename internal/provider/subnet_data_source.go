@@ -2,10 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"terraform-provider-arsys-baremetal/internal/models"
 	service "terraform-provider-arsys-baremetal/internal/services/publicip"
+	"terraform-provider-arsys-baremetal/internal/util"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
@@ -67,7 +68,7 @@ func (d *SubnetDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 
 	apiResponse, err := d.client.GetSubnet(id)
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
+		if errors.Is(err, util.ErrNotFound) {
 			resp.Diagnostics.AddError(
 				"Subnet not found",
 				fmt.Sprintf("Subnet with ID %s was not found", id),
