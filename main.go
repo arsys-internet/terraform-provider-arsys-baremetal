@@ -20,8 +20,8 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		// Dirección publicada en el Terraform Registry (namespace/type).
-		// Debe coincidir con el `source` que usan los consumidores.
+		// Address published on the Terraform Registry (namespace/type).
+		// Must match the `source` used by consumers.
 		Address: "registry.terraform.io/arsys-internet/arsys-baremetal",
 		Debug:   debug,
 	}

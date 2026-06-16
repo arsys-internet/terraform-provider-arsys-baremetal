@@ -1,5 +1,7 @@
 ---
+layout: "arsys-baremetal"
 page_title: "Arsys Baremetal Provider"
+sidebar_current: "docs-arsys-baremetal-index"
 description: |-
   The Arsys Baremetal provider is used to manage baremetal infrastructure resources through the Arsys/CloudBuilder API.
 ---
