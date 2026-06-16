@@ -1,16 +1,14 @@
 # Terraform Arsys Baremetal Provider
 
-A Terraform provider to manage Arsys Baremetal resources.
+A Terraform provider to manage Arsys Baremetal resources through the
+Arsys/CloudBuilder API.
 
-## Status
-
-Alpha Status: This provider is under active development and is subject to change, and breaking changes may occur.
-Not recommended for production use without proper testing.
+The provider is published on the [Terraform Registry](https://registry.terraform.io/providers/arsys-internet/arsys-baremetal/latest).
 
 ## Requirements
 
 - [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.9.7
-- [Go](https://go.dev/doc/install) >= 1.23
+- [Go](https://go.dev/doc/install) >= 1.25 (only required to build the provider from source)
 
 ## Supported Services
 
@@ -27,23 +25,67 @@ Not recommended for production use without proper testing.
     - Security
       - SSH Keys
 
-## Installation
+## Usage
 
-### Building The Provider
+Add the provider to your Terraform configuration. Terraform will download it
+from the registry automatically on `terraform init`:
 
-1. Clone the repository
-2. Enter the repository directory
-3. Build the provider using the Go `install` command:
+```hcl
+terraform {
+  required_providers {
+    arsys-baremetal = {
+      source  = "arsys-internet/arsys-baremetal"
+      version = "~> 0.7"
+    }
+  }
+}
 
-```shell
-go install
+provider "arsys-baremetal" {
+  # token = "your-api-token"   # prefer the BAREMETAL_API_TOKEN environment variable
+}
 ```
 
-To build the binary, run:
+### Authentication
+
+**IMPORTANT!** You need to add the machine IP to your user to allow API access
+in your Baremetal panel.
+
+Provide your API token via environment variable (recommended):
+
+```shell
+export BAREMETAL_API_TOKEN="{your-api-token}"
+```
+
+Optionally override the API base URL (defaults to `https://api.cloudbuilder.es/v1`):
+
+```shell
+export BAREMETAL_HOST="https://api.cloudbuilder.es/v1"
+```
+
+Then run:
+
+```shell
+terraform init
+terraform plan
+```
+
+See the [`examples/`](./examples) directory and the
+[registry documentation](https://registry.terraform.io/providers/arsys-internet/arsys-baremetal/latest/docs)
+for per-resource usage.
+
+## Development
+
+These steps are only needed if you want to build and test the provider locally
+instead of using the published registry version.
+
+### Building the provider
+
+Clone the repository, enter the directory and build the binary.
+
 Linux:
 
 ```shell
-set GOOS=linux && set GOARCH=amd64 && go build -o terraform-provider-arsys-baremetal
+GOOS=linux GOARCH=amd64 go build -o terraform-provider-arsys-baremetal
 ```
 
 Windows:
@@ -52,63 +94,32 @@ Windows:
 set GOOS=windows&&set GOARCH=amd64&&go build -o terraform-provider-arsys-baremetal.exe
 ```
 
-### Installing the provider locally
+### Using a local build (dev overrides)
 
-Since this provider is not yet published to the Terraform Registry, you need to install it locally. The installation
-path depends on your operating system and CPU architecture.
-
-Create the appropriate directory and copy the provider binary:
-Linux:
-For AMD64
-
-```shell
-mkdir -p ~/.terraform.d/plugins/local/arsys-baremetal/{provider-version}/linux_amd64/
-cp $GOPATH/bin/terraform-provider-arsys-baremetal ~/.terraform.d/plugins/local/arsys-baremetal/{provider-version}/linux_amd64/terraform-provider-arsys-baremetal_v{provider-version}
-```
-
-Windows:
-For AMD64
-
-```shell
-mkdir -p %APPDATA%\terraform.d\plugins\registry.terraform.io\local\arsys-baremetal\{provider-version}\windows_amd64
-copy %GOPATH%\bin\terraform-provider-arsys-baremetal.exe %APPDATA%\terraform.d\plugins\registry.terraform.io\local\arsys-baremetal\{provider-version}\windows_amd64\terraform-provider-arsys-baremetal_v{provider-version}.exe
-```
-
-## Configuration
-
-Configuring the provider to use it locally.
-
-Generate .terraformrc file in $HOME directory:
+To test a local binary without publishing it, configure `dev_overrides` in your
+Terraform CLI config file (`~/.terraformrc`), pointing to the directory that
+contains the compiled binary:
 
 ```shell
 cat > ~/.terraformrc << 'EOF'
 provider_installation {
-dev_overrides {
-"registry.terraform.io/local/arsys-baremetal" = "/$HOME/.terraform.d/plugins/local/arsys-baremetal/0.1/linux_amd64"
-}
-direct {}
+  dev_overrides {
+    "arsys-internet/arsys-baremetal" = "/absolute/path/to/your/built/provider/dir"
+  }
+  direct {}
 }
 EOF
 ```
 
-**IMPORTANT!**
-You need to add the machine ip to your user to allow access via api in your Baremetal panel
+With `dev_overrides` active you do **not** run `terraform init`; just run
+`terraform plan` / `terraform apply` directly.
 
-Export the API token:
+### Running tests
 
 ```shell
-export BAREMETAL_API_TOKEN="{your-api-token}"
-```
+# Unit tests (no API calls)
+TF_ACC=0 go test -v ./...
 
-Add the provider block to your Terraform configuration file.
-
-```hcl
-terraform {
-  required_providers {
-    arsys-baremetal = {
-      source  = "local/arsys-baremetal"
-      version = "{provider-version}"
-    }
-  }
-}
+# Acceptance tests (run against the real API)
+TF_ACC=1 BAREMETAL_API_TOKEN=xxx go test -v -timeout=120m ./...
 ```
