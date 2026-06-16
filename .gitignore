@@ -1,6 +1,12 @@
 *.dll
 *.exe
 .DS_Store
+
+# Compiled provider binaries
+/terraform-provider-arsys-baremetal
+/terraform-provider-arsys-baremetal.exe
+artifact/
+
 example.tf
 terraform.tfplan
 terraform.tfstate
