@@ -44,6 +44,7 @@ func (p *BaremetalProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 			},
 			"token": schema.StringAttribute{
 				Optional:    true,
+				Sensitive:   true,
 				Description: "API key of the Baremetal API.",
 			},
 		},

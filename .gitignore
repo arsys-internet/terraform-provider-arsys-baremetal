@@ -1,5 +1,7 @@
 *.dll
 *.exe
+terraform-provider-arsys-baremetal
+artifact/
 .DS_Store
 example.tf
 terraform.tfplan
@@ -23,7 +25,6 @@ website/node_modules
 .idea
 *.iml
 *.test
-*.iml
 .env
 
 website/vendor

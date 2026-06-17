@@ -26,10 +26,8 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		// Dirección para desarrollo local
-		Address: "registry.terraform.io/local/arsys-baremetal",
-		//Address: "local.providers/arsys-baremetal",
-		Debug: debug,
+		Address: "registry.terraform.io/arsys-internet/arsys-baremetal",
+		Debug:   debug,
 	}
 
 	err := providerserver.Serve(context.Background(), provider.New(version), opts)

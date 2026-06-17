@@ -2,13 +2,16 @@
 terraform {
   required_providers {
     arsys-baremetal = {
-      source = "local/arsys-baremetal"
+      source  = "arsys-internet/arsys-baremetal"
+      version = "~> 0.1"
     }
   }
 }
 
-# Set your API token
-# You can set the token directly in the provider block or use environment variables ARSYS_BAREMETAL_TOKEN.
+# Configure the provider.
+# Credentials can be set in the provider block or via the BAREMETAL_HOST and
+# BAREMETAL_API_TOKEN environment variables.
 provider "arsys-baremetal" {
-  # token = "token"
+  # host  = "https://api.cloudbuilder.es/v1"
+  # token = "your-api-token"
 }
